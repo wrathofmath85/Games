@@ -168,6 +168,7 @@
     }
     return node;
   };
+  const norm = (s)=> (s==null ? "" : String(s).trim().replace(/\s+/g," ").toUpperCase());
 
   function parseNumber(x){
     if (x === null || x === undefined) return null;
@@ -289,7 +290,7 @@
     ["Conference","Division","Team","Position"].forEach(f=>{
       const td = tr.children[ fields.indexOf(f)+1 ];
       if(!picked[f] || !official[f]) return;
-      (String(picked[f]).toUpperCase() === String(official[f]).toUpperCase()) ? good(td) : td.classList.add("bad");
+      (norm(picked[f]) === norm(official[f])) ? good(td) : td.classList.add("bad");
     });
 
     [["Age"], ["Points"]].forEach(([F])=>{
@@ -300,7 +301,7 @@
       else decorateMismatch(td, truth > mine ? "up" : "down");
     });
 
-    return picked.Name && String(picked.Name).toUpperCase() === String(official.Selection ?? official.Name ?? "").toUpperCase();
+    return picked.Name && norm(picked.Name) === norm(official.Selection ?? official.Name ?? "");
   }
 
   function checkRound(round){
@@ -347,17 +348,17 @@
     });
     document.body.appendChild(datalist);
 
-    // 2) CurrentSelection (use ONLY row 2 for ALL rounds)
+    // 2) CurrentSelection: use ONLY Row 2 (index 0 with header:true) for ALL rounds
     const officialRes = await loadCSV(CSV.CurrentSelection, {header:true, dynamicTyping:false, skipEmptyLines:true});
-    const r2 = (officialRes.data||[])[0] ? (officialRes.data||[])[1] : (officialRes.data||[])[1]; // safeguard
+    const r2 = (officialRes.data||[])[0] || {};
     const common = {
-      Selection: r2?.Selection ?? r2?.Name ?? "",
-      Conference: r2?.Conference ?? "",
-      Division: r2?.Division ?? "",
-      Team: r2?.Team ?? "",
-      Position: r2?.Position ?? "",
-      Age: r2?.Age ?? "",
-      Points: r2?.Points ?? r2?.["Fantasy Points"] ?? ""
+      Selection: r2.Selection ?? r2.Name ?? "",
+      Conference: r2.Conference ?? "",
+      Division: r2.Division ?? "",
+      Team: r2.Team ?? "",
+      Position: r2.Position ?? "",
+      Age: r2.Age ?? "",
+      Points: r2.Points ?? r2["Fantasy Points"] ?? ""
     };
     for(let round=1; round<=ROUNDS; round++) officialByRound[round] = common;
 
@@ -378,7 +379,6 @@
     $("#leftHeader").textContent = leftName;
     $("#rightHeader").textContent = rightName;
 
-    // final alignment after any font/layout changes
     requestAnimationFrame(alignCheckButtons);
     setTimeout(alignCheckButtons, 50);
   }
