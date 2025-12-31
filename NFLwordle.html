@@ -159,7 +159,23 @@
 
   /* ======= HELPERS ======= */
   const $ = (sel, root=document) => root.querySelector(sel);
-  const el = (tag, attrs={}) => Object.assign(document.createElement(tag), attrs);
+  
+  // Replace the existing el() with this:
+  const el = (tag, attrs = {}) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "dataset" && v && typeof v === "object") {
+        for (const [dk, dv] of Object.entries(v)) node.dataset[dk] = dv;
+      } else if (k in node) {
+        try { node[k] = v; } catch { node.setAttribute(k, v); }
+      } else {
+        node.setAttribute(k, v);
+      }
+    }
+    return node;
+  };
+
+
 
   function parseNumber(x){
     if (x === null || x === undefined) return null;
