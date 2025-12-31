@@ -347,20 +347,19 @@
     });
     document.body.appendChild(datalist);
 
-    // 2) CurrentSelection (official per round)
+    // 2) CurrentSelection (use ONLY row 2 for ALL rounds)
     const officialRes = await loadCSV(CSV.CurrentSelection, {header:true, dynamicTyping:false, skipEmptyLines:true});
-    (officialRes.data||[]).forEach((r,idx)=>{
-      const round = idx+1; if(round>ROUNDS) return;
-      officialByRound[round] = {
-        Selection: r.Selection ?? r.Name ?? "",
-        Conference: r.Conference ?? "",
-        Division: r.Division ?? "",
-        Team: r.Team ?? "",
-        Position: r.Position ?? "",
-        Age: r.Age ?? "",
-        Points: r.Points ?? r["Fantasy Points"] ?? ""
-      };
-    });
+    const r2 = (officialRes.data||[])[0] ? (officialRes.data||[])[1] : (officialRes.data||[])[1]; // safeguard
+    const common = {
+      Selection: r2?.Selection ?? r2?.Name ?? "",
+      Conference: r2?.Conference ?? "",
+      Division: r2?.Division ?? "",
+      Team: r2?.Team ?? "",
+      Position: r2?.Position ?? "",
+      Age: r2?.Age ?? "",
+      Points: r2?.Points ?? r2?.["Fantasy Points"] ?? ""
+    };
+    for(let round=1; round<=ROUNDS; round++) officialByRound[round] = common;
 
     // 3) CurrentStandings (two names + scores)
     const standingsRes = await loadCSV(CSV.CurrentStandings, {header:false, dynamicTyping:false, skipEmptyLines:false});
@@ -381,7 +380,7 @@
 
     // final alignment after any font/layout changes
     requestAnimationFrame(alignCheckButtons);
-    setTimeout(alignCheckButtons, 50); // extra safety for webfont/layout settle
+    setTimeout(alignCheckButtons, 50);
   }
 
   boot().catch(err=>{
