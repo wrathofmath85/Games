@@ -48,9 +48,23 @@
   .note{margin:10px 0 12px 0;color:var(--muted);font-size:13px}
   .tag{display:inline-block;background:var(--chip);padding:2px 8px;border-radius:999px;color:#bfeaff;font-size:12px}
 
-  table{width:100%;border-collapse:separate;border-spacing:0 8px}
-  thead th{font-size:12px;color:var(--muted);font-weight:700;text-align:left;padding:0 8px 2px 8px;white-space:nowrap}
-  tbody td{background:var(--panel);border:1px solid var(--rule);padding:8px 8px;vertical-align:middle}
+  /* Better viewing: horizontal scroll if needed + fixed column widths */
+  .tableWrap{overflow-x:auto; padding-bottom:6px;}
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0 8px;
+    table-layout:fixed;   /* key for consistent widths */
+    min-width:1080px;     /* prevents squish; enables scroll if smaller screen */
+  }
+  thead th{
+    font-size:12px;color:var(--muted);font-weight:700;text-align:left;
+    padding:0 8px 2px 8px;white-space:nowrap
+  }
+  tbody td{
+    background:var(--panel);border:1px solid var(--rule);padding:8px 8px;vertical-align:middle;
+    overflow:hidden;
+  }
   tbody tr td:first-child{border-radius:12px 0 0 12px}
   tbody tr td:last-child{border-radius:0 12px 12px 0}
 
@@ -59,23 +73,48 @@
     color:#cfeaff;
     font-size:13px;
   }
+
   .playerBadge{
-    display:inline-block;
-    padding:3px 8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:3px 10px;
     border-radius:999px;
     background:#0b1220;
     border:1px solid #1f2d45;
     font-weight:800;
     letter-spacing:.3px;
+    white-space:nowrap;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
-  .nameCell{min-width:220px}
+
+  .nameCell{min-width:260px}
   input[type="text"].name-input{
     width:100%;background:#0d1522;color:var(--text);border:1px solid #1f2d45;border-radius:10px;
     padding:8px 10px;font-size:14px;outline:none
   }
+
+  /* Arrow + value on same line */
   .readonly{
-    display:block;background:#0b1220;border:1px solid #1f2d45;border-radius:10px;padding:8px;
+    display:flex;                 /* key */
+    align-items:center;           /* vertically center */
+    justify-content:space-between;/* value left, arrow right */
+    gap:8px;
+    background:#0b1220;border:1px solid #1f2d45;border-radius:10px;padding:8px;
     color:#dce8ff;min-height:18px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+  .valText{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .arrow{
+    flex:0 0 auto;
+    font-weight:900;
+    color:var(--warn);
+    margin-left:6px;
   }
 
   .pill{
@@ -89,7 +128,6 @@
 
   .good{background:rgba(59,211,127,.1)!important;border-color:#1a3e2c!important}
   .bad{background:rgba(255,107,107,.1)!important;border-color:#4a1f21!important}
-  .arrow{font-weight:900;margin-left:6px;color:var(--warn)}
 
   .footer{margin:28px 0;color:var(--muted);font-size:12px;text-align:center}
 
@@ -129,19 +167,35 @@
         Start typing a name — the list filters as you type.
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Turn</th>
-            <th>Name</th>
-            <th>Conference</th><th>Division</th><th>Team</th>
-            <th>Position</th><th>Age</th><th>Fantasy Points</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="guessBody"></tbody>
-      </table>
+      <div class="tableWrap">
+        <table>
+          <!-- tuned column widths -->
+          <colgroup>
+            <col style="width:44px" />
+            <col style="width:210px" />
+            <col style="width:300px" />
+            <col style="width:88px" />
+            <col style="width:92px" />
+            <col style="width:190px" />
+            <col style="width:78px" />
+            <col style="width:64px" />
+            <col style="width:108px" />
+            <col style="width:148px" />
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Turn</th>
+              <th>Name</th>
+              <th>Conference</th><th>Division</th><th>Team</th>
+              <th>Position</th><th>Age</th><th>Fantasy Points</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="guessBody"></tbody>
+        </table>
+      </div>
     </section>
 
     <div class="footer">Data updates when you refresh the page.</div>
@@ -152,8 +206,6 @@
   const CSV = {
     Data: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv",
     CurrentSelection: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=2147341155&single=true&output=csv",
-
-    // NEW: standings with columns: Start Position, Name, Wins
     CurrentStandings: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=811608622&single=true&output=csv"
   };
 
@@ -163,7 +215,6 @@
   let playersByName = new Map();
   let official = null;
 
-  // players
   let p1 = { name:"Player 1", wins:0 };
   let p2 = { name:"Player 2", wins:0 };
 
@@ -191,14 +242,15 @@
   function clearStyles(tr){
     tr?.querySelectorAll("td").forEach(td=>{
       td.classList.remove("good","bad");
-      td.querySelector(".arrow")?.remove();
     });
+    tr?.querySelectorAll(".arrow")?.forEach(a => a.remove());
   }
-  function decorateMismatch(td, direction){
-    td.classList.add("bad");
+
+  function decorateMismatch(readonlyDiv, direction){
+    readonlyDiv.closest("td")?.classList.add("bad");
     const span = el("span",{className:"arrow"});
     span.textContent = direction === "up" ? "↑" : "↓";
-    td.appendChild(span);
+    readonlyDiv.appendChild(span);   // ✅ stays on the same line (flex)
   }
   const good = td => td.classList.add("good");
 
@@ -211,20 +263,23 @@
     const body = $("#guessBody");
     body.innerHTML = "";
 
+    const makeReadonly = (fieldKey) => {
+      const wrap = el("div",{className:"readonly", dataset:{field:fieldKey}});
+      wrap.appendChild(el("span",{className:"valText", textContent:""}));
+      return wrap;
+    };
+
     const makeRow = (guessNum) => {
       const tr = el("tr",{dataset:{guess:guessNum}});
 
-      // #
       tr.appendChild(el("td",{className:"smallMono", textContent:String(guessNum)}));
 
-      // Turn player badge
       const who = (guessNum % 2 === 1) ? "p1" : "p2";
       const playerName = (who === "p1") ? p1.name : p2.name;
       const turnTd = el("td");
       turnTd.appendChild(el("span",{className:"playerBadge", textContent: playerName}));
       tr.appendChild(turnTd);
 
-      // Name input
       const nameTd = el("td",{className:"nameCell"});
       const input  = el("input",{type:"text", className:"name-input", placeholder:`Guess ${guessNum} – start typing…`});
       input.setAttribute("list","players-list");
@@ -233,14 +288,12 @@
       nameTd.appendChild(input);
       tr.appendChild(nameTd);
 
-      // readonly fields
       fields.forEach(f=>{
         const td = el("td");
-        td.appendChild(el("div",{className:"readonly",dataset:{field:f.toLowerCase()}}));
+        td.appendChild(makeReadonly(f.toLowerCase()));
         tr.appendChild(td);
       });
 
-      // check button
       const btnTd = el("td");
       const btn = el("button",{className:"pill", textContent:"Check Guess"});
       btn.addEventListener("click", ()=>checkGuess(guessNum));
@@ -256,43 +309,44 @@
   }
 
   function refreshTurnBadges(){
-    // update labels in each row (after we load p1/p2 from standings)
     document.querySelectorAll('#guessBody tr').forEach(tr=>{
       const guessNum = Number(tr.dataset.guess);
       const who = (guessNum % 2 === 1) ? p1.name : p2.name;
       const badge = tr.querySelector(".playerBadge");
       if (badge) badge.textContent = who;
     });
-
     $("#oddName").textContent  = p1.name;
     $("#evenName").textContent = p2.name;
   }
 
   /* ======= POPULATE CELLS WHEN NAME CHOSEN ======= */
+  function setReadonly(tr, field, value){
+    const box = tr.querySelector(`[data-field="${field}"]`);
+    if(!box) return;
+    const txt = box.querySelector(".valText");
+    if(txt) txt.textContent = value ?? "";
+  }
+
   function populateFromName(tr, name){
     clearStyles(tr);
     const rec = playersByName.get(name);
 
-    const cells = {
-      conference: tr.querySelector('[data-field="conference"]'),
-      division:   tr.querySelector('[data-field="division"]'),
-      team:       tr.querySelector('[data-field="team"]'),
-      position:   tr.querySelector('[data-field="position"]'),
-      age:        tr.querySelector('[data-field="age"]'),
-      points:     tr.querySelector('[data-field="points"]')
-    };
-
     if(!rec){
-      Object.values(cells).forEach(c=>c.textContent="");
+      setReadonly(tr,"conference","");
+      setReadonly(tr,"division","");
+      setReadonly(tr,"team","");
+      setReadonly(tr,"position","");
+      setReadonly(tr,"age","");
+      setReadonly(tr,"points","");
       return;
     }
 
-    cells.conference.textContent = rec.Conference ?? "";
-    cells.division.textContent   = rec.Division ?? "";
-    cells.team.textContent       = rec.Team ?? "";
-    cells.position.textContent   = rec.Position ?? "";
-    cells.age.textContent        = rec.Age ?? "";
-    cells.points.textContent     = rec.Points ?? rec["Fantasy Points"] ?? "";
+    setReadonly(tr,"conference", rec.Conference ?? "");
+    setReadonly(tr,"division",   rec.Division ?? "");
+    setReadonly(tr,"team",       rec.Team ?? "");
+    setReadonly(tr,"position",   rec.Position ?? "");
+    setReadonly(tr,"age",        rec.Age ?? "");
+    setReadonly(tr,"points",     rec.Points ?? rec["Fantasy Points"] ?? "");
   }
 
   function getRow(guessNum){
@@ -303,12 +357,12 @@
     const name = tr.querySelector(".name-input").value.trim();
     return {
       Name: name,
-      Conference: tr.querySelector('[data-field="conference"]').textContent.trim(),
-      Division:   tr.querySelector('[data-field="division"]').textContent.trim(),
-      Team:       tr.querySelector('[data-field="team"]').textContent.trim(),
-      Position:   tr.querySelector('[data-field="position"]').textContent.trim(),
-      Age:        tr.querySelector('[data-field="age"]').textContent.trim(),
-      Points:     tr.querySelector('[data-field="points"]').textContent.trim()
+      Conference: tr.querySelector('[data-field="conference"] .valText')?.textContent.trim() ?? "",
+      Division:   tr.querySelector('[data-field="division"] .valText')?.textContent.trim() ?? "",
+      Team:       tr.querySelector('[data-field="team"] .valText')?.textContent.trim() ?? "",
+      Position:   tr.querySelector('[data-field="position"] .valText')?.textContent.trim() ?? "",
+      Age:        tr.querySelector('[data-field="age"] .valText')?.textContent.trim() ?? "",
+      Points:     tr.querySelector('[data-field="points"] .valText')?.textContent.trim() ?? ""
     };
   }
 
@@ -317,7 +371,7 @@
     const picked = valuesForRow(tr);
 
     ["Conference","Division","Team","Position"].forEach(f=>{
-      const td = tr.children[ fields.indexOf(f) + 3 ]; // +3 because: #, Turn, Name are first 3 cols
+      const td = tr.children[ fields.indexOf(f) + 3 ]; // +3: #, Turn, Name
       if(!picked[f] || !official[f]) return;
       (norm(picked[f]) === norm(official[f])) ? good(td) : td.classList.add("bad");
     });
@@ -327,11 +381,15 @@
       const mine = parseNumber(picked[F]);
       const truth = parseNumber(official[F]);
       if(truth==null || mine==null) return;
-      if(mine === truth) good(td);
-      else decorateMismatch(td, truth > mine ? "up" : "down");
+
+      if(mine === truth){
+        good(td);
+      }else{
+        const readonlyDiv = td.querySelector(".readonly");
+        decorateMismatch(readonlyDiv, truth > mine ? "up" : "down");
+      }
     });
 
-    // "Correct" = exact name match to official selection/name
     const officialName = official.Selection ?? official.Name ?? "";
     return picked.Name && norm(picked.Name) === norm(officialName);
   }
@@ -347,10 +405,8 @@
   }
 
   function checkGuess(guessNum){
-    if(!official){
-      alert("Official selection data is not available yet.");
-      return;
-    }
+    if(!official) return;
+
     const tr = getRow(guessNum);
     if(!tr) return;
 
@@ -361,14 +417,12 @@
     if(correct){
       bumpWin(which);
       alert(`${winnerName.toUpperCase()} WINS`);
-    }else{
-      alert("NOT CORRECT");
     }
+    // ✅ no alert when wrong
   }
 
   /* ======= LOAD & BOOT ======= */
   async function boot(){
-    // Build empty UI first
     buildRows();
 
     // 1) Players Data CSV (autocomplete + details)
@@ -398,7 +452,7 @@
     });
     document.body.appendChild(datalist);
 
-    // 2) Official selection (same behavior as your prior version: first data row)
+    // 2) Official selection (first data row)
     const officialRes = await loadCSV(CSV.CurrentSelection, {header:true, dynamicTyping:false, skipEmptyLines:true});
     const r2 = (officialRes.data||[])[0] || {};
     official = {
@@ -415,7 +469,6 @@
     const standingsRes = await loadCSV(CSV.CurrentStandings, {header:true, dynamicTyping:false, skipEmptyLines:true});
     const srows = (standingsRes.data||[]).filter(r=>r && (r.Name || r["Name"]));
 
-    // Find start positions 1 and 2 (robust to minor header differences)
     const getStartPos = (r) => r["Start Position"] ?? r.StartPosition ?? r.Start ?? r.Position ?? r["Start"] ?? "";
     const getName     = (r) => r["Name"] ?? r.Name ?? "";
     const getWins     = (r) => r["Wins"] ?? r.Wins ?? 0;
@@ -439,7 +492,6 @@
     $("#p2Score").textContent = String(p2.wins);
     $("#boardHeader").textContent = `${p1.name} vs ${p2.name}`;
 
-    // Update turn badges + rules text
     refreshTurnBadges();
   }
 
