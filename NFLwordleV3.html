@@ -36,7 +36,6 @@
 
   /* TABLES */
   .tables{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
-  .side{background:transparent;}
   .side h3{margin:0 0 8px 0;font-size:16px;color:#e6f2ff;font-weight:900;letter-spacing:.3px}
   table{width:100%;border-collapse:separate;border-spacing:0 8px}
   thead th{font-size:11px;color:var(--muted);font-weight:800;text-align:center;padding:0 4px 2px 4px}
@@ -68,7 +67,7 @@
     width:26px;height:26px;
     border-radius:7px;
     border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.06);
+    background:rgba(255,255,255,.06); /* default gray */
     font-weight:1000;
     line-height:1;
     user-select:none;
@@ -166,7 +165,7 @@ const CSV = {
   // Official answer (kept from your existing site)
   CurrentSelection: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=2147341155&single=true&output=csv",
 
-  // Scoreboard (kept from your existing site)
+  // Scoreboard (wins)
   CurrentStandings: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=224409268&single=true&output=csv"
 };
 
@@ -184,10 +183,15 @@ const el = (tag, attrs={}) => {
   return n;
 };
 const norm = (s)=> (s==null ? "" : String(s).trim().replace(/\s+/g," ").toUpperCase());
+
+function isBlankCell(v){
+  const s = String(v ?? "").trim();
+  return !s || s.toUpperCase() === "#N/A";
+}
 function parseNumber(x){
   if (x === null || x === undefined) return null;
   const s = String(x).trim();
-  if (!s || s === "#N/A") return null;
+  if (!s || s.toUpperCase() === "#N/A") return null;
   const n = Number(s.replace(/[, ]/g,""));
   return Number.isFinite(n) ? n : null;
 }
@@ -196,25 +200,32 @@ function loadCSV(url, opts={}) {
     Papa.parse(url, { download:true, ...opts, complete: resolve, error: reject });
   });
 }
-function makeBox(status, arrowDir=null){
-  const span = el("span",{className:"box"});
-  if (status === "ok") span.classList.add("ok");
-  if (status === "bad") span.classList.add("bad");
-  // keep box empty (no text), per your request
-  if (arrowDir) {
+
+/*
+  Box rules requested:
+  - If the pick hasn't been made yet => leave gray (no red/green)
+  - For numeric columns (Age, Pts):
+      * wrong => DO NOT color red; show only arrow (still keep the gray box)
+      * right => color green (no arrow)
+*/
+function makeBox({color=null, arrowDir=null} = {}){
+  const box = el("span",{className:"box"});
+  if (color === "ok") box.classList.add("ok");
+  if (color === "bad") box.classList.add("bad"); // (used only for non-numeric)
+  if (arrowDir){
     const a = el("span",{className:"arrow", text: arrowDir === "up" ? "↑" : "↓"});
     const wrap = document.createElement("span");
-    wrap.appendChild(span);
+    wrap.appendChild(box);
     wrap.appendChild(a);
     return wrap;
   }
-  return span;
+  return box;
 }
 
 /* ======= PARSE YOUR SELECTIONS GRID (NO HEADERS) =======
-   Expected layout (from your screenshot):
-   Left player columns:  A:round  B:Selection  C:Position  D:Age  E:Points  F:Conference  G:Division  H:Team
-   Right player columns: I:(blank/name header) J:Selection K:Position L:Age M:Points N:Conference O:Division P:Team
+   Layout expected (from your screenshot):
+   Left:  A round, B Selection, C Position, D Age, E Points, F Conference, G Division, H Team
+   Right: I header/name, J Selection, K Position, L Age, M Points, N Conference, O Division, P Team
 */
 function extractPicksGrid(grid){
   const leftName  = (grid?.[0]?.[0] ?? "Left").toString().trim() || "Left";
@@ -253,38 +264,50 @@ function extractPicksGrid(grid){
 }
 
 function gradePick(pick, official){
-  // Pick correctness (selection name)
-  const selOk = norm(pick.Selection) && (norm(pick.Selection) === norm(official.Selection));
+  // Determine if this row is "made" — if no selection, treat as not made
+  const made = !isBlankCell(pick.Selection);
 
-  // Categorical matches
+  // For not-made picks: return all null so UI stays gray
+  if (!made) {
+    return {
+      made:false,
+      pick:null, conf:null, div:null, team:null, pos:null,
+      age:{color:null, arrow:null},
+      pts:{color:null, arrow:null}
+    };
+  }
+
+  // Categorical: if we have a value, mark ok/bad
+  const selOk  = norm(pick.Selection)  && (norm(pick.Selection)  === norm(official.Selection));
   const confOk = norm(pick.Conference) && (norm(pick.Conference) === norm(official.Conference));
   const divOk  = norm(pick.Division)   && (norm(pick.Division)   === norm(official.Division));
   const teamOk = norm(pick.Team)       && (norm(pick.Team)       === norm(official.Team));
   const posOk  = norm(pick.Position)   && (norm(pick.Position)   === norm(official.Position));
 
-  // Numeric w/ arrows
+  // Numeric: arrows only when wrong; green when exact match
   const ageMine = parseNumber(pick.Age);
   const ageTruth= parseNumber(official.Age);
-  let age = { status:null, arrow:null };
+  let age = { color:null, arrow:null };
   if (ageMine!=null && ageTruth!=null){
-    if (ageMine === ageTruth) age = {status:"ok", arrow:null};
-    else age = {status:"bad", arrow: (ageTruth > ageMine ? "up" : "down")};
+    if (ageMine === ageTruth) age = { color:"ok", arrow:null };
+    else age = { color:null, arrow: (ageTruth > ageMine ? "up" : "down") }; // NO red
   }
 
   const ptsMine = parseNumber(pick.Points);
   const ptsTruth= parseNumber(official.Points);
-  let pts = { status:null, arrow:null };
+  let pts = { color:null, arrow:null };
   if (ptsMine!=null && ptsTruth!=null){
-    if (ptsMine === ptsTruth) pts = {status:"ok", arrow:null};
-    else pts = {status:"bad", arrow: (ptsTruth > ptsMine ? "up" : "down")};
+    if (ptsMine === ptsTruth) pts = { color:"ok", arrow:null };
+    else pts = { color:null, arrow: (ptsTruth > ptsMine ? "up" : "down") }; // NO red
   }
 
   return {
-    pick: selOk ? "ok" : (norm(pick.Selection) ? "bad" : null),
-    conf: confOk ? "ok" : (norm(pick.Conference) ? "bad" : null),
-    div:  divOk  ? "ok" : (norm(pick.Division) ? "bad" : null),
-    team: teamOk ? "ok" : (norm(pick.Team) ? "bad" : null),
-    pos:  posOk  ? "ok" : (norm(pick.Position) ? "bad" : null),
+    made:true,
+    pick: selOk ? "ok" : "bad",
+    conf: confOk ? "ok" : "bad",
+    div:  divOk  ? "ok" : "bad",
+    team: teamOk ? "ok" : "bad",
+    pos:  posOk  ? "ok" : "bad",
     age,
     pts
   };
@@ -292,6 +315,7 @@ function gradePick(pick, official){
 
 function renderSide(tbody, picks, official){
   tbody.innerHTML = "";
+
   for (let i=0; i<ROUNDS; i++){
     const p = picks[i] || {};
     const g = gradePick(p, official);
@@ -303,20 +327,29 @@ function renderSide(tbody, picks, official){
     tdR.textContent = (i+1);
     tr.appendChild(tdR);
 
-    // Boxes (no text values)
-    const addBox = (contentNode)=>{
+    const add = (node)=>{
       const td = el("td",{className:"boxCell"});
-      if (contentNode) td.appendChild(contentNode);
+      td.appendChild(node);
       tr.appendChild(td);
     };
 
-    addBox(g.pick ? makeBox(g.pick) : makeBox(null));
-    addBox(g.conf ? makeBox(g.conf) : makeBox(null));
-    addBox(g.div  ? makeBox(g.div)  : makeBox(null));
-    addBox(g.team ? makeBox(g.team) : makeBox(null));
-    addBox(g.pos  ? makeBox(g.pos)  : makeBox(null));
-    addBox(g.age.status ? makeBox(g.age.status, g.age.arrow) : makeBox(null));
-    addBox(g.pts.status ? makeBox(g.pts.status, g.pts.arrow) : makeBox(null));
+    // If not made => all gray boxes
+    if (!g.made){
+      add(makeBox()); add(makeBox()); add(makeBox()); add(makeBox()); add(makeBox()); add(makeBox()); add(makeBox());
+      tbody.appendChild(tr);
+      continue;
+    }
+
+    // Non-numeric: ok => green, bad => red
+    add(makeBox({color:g.pick}));
+    add(makeBox({color:g.conf}));
+    add(makeBox({color:g.div}));
+    add(makeBox({color:g.team}));
+    add(makeBox({color:g.pos}));
+
+    // Numeric: ok => green, wrong => gray + arrow only
+    add(makeBox({color:g.age.color, arrowDir:g.age.arrow}));
+    add(makeBox({color:g.pts.color, arrowDir:g.pts.arrow}));
 
     tbody.appendChild(tr);
   }
@@ -333,7 +366,7 @@ async function boot(){
   const offRes = await loadCSV(CSV.CurrentSelection, { header:true, dynamicTyping:false, skipEmptyLines:true });
   const r2 = (offRes.data || [])[0] || {};
   const official = {
-    Selection: r2.Selection ?? r2.Name ?? "",
+    Selection:  r2.Selection ?? r2.Name ?? "",
     Conference: r2.Conference ?? "",
     Division:   r2.Division ?? "",
     Team:       r2.Team ?? "",
@@ -350,7 +383,7 @@ async function boot(){
   const leftScore  = (st?.[1]?.[0] ?? "0").toString();
   const rightScore = (st?.[1]?.[1] ?? "0").toString();
 
-  // Put names on scoreboard/headers (NOT in the tables)
+  // Names on scoreboard/headers (NOT in the tables)
   $("#leftName").textContent   = sLeftName;
   $("#rightName").textContent  = sRightName;
   $("#leftScore").textContent  = leftScore;
@@ -359,7 +392,7 @@ async function boot(){
   $("#leftHeader").textContent  = sLeftName;
   $("#rightHeader").textContent = sRightName;
 
-  // 4) Render result-only boxes
+  // 4) Render
   renderSide($("#leftBody"), left, official);
   renderSide($("#rightBody"), right, official);
 }
