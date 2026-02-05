@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NFL Wordle Showdown</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#11161f; --muted:#8ea0b4; --text:#e9eef5; --rule:#253043;
+    --accent:#5dd0ff; --accent-ink:#052c3a; --ok:#3bd37f; --bad:#ff6b6b;
+    --chip:#0e2e3a; --pill:#0d3a46; --warn:#ffd166;
+  }
+  html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial;}
+  .wrap{max-width:1200px;margin:40px auto;padding:0 16px;}
+
+  /* SCOREBOARD */
+  .scoreboard{
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#0e131c 0%, #0d1522 100%);border:1px solid var(--rule);
+    border-radius:18px;padding:20px 16px; box-shadow:0 8px 24px rgba(0,0,0,.25);
+    max-width:900px;margin:0 auto;
+  }
+  .team{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;}
+  .name{font-weight:800;letter-spacing:.5px;font-size:28px;text-transform:uppercase;}
+  .score{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    font-size:48px;background:#0a0f17;border:2px solid #1a263a;border-radius:12px;
+    padding:6px 14px;min-width:90px;text-align:center;box-shadow:inset 0 0 0 2px #0a1828;
+  }
+  .center{ text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:220px }
+  .label{font-size:12px;color:var(--muted);letter-spacing:.2px}
+  .big{font-weight:800;font-size:14px;color:#cfeaff}
+  .banner{font-weight:900;font-size:14px;background:var(--accent);color:var(--accent-ink);
+    padding:4px 10px;border-radius:999px;letter-spacing:.5px}
+
+  /* SINGLE TABLE */
+  .board{
+    margin-top:28px;
+    background:linear-gradient(180deg,#0e131c 0%, #0d1522 100%);
+    border:1px solid var(--rule);
+    border-radius:18px;
+    padding:18px 14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .board h3{margin:0 0 10px 0;font-size:18px;color:#e6f2ff}
+  .note{margin:10px 0 12px 0;color:var(--muted);font-size:13px}
+  .tag{display:inline-block;background:var(--chip);padding:2px 8px;border-radius:999px;color:#bfeaff;font-size:12px}
+
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  thead th{font-size:12px;color:var(--muted);font-weight:700;text-align:left;padding:0 8px 2px 8px;white-space:nowrap}
+  tbody td{background:var(--panel);border:1px solid var(--rule);padding:8px 8px;vertical-align:middle}
+  tbody tr td:first-child{border-radius:12px 0 0 12px}
+  tbody tr td:last-child{border-radius:0 12px 12px 0}
+
+  .smallMono{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    color:#cfeaff;
+    font-size:13px;
+  }
+  .playerBadge{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    background:#0b1220;
+    border:1px solid #1f2d45;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+  .nameCell{min-width:220px}
+  input[type="text"].name-input{
+    width:100%;background:#0d1522;color:var(--text);border:1px solid #1f2d45;border-radius:10px;
+    padding:8px 10px;font-size:14px;outline:none
+  }
+  .readonly{
+    display:block;background:#0b1220;border:1px solid #1f2d45;border-radius:10px;padding:8px;
+    color:#dce8ff;min-height:18px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  }
+
+  .pill{
+    border:none;background:var(--pill);color:#d3f7ff;border:1px solid #1a3a43;cursor:pointer;
+    padding:10px 14px;border-radius:999px;font-weight:800;min-width:132px;box-shadow:0 2px 0 #072129;
+    transition:transform .06s ease, filter .12s ease;
+    white-space:nowrap;text-align:center;
+  }
+  .pill:hover{filter:brightness(1.08)}
+  .pill:active{transform:translateY(1px)}
+
+  .good{background:rgba(59,211,127,.1)!important;border-color:#1a3e2c!important}
+  .bad{background:rgba(255,107,107,.1)!important;border-color:#4a1f21!important}
+  .arrow{font-weight:900;margin-left:6px;color:var(--warn)}
+
+  .footer{margin:28px 0;color:var(--muted);font-size:12px;text-align:center}
+
+  @media (max-width:1100px){
+    .scoreboard{grid-template-columns:1fr; text-align:center}
+    .team{grid-template-columns:1fr; justify-items:center}
+    .name{font-size:24px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- SCOREBOARD -->
+    <section class="scoreboard" id="scoreboard">
+      <div class="team team-left">
+        <div class="name" id="p1Name">PLAYER 1</div>
+        <div class="score" id="p1Score">0</div>
+      </div>
+      <div class="center">
+        <div class="label">NFL WORDLE</div>
+        <div class="big">SHOWDOWN</div>
+        <div class="banner">10 GUESSES • ALTERNATING TURNS</div>
+      </div>
+      <div class="team team-right">
+        <div class="name" id="p2Name" style="text-align:right">PLAYER 2</div>
+        <div class="score" id="p2Score">0</div>
+      </div>
+    </section>
+
+    <!-- SINGLE BOARD -->
+    <section class="board">
+      <h3 id="boardHeader">Guesses</h3>
+      <div class="note">
+        <span class="tag">Rules</span>
+        Guess <b>#1,3,5,7,9</b> = <span class="smallMono" id="oddName">Player 1</span> •
+        Guess <b>#2,4,6,8,10</b> = <span class="smallMono" id="evenName">Player 2</span>.
+        Start typing a name — the list filters as you type.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Turn</th>
+            <th>Name</th>
+            <th>Conference</th><th>Division</th><th>Team</th>
+            <th>Position</th><th>Age</th><th>Fantasy Points</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="guessBody"></tbody>
+      </table>
+    </section>
+
+    <div class="footer">Data updates when you refresh the page.</div>
+  </div>
+
+  <script>
+  /* ======= CONFIG: CSV SOURCES ======= */
+  const CSV = {
+    Data: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv",
+    CurrentSelection: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=2147341155&single=true&output=csv",
+
+    // NEW: standings with columns: Start Position, Name, Wins
+    CurrentStandings: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=811608622&single=true&output=csv"
+  };
+
+  /* ======= GLOBAL STATE ======= */
+  const GUESSES = 10;
+  const fields = ["Conference","Division","Team","Position","Age","Points"];
+  let playersByName = new Map();
+  let official = null;
+
+  // players
+  let p1 = { name:"Player 1", wins:0 };
+  let p2 = { name:"Player 2", wins:0 };
+
+  /* ======= HELPERS ======= */
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const el = (tag, attrs = {}) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "dataset" && v && typeof v === "object") {
+        for (const [dk, dv] of Object.entries(v)) node.dataset[dk] = dv;
+      } else if (k in node) {
+        try { node[k] = v; } catch { node.setAttribute(k, v); }
+      } else node.setAttribute(k, v);
+    }
+    return node;
+  };
+  const norm = (s)=> (s==null ? "" : String(s).trim().replace(/\s+/g," ").toUpperCase());
+
+  function parseNumber(x){
+    if (x === null || x === undefined) return null;
+    const n = Number(String(x).replace(/[, ]/g,""));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function clearStyles(tr){
+    tr?.querySelectorAll("td").forEach(td=>{
+      td.classList.remove("good","bad");
+      td.querySelector(".arrow")?.remove();
+    });
+  }
+  function decorateMismatch(td, direction){
+    td.classList.add("bad");
+    const span = el("span",{className:"arrow"});
+    span.textContent = direction === "up" ? "↑" : "↓";
+    td.appendChild(span);
+  }
+  const good = td => td.classList.add("good");
+
+  function loadCSV(url, opts={}){ return new Promise((resolve,reject)=>{
+    Papa.parse(url, { download:true, ...opts, complete: resolve, error: reject });
+  }); }
+
+  /* ======= UI BUILD ======= */
+  function buildRows(){
+    const body = $("#guessBody");
+    body.innerHTML = "";
+
+    const makeRow = (guessNum) => {
+      const tr = el("tr",{dataset:{guess:guessNum}});
+
+      // #
+      tr.appendChild(el("td",{className:"smallMono", textContent:String(guessNum)}));
+
+      // Turn player badge
+      const who = (guessNum % 2 === 1) ? "p1" : "p2";
+      const playerName = (who === "p1") ? p1.name : p2.name;
+      const turnTd = el("td");
+      turnTd.appendChild(el("span",{className:"playerBadge", textContent: playerName}));
+      tr.appendChild(turnTd);
+
+      // Name input
+      const nameTd = el("td",{className:"nameCell"});
+      const input  = el("input",{type:"text", className:"name-input", placeholder:`Guess ${guessNum} – start typing…`});
+      input.setAttribute("list","players-list");
+      input.dataset.guess = guessNum;
+      input.addEventListener("change", ()=>populateFromName(tr, input.value.trim()));
+      nameTd.appendChild(input);
+      tr.appendChild(nameTd);
+
+      // readonly fields
+      fields.forEach(f=>{
+        const td = el("td");
+        td.appendChild(el("div",{className:"readonly",dataset:{field:f.toLowerCase()}}));
+        tr.appendChild(td);
+      });
+
+      // check button
+      const btnTd = el("td");
+      const btn = el("button",{className:"pill", textContent:"Check Guess"});
+      btn.addEventListener("click", ()=>checkGuess(guessNum));
+      btnTd.appendChild(btn);
+      tr.appendChild(btnTd);
+
+      return tr;
+    };
+
+    for(let g=1; g<=GUESSES; g++){
+      body.appendChild(makeRow(g));
+    }
+  }
+
+  function refreshTurnBadges(){
+    // update labels in each row (after we load p1/p2 from standings)
+    document.querySelectorAll('#guessBody tr').forEach(tr=>{
+      const guessNum = Number(tr.dataset.guess);
+      const who = (guessNum % 2 === 1) ? p1.name : p2.name;
+      const badge = tr.querySelector(".playerBadge");
+      if (badge) badge.textContent = who;
+    });
+
+    $("#oddName").textContent  = p1.name;
+    $("#evenName").textContent = p2.name;
+  }
+
+  /* ======= POPULATE CELLS WHEN NAME CHOSEN ======= */
+  function populateFromName(tr, name){
+    clearStyles(tr);
+    const rec = playersByName.get(name);
+
+    const cells = {
+      conference: tr.querySelector('[data-field="conference"]'),
+      division:   tr.querySelector('[data-field="division"]'),
+      team:       tr.querySelector('[data-field="team"]'),
+      position:   tr.querySelector('[data-field="position"]'),
+      age:        tr.querySelector('[data-field="age"]'),
+      points:     tr.querySelector('[data-field="points"]')
+    };
+
+    if(!rec){
+      Object.values(cells).forEach(c=>c.textContent="");
+      return;
+    }
+
+    cells.conference.textContent = rec.Conference ?? "";
+    cells.division.textContent   = rec.Division ?? "";
+    cells.team.textContent       = rec.Team ?? "";
+    cells.position.textContent   = rec.Position ?? "";
+    cells.age.textContent        = rec.Age ?? "";
+    cells.points.textContent     = rec.Points ?? rec["Fantasy Points"] ?? "";
+  }
+
+  function getRow(guessNum){
+    return document.querySelector(`#guessBody tr[data-guess="${guessNum}"]`);
+  }
+
+  function valuesForRow(tr){
+    const name = tr.querySelector(".name-input").value.trim();
+    return {
+      Name: name,
+      Conference: tr.querySelector('[data-field="conference"]').textContent.trim(),
+      Division:   tr.querySelector('[data-field="division"]').textContent.trim(),
+      Team:       tr.querySelector('[data-field="team"]').textContent.trim(),
+      Position:   tr.querySelector('[data-field="position"]').textContent.trim(),
+      Age:        tr.querySelector('[data-field="age"]').textContent.trim(),
+      Points:     tr.querySelector('[data-field="points"]').textContent.trim()
+    };
+  }
+
+  function gradeOne(tr, official){
+    clearStyles(tr);
+    const picked = valuesForRow(tr);
+
+    ["Conference","Division","Team","Position"].forEach(f=>{
+      const td = tr.children[ fields.indexOf(f) + 3 ]; // +3 because: #, Turn, Name are first 3 cols
+      if(!picked[f] || !official[f]) return;
+      (norm(picked[f]) === norm(official[f])) ? good(td) : td.classList.add("bad");
+    });
+
+    [["Age"], ["Points"]].forEach(([F])=>{
+      const td  = tr.children[ fields.indexOf(F) + 3 ];
+      const mine = parseNumber(picked[F]);
+      const truth = parseNumber(official[F]);
+      if(truth==null || mine==null) return;
+      if(mine === truth) good(td);
+      else decorateMismatch(td, truth > mine ? "up" : "down");
+    });
+
+    // "Correct" = exact name match to official selection/name
+    const officialName = official.Selection ?? official.Name ?? "";
+    return picked.Name && norm(picked.Name) === norm(officialName);
+  }
+
+  function bumpWin(which){
+    if(which === "p1"){
+      p1.wins = (parseNumber(p1.wins) ?? 0) + 1;
+      $("#p1Score").textContent = String(p1.wins);
+    }else{
+      p2.wins = (parseNumber(p2.wins) ?? 0) + 1;
+      $("#p2Score").textContent = String(p2.wins);
+    }
+  }
+
+  function checkGuess(guessNum){
+    if(!official){
+      alert("Official selection data is not available yet.");
+      return;
+    }
+    const tr = getRow(guessNum);
+    if(!tr) return;
+
+    const correct = gradeOne(tr, official);
+    const which = (guessNum % 2 === 1) ? "p1" : "p2";
+    const winnerName = (which === "p1") ? p1.name : p2.name;
+
+    if(correct){
+      bumpWin(which);
+      alert(`${winnerName.toUpperCase()} WINS`);
+    }else{
+      alert("NOT CORRECT");
+    }
+  }
+
+  /* ======= LOAD & BOOT ======= */
+  async function boot(){
+    // Build empty UI first
+    buildRows();
+
+    // 1) Players Data CSV (autocomplete + details)
+    const playersRes = await loadCSV(CSV.Data, {header:true, dynamicTyping:false, skipEmptyLines:true});
+    const rows = (playersRes.data||[]).filter(r=>r && (r.Name || r.Player));
+
+    const datalist = el("datalist",{id:"players-list"});
+    const seen = new Set();
+
+    rows.forEach(r=>{
+      const record = {
+        Name: r.Name ?? r.Player ?? "",
+        Conference: r.Conference ?? r.Conf ?? "",
+        Division: r.Division ?? "",
+        Team: r.Team ?? "",
+        Position: r.Position ?? r.Pos ?? "",
+        Age: r.Age ?? "",
+        Points: r.Points ?? r["Fantasy Points"] ?? r.FantasyPoints ?? ""
+      };
+      if(record.Name){
+        playersByName.set(record.Name, record);
+        if(!seen.has(record.Name)){
+          seen.add(record.Name);
+          datalist.appendChild(el("option",{value:record.Name}));
+        }
+      }
+    });
+    document.body.appendChild(datalist);
+
+    // 2) Official selection (same behavior as your prior version: first data row)
+    const officialRes = await loadCSV(CSV.CurrentSelection, {header:true, dynamicTyping:false, skipEmptyLines:true});
+    const r2 = (officialRes.data||[])[0] || {};
+    official = {
+      Selection: r2.Selection ?? r2.Name ?? "",
+      Conference: r2.Conference ?? "",
+      Division: r2.Division ?? "",
+      Team: r2.Team ?? "",
+      Position: r2.Position ?? "",
+      Age: r2.Age ?? "",
+      Points: r2.Points ?? r2["Fantasy Points"] ?? ""
+    };
+
+    // 3) Standings CSV (Start Position, Name, Wins)
+    const standingsRes = await loadCSV(CSV.CurrentStandings, {header:true, dynamicTyping:false, skipEmptyLines:true});
+    const srows = (standingsRes.data||[]).filter(r=>r && (r.Name || r["Name"]));
+
+    // Find start positions 1 and 2 (robust to minor header differences)
+    const getStartPos = (r) => r["Start Position"] ?? r.StartPosition ?? r.Start ?? r.Position ?? r["Start"] ?? "";
+    const getName     = (r) => r["Name"] ?? r.Name ?? "";
+    const getWins     = (r) => r["Wins"] ?? r.Wins ?? 0;
+
+    const rP1 = srows.find(r => String(getStartPos(r)).trim() === "1");
+    const rP2 = srows.find(r => String(getStartPos(r)).trim() === "2");
+
+    if(rP1){
+      p1.name = String(getName(rP1) || "Player 1");
+      p1.wins = parseNumber(getWins(rP1)) ?? 0;
+    }
+    if(rP2){
+      p2.name = String(getName(rP2) || "Player 2");
+      p2.wins = parseNumber(getWins(rP2)) ?? 0;
+    }
+
+    // Update scoreboard
+    $("#p1Name").textContent = p1.name;
+    $("#p2Name").textContent = p2.name;
+    $("#p1Score").textContent = String(p1.wins);
+    $("#p2Score").textContent = String(p2.wins);
+    $("#boardHeader").textContent = `${p1.name} vs ${p2.name}`;
+
+    // Update turn badges + rules text
+    refreshTurnBadges();
+  }
+
+  boot().catch(err=>{
+    console.error(err);
+    alert("There was a problem loading the data. Open the console for details.");
+  });
+  </script>
+</body>
+</html>
