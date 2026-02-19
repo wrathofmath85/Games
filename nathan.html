@@ -709,7 +709,7 @@ if (!pickedRow) return; // require an exact match from the list
         await sendSubmission({ player: PLAYER_KEY, row: sheetRow, name: pickedName });
         tr._submitted = true;
 
-        sel.disabled = true;
+        input.disabled = true;
 
         compareAndMark(tr, pickedRow);
 
