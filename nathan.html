@@ -16,11 +16,18 @@
       --bg0:#070A12;
       --bg1:#0B1226;
       --bg2:#101B3A;
+
       --glass: rgba(255,255,255,.10);
       --glass2: rgba(255,255,255,.06);
       --border: rgba(255,255,255,.18);
+
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.68);
+
+      --good: rgba(52, 211, 153, 1);
+      --bad: rgba(248, 113, 113, 1);
+      --warn: rgba(250, 204, 21, 1);
+
       --shadow: 0 18px 55px rgba(0,0,0,.55);
       --radius: 22px;
     }
@@ -39,101 +46,221 @@
       overflow-x:hidden;
     }
 
-    .wrap{ max-width:1200px; margin:0 auto; padding:24px 16px 40px; }
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
 
-    .topbar{ display:flex; gap:14px; align-items:center; justify-content:space-between; margin-bottom:16px; }
-    .brand{ display:flex; gap:12px; align-items:center; }
+    .topbar{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 16px;
+    }
+
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
     .logo{
       width:44px; height:44px; border-radius:14px;
       background: linear-gradient(135deg, rgba(59,130,246,.85), rgba(249,115,22,.75));
       box-shadow: var(--shadow);
-      position:relative; overflow:hidden;
+      position:relative;
+      overflow:hidden;
       border:1px solid rgba(255,255,255,.18);
     }
     .logo:before{
       content:"";
       position:absolute; inset:-30%;
-      background: repeating-linear-gradient(90deg, rgba(255,255,255,.0) 0 18px, rgba(255,255,255,.12) 18px 22px);
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,.0) 0 18px,
+        rgba(255,255,255,.12) 18px 22px
+      );
       transform: rotate(12deg);
     }
-    .brand h1{ font-size:18px; line-height:1.1; margin:0; font-weight:800; letter-spacing:.4px; }
-    .brand p{ margin:2px 0 0 0; font-size:12px; color: rgba(255,255,255,.70); }
+    .brand h1{
+      font-size: 18px;
+      line-height: 1.1;
+      margin:0;
+      font-weight: 800;
+      letter-spacing:.4px;
+    }
+    .brand p{
+      margin:2px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+    }
+    .dot.ok{ background: rgba(52,211,153,.95); box-shadow: 0 0 0 4px rgba(52,211,153,.12); }
+    .dot.bad{ background: rgba(248,113,113,.95); box-shadow: 0 0 0 4px rgba(248,113,113,.12); }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.18);
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
 
     .hero{
-      padding: 18px;
+      padding: 18px 18px 16px;
       display:flex;
       gap: 14px;
       align-items:flex-end;
       justify-content: space-between;
       border-bottom:1px solid rgba(255,255,255,.10);
     }
-    .hero .title{ display:flex; flex-direction:column; gap:6px; }
-    .hero .big{ font-size:26px; font-weight:800; margin:0; letter-spacing:.2px; }
-    .muted{ color: rgba(255,255,255,.70); }
+    .hero .title{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .hero .big{
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin:0;
+    }
+    .pillrow{
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .pill{
+      font-size: 12px;
+      color: rgba(255,255,255,.82);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      padding: 6px 10px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
 
-    .status{ display:flex; gap:10px; align-items:center; color: rgba(255,255,255,.70); font-size:12px; }
-    .dot{ width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,.25); box-shadow:0 0 0 4px rgba(255,255,255,.06); }
-    .dot.ok{ background: rgba(52,211,153,.95); box-shadow:0 0 0 4px rgba(52,211,153,.12); }
-    .dot.bad{ background: rgba(248,113,113,.95); box-shadow:0 0 0 4px rgba(248,113,113,.12); }
-
-    .tableWrap{ overflow:auto; -webkit-overflow-scrolling:touch; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; min-width:980px; }
+    .tableWrap{
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing: 0;
+      min-width: 980px;
+    }
     thead th{
-      position:sticky; top:0; z-index:2;
+      position: sticky;
+      top: 0;
+      z-index: 2;
       background: rgba(12,18,40,.72);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border-bottom:1px solid rgba(255,255,255,.12);
-      font-size:12px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
       letter-spacing:.35px;
-      text-transform:uppercase;
+      text-transform: uppercase;
       color: rgba(255,255,255,.72);
-      padding:12px;
+      padding: 12px 12px;
       text-align:left;
       white-space:nowrap;
     }
     tbody td{
-      padding:12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
       white-space:nowrap;
-      font-size:13px;
+      font-size: 13px;
       color: rgba(255,255,255,.88);
       vertical-align:middle;
     }
     tbody tr:hover td{ background: rgba(255,255,255,.04); }
 
-    .pickNum{ font-weight:800; color: rgba(255,255,255,.82); }
+    .pickNum{
+      font-weight:800;
+      color: rgba(255,255,255,.82);
+    }
 
     select{
-      width:260px;
-      max-width:100%;
+      width: 260px;
+      max-width: 100%;
       background: rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.16);
       color: rgba(255,255,255,.92);
-      padding:10px;
-      border-radius:14px;
+      padding: 10px 10px;
+      border-radius: 14px;
       outline:none;
     }
     option{ color:#0b1022; }
 
-    .meta{ color: rgba(255,255,255,.78); font-variant-numeric: tabular-nums; }
+    .meta{
+      color: rgba(255,255,255,.84);
+      font-variant-numeric: tabular-nums;
+    }
+    .mutedText{ color: var(--muted); }
+
+    .cellFlex{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-width: 110px;
+    }
+    .value{
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 26px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      font-weight: 900;
+      line-height: 1;
+      font-size: 14px;
+      flex: 0 0 auto;
+    }
+    .badge.good{
+      border-color: rgba(52,211,153,.35);
+      background: rgba(52,211,153,.14);
+      color: rgba(52,211,153,1);
+    }
+    .badge.bad{
+      border-color: rgba(248,113,113,.35);
+      background: rgba(248,113,113,.14);
+      color: rgba(248,113,113,1);
+    }
+    .badge.arrow{
+      width: 30px;
+      font-size: 16px;
+      border-color: rgba(248,113,113,.35);
+      background: rgba(248,113,113,.14);
+      color: rgba(248,113,113,1);
+    }
 
     .btn{
       cursor:pointer;
-      border:1px solid rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.16);
       background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
       color: rgba(255,255,255,.92);
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:700;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      letter-spacing:.2px;
       transition: transform .08s ease, border-color .15s ease;
       user-select:none;
       white-space:nowrap;
@@ -144,7 +271,11 @@
       border-color: rgba(59,130,246,.40);
       background: linear-gradient(180deg, rgba(59,130,246,.38), rgba(59,130,246,.16));
     }
-    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
 
     .toast{
       position: fixed;
@@ -179,7 +310,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>Work NFL Picker</h1>
-          <p>Glassmorphism submit page</p>
+          <p>Submit page</p>
         </div>
       </div>
       <div class="status">
@@ -191,14 +322,16 @@
     <div class="card">
       <div class="hero">
         <div class="title">
-          <p class="muted" style="margin:0;font-size:12px;letter-spacing:.35px;text-transform:uppercase;">Player</p>
+          <p class="mutedText" style="margin:0;font-size:12px;letter-spacing:.35px;text-transform:uppercase;">Player</p>
           <h2 id="playerName" class="big">NATHAN</h2>
-          <p class="muted" style="margin:0;font-size:12px;">If submits don’t write, click <b>Open test link</b> to see if your web app is public.</p>
+          <div class="pillrow">
+            <span class="pill">5 picks</span>
+            <span class="pill">Auto-fill</span>
+            <span class="pill">Compare to Current Selection after submit</span>
+          </div>
         </div>
-
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
-          <button class="btn" id="reloadBtn" title="Reload CSV data">Reload</button>
-          <button class="btn" id="testBtn" title="Open a test call to your web app">Open test link</button>
+        <div class="status" style="justify-content:flex-end;">
+          <span class="mutedText" id="currentStatus">Current Selection: loading…</span>
         </div>
       </div>
 
@@ -227,12 +360,20 @@
 
 <script>
 /*** CONFIG ***/
-const PICKS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
-const DATA_CSV_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv";
+const PICKS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
 
-// IMPORTANT: must be the /exec URL
-const SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxspTZqBOMoMLSEaVXDL5ibAx5iOhRuv6uwqEx0OC_XKQMCK5XtcSjLifp1XdxTCjlfSA/exec";
+const DATA_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv";
 
+const CURRENT_SELECTION_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=2147341155&single=true&output=csv";
+
+// Apps Script Web App URL (/exec):
+const SCRIPT_WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbx_BCBrtEOEX58IjacY0ZQG3o648GfpoR2NM3Ll2M0t5Y4obhFJm9Lhzo3AINgXb-TraQ/exec";
+
+// This page is for Nathan:
 const PLAYER_KEY = "nathan";
 const PLAYER_NAME_CELL = "A1";
 /*** END CONFIG ***/
@@ -243,20 +384,11 @@ const elDot = document.getElementById('dot');
 const elStatus = document.getElementById('statusText');
 const elToast = document.getElementById('toast');
 const elToastText = document.getElementById('toastText');
+const elCurrentStatus = document.getElementById('currentStatus');
 
 let dataByName = new Map();
 let allNames = [];
-
-document.getElementById('reloadBtn').addEventListener('click', () => init());
-
-document.getElementById('testBtn').addEventListener('click', () => {
-  const u = new URL(SCRIPT_WEB_APP_URL);
-  u.searchParams.set("player", "nathan");
-  u.searchParams.set("row", "2");
-  u.searchParams.set("name", "TEST_FROM_OPEN_TEST_LINK");
-  u.searchParams.set("_", String(Date.now()));
-  window.open(u.toString(), "_blank");
-});
+let currentSelection = null; // {position, age, points, conference, division, team}
 
 function setStatus(ok, text){
   elDot.className = "dot " + (ok ? "ok" : "bad");
@@ -267,12 +399,16 @@ function toast(ok, msg){
   elToast.className = "toast show " + (ok ? "ok" : "bad");
   elToastText.textContent = msg;
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => elToast.className = "toast", 2600);
+  toast._t = setTimeout(() => elToast.className = "toast", 2400);
+}
+
+function withBuster(url){
+  return url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
 }
 
 function parseCSV(url){
   return new Promise((resolve, reject) => {
-    Papa.parse(url + (url.includes("?") ? "&" : "?") + "_=" + Date.now(), {
+    Papa.parse(withBuster(url), {
       download: true,
       header: true,
       skipEmptyLines: true,
@@ -283,8 +419,7 @@ function parseCSV(url){
 }
 
 function fetchText(url){
-  const u = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
-  return fetch(u, { cache: "no-store" }).then(r => r.text());
+  return fetch(withBuster(url), { cache: "no-store" }).then(r => r.text());
 }
 
 function csvTextToGrid(text){
@@ -313,13 +448,15 @@ function buildDataMap(dataRows){
     Object.keys(obj).find(x => x.toLowerCase().includes(contains)) || null;
 
   dataByName.clear();
-  const nameKey = "Name" in (dataRows[0]||{}) ? "Name" : keyFor(dataRows[0]||{}, "name");
-  const posKey  = keyFor(dataRows[0]||{}, "pos");
-  const ageKey  = keyFor(dataRows[0]||{}, "age");
-  const ptsKey  = keyFor(dataRows[0]||{}, "poi");
-  const confKey = keyFor(dataRows[0]||{}, "conf");
-  const divKey  = keyFor(dataRows[0]||{}, "div");
-  const teamKey = keyFor(dataRows[0]||{}, "team");
+
+  const probe = dataRows[0] || {};
+  const nameKey = ("Name" in probe) ? "Name" : keyFor(probe, "name");
+  const posKey  = keyFor(probe, "pos");
+  const ageKey  = keyFor(probe, "age");
+  const ptsKey  = keyFor(probe, "poi");
+  const confKey = keyFor(probe, "conf");
+  const divKey  = keyFor(probe, "div");
+  const teamKey = keyFor(probe, "team");
 
   for (const r of dataRows){
     const nm = (r[nameKey] || "").trim();
@@ -338,8 +475,138 @@ function buildDataMap(dataRows){
   allNames = Array.from(dataByName.keys()).sort((a,b)=>a.localeCompare(b));
 }
 
+function buildCurrentSelection(currentRows){
+  const keyFor = (obj, contains) =>
+    Object.keys(obj).find(x => x.toLowerCase().includes(contains)) || null;
+
+  const first = (currentRows || []).find(r => Object.values(r).some(v => String(v||"").trim() !== ""));
+  if (!first) return null;
+
+  const posKey  = keyFor(first, "pos");
+  const ageKey  = keyFor(first, "age");
+  const ptsKey  = keyFor(first, "poi");
+  const confKey = keyFor(first, "conf");
+  const divKey  = keyFor(first, "div");
+  const teamKey = keyFor(first, "team");
+
+  return {
+    position: (posKey ? (first[posKey]||"") : "").trim(),
+    age: (ageKey ? (first[ageKey]||"") : "").trim(),
+    points: (ptsKey ? (first[ptsKey]||"") : "").trim(),
+    conference: (confKey ? (first[confKey]||"") : "").trim(),
+    division: (divKey ? (first[divKey]||"") : "").trim(),
+    team: (teamKey ? (first[teamKey]||"") : "").trim()
+  };
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+function renderValueWithBadge(value, badgeHtml){
+  const safe = escapeHtml(value || "—");
+  return `<div class="cellFlex"><span class="value">${safe}</span>${badgeHtml || ""}</div>`;
+}
+
+function badgeGood(){ return `<span class="badge good">✓</span>`; }
+function badgeBad(){ return `<span class="badge bad">✗</span>`; }
+function badgeArrow(dir){ return `<span class="badge arrow">${dir}</span>`; }
+
+function toNumberLoose(v){
+  const n = parseFloat(String(v||"").replace(/[^0-9.\-]/g,""));
+  return Number.isFinite(n) ? n : null;
+}
+
+function compareAndMark(tr, picked){
+  if (!currentSelection){
+    // no current target available; do nothing
+    return;
+  }
+
+  // Position
+  tr._cells.tdPos.innerHTML = renderValueWithBadge(
+    picked.position,
+    (picked.position && currentSelection.position && picked.position === currentSelection.position) ? badgeGood() : badgeBad()
+  );
+
+  // Conference
+  tr._cells.tdConf.innerHTML = renderValueWithBadge(
+    picked.conference,
+    (picked.conference && currentSelection.conference && picked.conference === currentSelection.conference) ? badgeGood() : badgeBad()
+  );
+
+  // Division
+  tr._cells.tdDiv.innerHTML = renderValueWithBadge(
+    picked.division,
+    (picked.division && currentSelection.division && picked.division === currentSelection.division) ? badgeGood() : badgeBad()
+  );
+
+  // Team
+  tr._cells.tdTeam.innerHTML = renderValueWithBadge(
+    picked.team,
+    (picked.team && currentSelection.team && picked.team === currentSelection.team) ? badgeGood() : badgeBad()
+  );
+
+  // Age (arrow if wrong)
+  const aPick = toNumberLoose(picked.age);
+  const aCur  = toNumberLoose(currentSelection.age);
+  if (aPick != null && aCur != null && aPick === aCur){
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeGood());
+  } else if (aPick != null && aCur != null){
+    // If current is higher -> show ↑ (meaning "go higher")
+    const dir = (aCur > aPick) ? "↑" : "↓";
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeArrow(dir));
+  } else {
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeBad());
+  }
+
+  // Points (arrow if wrong)
+  const pPick = toNumberLoose(picked.points);
+  const pCur  = toNumberLoose(currentSelection.points);
+  if (pPick != null && pCur != null && pPick === pCur){
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeGood());
+  } else if (pPick != null && pCur != null){
+    const dir = (pCur > pPick) ? "↑" : "↓";
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeArrow(dir));
+  } else {
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeBad());
+  }
+}
+
+function fillRow(tr, row){
+  const c = tr._cells;
+
+  if (!row){
+    c.tdPos.textContent = "—";
+    c.tdAge.textContent = "—";
+    c.tdPts.textContent = "—";
+    c.tdConf.textContent= "—";
+    c.tdDiv.textContent = "—";
+    c.tdTeam.textContent= "—";
+    for (const k of Object.keys(c)){
+      c[k].className = "meta mutedText";
+    }
+    return;
+  }
+
+  // Before submit: show raw values (no badges)
+  c.tdPos.textContent = row.position || "—";
+  c.tdAge.textContent = row.age || "—";
+  c.tdPts.textContent = row.points || "—";
+  c.tdConf.textContent= row.conference || "—";
+  c.tdDiv.textContent = row.division || "—";
+  c.tdTeam.textContent= row.team || "—";
+
+  for (const k of Object.keys(c)){
+    c[k].className = "meta";
+  }
+}
+
 function renderRows(){
   elRows.innerHTML = "";
+
   for (let i=1; i<=5; i++){
     const tr = document.createElement('tr');
 
@@ -349,18 +616,17 @@ function renderRows(){
 
     const tdSel = document.createElement('td');
     const sel = document.createElement('select');
-    sel.innerHTML =
-      `<option value="">— choose player —</option>` +
+    sel.innerHTML = `<option value="">— choose player —</option>` +
       allNames.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
     tdSel.appendChild(sel);
     tr.appendChild(tdSel);
 
-    const tdPos = document.createElement('td'); tdPos.className="meta muted"; tdPos.textContent = "—"; tr.appendChild(tdPos);
-    const tdAge = document.createElement('td'); tdAge.className="meta muted"; tdAge.textContent = "—"; tr.appendChild(tdAge);
-    const tdPts = document.createElement('td'); tdPts.className="meta muted"; tdPts.textContent = "—"; tr.appendChild(tdPts);
-    const tdConf= document.createElement('td'); tdConf.className="meta muted"; tdConf.textContent="—"; tr.appendChild(tdConf);
-    const tdDiv = document.createElement('td'); tdDiv.className="meta muted"; tdDiv.textContent = "—"; tr.appendChild(tdDiv);
-    const tdTeam= document.createElement('td'); tdTeam.className="meta muted"; tdTeam.textContent="—"; tr.appendChild(tdTeam);
+    const tdPos = document.createElement('td'); tdPos.className="meta mutedText"; tdPos.textContent = "—"; tr.appendChild(tdPos);
+    const tdAge = document.createElement('td'); tdAge.className="meta mutedText"; tdAge.textContent = "—"; tr.appendChild(tdAge);
+    const tdPts = document.createElement('td'); tdPts.className="meta mutedText"; tdPts.textContent = "—"; tr.appendChild(tdPts);
+    const tdConf= document.createElement('td'); tdConf.className="meta mutedText"; tdConf.textContent="—"; tr.appendChild(tdConf);
+    const tdDiv = document.createElement('td'); tdDiv.className="meta mutedText"; tdDiv.textContent = "—"; tr.appendChild(tdDiv);
+    const tdTeam= document.createElement('td'); tdTeam.className="meta mutedText"; tdTeam.textContent="—"; tr.appendChild(tdTeam);
 
     const tdBtn = document.createElement('td');
     const btn = document.createElement('button');
@@ -368,122 +634,112 @@ function renderRows(){
     btn.textContent = "Submit";
     btn.disabled = true;
 
+    tdBtn.appendChild(btn);
+    tr.appendChild(tdBtn);
+
+    tr._cells = { tdPos, tdAge, tdPts, tdConf, tdDiv, tdTeam };
+    tr._submitted = false;
+
     sel.addEventListener('change', () => {
+      if (tr._submitted) return;
       const row = dataByName.get(sel.value);
-      fillRow({ tdPos, tdAge, tdPts, tdConf, tdDiv, tdTeam }, row);
+      fillRow(tr, row);
       btn.disabled = !sel.value;
     });
 
     btn.addEventListener('click', async () => {
-      const picked = sel.value;
-      if (!picked) return;
+      if (tr._submitted) return;
 
-      const sheetRow = i + 1;
+      const pickedName = sel.value;
+      if (!pickedName) return;
+
+      const pickedRow = dataByName.get(pickedName);
+      if (!pickedRow) return;
+
+      const sheetRow = i + 1; // row2..row6
       btn.disabled = true;
       btn.textContent = "Sending…";
 
       try{
-        const ok = await sendSubmission({ player: PLAYER_KEY, row: sheetRow, name: picked });
-        if (ok === true){
-          toast(true, `Sent pick #${i}: ${picked}`);
-          btn.textContent = "Submitted ✓";
-        } else {
-          toast(false, `Server said: ${ok}`);
-          btn.disabled = false;
-          btn.textContent = "Submit";
-        }
+        await sendSubmission({ player: PLAYER_KEY, row: sheetRow, name: pickedName });
+        tr._submitted = true;
+
+        // Lock dropdown after submit
+        sel.disabled = true;
+
+        // Compare immediately
+        compareAndMark(tr, pickedRow);
+
+        btn.textContent = "Submitted ✓";
+        toast(true, `Submitted pick #${i}: ${pickedName}`);
       }catch(e){
         console.error(e);
-        toast(false, "Send failed. Try Open test link.");
         btn.disabled = false;
         btn.textContent = "Submit";
+        toast(false, "Submit failed (network/deploy).");
       }
     });
 
-    tdBtn.appendChild(btn);
-    tr.appendChild(tdBtn);
     elRows.appendChild(tr);
   }
 }
 
-function fillRow(cells, row){
-  if (!row){
-    Object.values(cells).forEach(td => { td.textContent="—"; td.className="meta muted"; });
-    return;
-  }
-  cells.tdPos.textContent = row.position || "—";
-  cells.tdAge.textContent = row.age || "—";
-  cells.tdPts.textContent = row.points || "—";
-  cells.tdConf.textContent= row.conference || "—";
-  cells.tdDiv.textContent = row.division || "—";
-  cells.tdTeam.textContent= row.team || "—";
-  Object.values(cells).forEach(td => td.className="meta");
-}
-
+// Submit: try normal fetch, fallback to Image ping (corporate-friendly)
 async function sendSubmission(payload){
   const url = new URL(SCRIPT_WEB_APP_URL);
   url.searchParams.set("player", payload.player);
   url.searchParams.set("row", String(payload.row));
   url.searchParams.set("name", payload.name);
-  url.searchParams.set("_", String(Date.now())); // cache buster
+  url.searchParams.set("_", String(Date.now()));
 
-  // 1) Try normal CORS fetch (gives real success/failure where allowed)
   try{
     const resp = await fetch(url.toString(), { method: "GET", cache: "no-store" });
-    // If this works, we can read JSON and know if it wrote.
     const txt = await resp.text();
-    try{
-      const j = JSON.parse(txt);
-      return j.ok ? true : (j.error || "Unknown server error");
-    }catch{
-      // Might be HTML (login page) -> deployment/auth is wrong
-      if (txt.toLowerCase().includes("accounts.google.com") || txt.toLowerCase().includes("sign in")){
-        return "Web app is not public (login required). Fix deployment: Execute as Me + Anyone access.";
-      }
-      return "Unexpected response (likely not public). Use Open test link.";
-    }
+    const j = JSON.parse(txt);
+    if (!j.ok) throw new Error(j.error || "Server error");
+    return true;
   }catch{
-    // 2) Corporate fallback: image ping (cannot confirm result, but request is sent)
-    return imagePing_(url.toString());
+    // fallback
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(true);
+      img.src = url.toString();
+      setTimeout(() => resolve(true), 1200);
+    });
   }
-}
-
-function imagePing_(u){
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(true);
-    img.src = u;
-    setTimeout(() => resolve(true), 1200);
-  });
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
 }
 
 async function init(){
   try{
     setStatus(true, "Loading…");
-    const [picksText, dataRows] = await Promise.all([
+    elCurrentStatus.textContent = "Current Selection: loading…";
+
+    const [picksText, dataRows, curRows] = await Promise.all([
       fetchText(PICKS_CSV_URL),
-      parseCSV(DATA_CSV_URL)
+      parseCSV(DATA_CSV_URL),
+      parseCSV(CURRENT_SELECTION_CSV_URL)
     ]);
 
     const grid = csvTextToGrid(picksText);
-    const nm = getA1FromGrid(grid, PLAYER_NAME_CELL) || "NATHAN";
-    elPlayerName.textContent = nm;
+    elPlayerName.textContent = getA1FromGrid(grid, PLAYER_NAME_CELL) || "NATHAN";
 
     buildDataMap(dataRows);
-    renderRows();
 
+    currentSelection = buildCurrentSelection(curRows);
+    if (currentSelection){
+      elCurrentStatus.textContent = "Current Selection: loaded";
+    }else{
+      elCurrentStatus.textContent = "Current Selection: not found";
+    }
+
+    renderRows();
     setStatus(true, "Ready");
   }catch(e){
     console.error(e);
     setStatus(false, "Load failed");
-    toast(false, "Could not load CSVs. Try Reload.");
+    elCurrentStatus.textContent = "Current Selection: load failed";
+    toast(false, "Could not load CSVs (network policy?).");
   }
 }
 
