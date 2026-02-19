@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Work NFL Picker – Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1226;
+      --bg2:#101B3A;
+      --glass: rgba(255,255,255,.10);
+      --glass2: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.18);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --good: rgba(52, 211, 153, 1);
+      --bad: rgba(248, 113, 113, 1);
+      --warn: rgba(250, 204, 21, 1);
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --radius: 22px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(1000px 650px at 20% 20%, rgba(249,115,22,.18), transparent 60%),
+        radial-gradient(900px 650px at 80% 25%, rgba(59,130,246,.18), transparent 55%),
+        radial-gradient(900px 700px at 50% 90%, rgba(168,85,247,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg2));
+      overflow-x:hidden;
+    }
+    .wrap{ max-width: 1250px; margin: 0 auto; padding: 24px 16px 44px; }
+
+    .topbar{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+      margin-bottom: 16px;
+    }
+    .brand{ display:flex; gap:12px; align-items:center; }
+    .logo{
+      width:44px; height:44px; border-radius:14px;
+      background: linear-gradient(135deg, rgba(249,115,22,.80), rgba(59,130,246,.72));
+      box-shadow: var(--shadow);
+      border:1px solid rgba(255,255,255,.18);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:before{
+      content:"";
+      position:absolute; inset:-30%;
+      background: repeating-linear-gradient(90deg, rgba(255,255,255,.0) 0 18px, rgba(255,255,255,.12) 18px 22px);
+      transform: rotate(12deg);
+    }
+    .brand h1{ font-size:18px; line-height:1.1; margin:0; font-weight:800; letter-spacing:.4px; }
+    .brand p{ margin:2px 0 0 0; font-size:12px; color:var(--muted); }
+
+    .card{
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .hero{
+      padding: 18px 18px 16px;
+      display:flex;
+      gap: 14px;
+      align-items:flex-end;
+      justify-content: space-between;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .hero .big{
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin:0;
+    }
+    .sub{ color: var(--muted); margin:6px 0 0 0; font-size: 12px; }
+
+    .btn{
+      cursor:pointer;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      color: rgba(255,255,255,.92);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      letter-spacing:.2px;
+      transition: transform .08s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+    .btn:active{ transform: translateY(0px); }
+
+    .status{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px; }
+    .dot{ width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,.25); box-shadow:0 0 0 4px rgba(255,255,255,.06); }
+    .dot.ok{ background: rgba(52,211,153,.95); box-shadow: 0 0 0 4px rgba(52,211,153,.12); }
+    .dot.bad{ background: rgba(248,113,113,.95); box-shadow: 0 0 0 4px rgba(248,113,113,.12); }
+
+    .tableWrap{ overflow:auto; -webkit-overflow-scrolling:touch; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 1100px; }
+    thead th{
+      position: sticky; top:0; z-index: 2;
+      background: rgba(12,18,40,.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
+      letter-spacing:.35px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      padding: 12px 12px;
+      text-align:left;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      white-space:nowrap;
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      vertical-align:middle;
+    }
+    tbody tr:hover td{ background: rgba(255,255,255,.04); }
+
+    .pickNum{ font-weight: 800; color: rgba(255,255,255,.82); }
+    .nameCell{ max-width: 280px; overflow:hidden; text-overflow:ellipsis; }
+    .muted{ color: var(--muted); }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 34px;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .ok{ color: rgba(52,211,153,.98); }
+    .bad{ color: rgba(248,113,113,.98); }
+    .warn{ color: rgba(250,204,21,.98); }
+
+    .legend{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .legend span{
+      display:inline-flex; gap:8px; align-items:center;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>Work NFL Picker</h1>
+          <p>Dashboard (Nathan vs Sam)</p>
+        </div>
+      </div>
+
+      <div class="status">
+        <span id="dot" class="dot"></span>
+        <span id="statusText">Loading…</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hero">
+        <div>
+          <h2 class="big">Comparison Board</h2>
+          <p class="sub">✅ = matches the other person for that row · Age/Points show ↑/↓ when not equal</p>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn" id="refreshBtn">Refresh</button>
+        </div>
+      </div>
+
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:80px;">Pick</th>
+              <th style="width:280px;">Nathan</th>
+              <th style="width:280px;">Sam</th>
+              <th>Position</th>
+              <th>Age</th>
+              <th>Points</th>
+              <th>Conference</th>
+              <th>Division</th>
+              <th>Team</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="badge ok">✅</span> Match</span>
+      <span><span class="badge bad">✕</span> No match</span>
+      <span><span class="badge bad">↑</span> Higher</span>
+      <span><span class="badge bad">↓</span> Lower</span>
+      <span><span class="badge muted">—</span> Missing</span>
+    </div>
+  </div>
+
+<script>
+/*** CONFIG ***/
+const PICKS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
+const DATA_CSV_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv";
+/*** END CONFIG ***/
+
+const elTbody = document.getElementById('tbody');
+const elDot = document.getElementById('dot');
+const elStatus = document.getElementById('statusText');
+document.getElementById('refreshBtn').addEventListener('click', () => load());
+
+let dataByName = new Map();
+
+function setStatus(ok, text){
+  elDot.className = "dot " + (ok ? "ok" : "bad");
+  elStatus.textContent = text;
+}
+
+function parseCSV(url){
+  return new Promise((resolve, reject) => {
+    Papa.parse(url, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => resolve(res.data),
+      error: (err) => reject(err)
+    });
+  });
+}
+
+function buildDataMap(dataRows){
+  const keyFor = (obj, contains) => Object.keys(obj).find(x => x.toLowerCase().includes(contains)) || null;
+
+  dataByName.clear();
+  const nameKey = "Name" in (dataRows[0]||{}) ? "Name" : keyFor(dataRows[0]||{}, "name");
+  const posKey  = keyFor(dataRows[0]||{}, "pos");
+  const ageKey  = keyFor(dataRows[0]||{}, "age");
+  const ptsKey  = keyFor(dataRows[0]||{}, "poi");
+  const confKey = keyFor(dataRows[0]||{}, "conf");
+  const divKey  = keyFor(dataRows[0]||{}, "div");
+  const teamKey = keyFor(dataRows[0]||{}, "team");
+
+  for (const r of dataRows){
+    const nm = (r[nameKey] || "").trim();
+    if (!nm) continue;
+    dataByName.set(nm, {
+      name: nm,
+      position: (posKey ? (r[posKey]||"") : "").trim(),
+      age: toNum(r[ageKey]),
+      points: toNum(r[ptsKey]),
+      conference: (confKey ? (r[confKey]||"") : "").trim(),
+      division: (divKey ? (r[divKey]||"") : "").trim(),
+      team: (teamKey ? (r[teamKey]||"") : "").trim()
+    });
+  }
+}
+
+function toNum(v){
+  const n = parseFloat(String(v ?? "").replace(/[^0-9.\-]/g,''));
+  return Number.isFinite(n) ? n : null;
+}
+
+function badge(type, text){
+  const cls = type === "ok" ? "badge ok"
+            : type === "bad" ? "badge bad"
+            : type === "warn" ? "badge warn"
+            : "badge muted";
+  return `<span class="${cls}">${text}</span>`;
+}
+
+function compareText(a, b){
+  if (!a || !b) return badge("muted", "—");
+  return (String(a).toUpperCase() === String(b).toUpperCase()) ? badge("ok","✅") : badge("bad","✕");
+}
+
+function compareNum(a, b){
+  if (a == null || b == null) return badge("muted","—");
+  if (a === b) return badge("ok","✅");
+  return (a > b) ? badge("bad","↑") : badge("bad","↓");
+}
+
+function safeName(n){ return n ? String(n) : ""; }
+
+async function load(){
+  try{
+    setStatus(true, "Loading…");
+
+    const [picksRows, dataRows] = await Promise.all([
+      parseCSV(PICKS_CSV_URL),
+      parseCSV(DATA_CSV_URL)
+    ]);
+
+    buildDataMap(dataRows);
+
+    // Picks CSV shape (from your screenshot):
+    // Nathan selection is column "Selection" under Nathan block (likely header "Selection")
+    // Sam selection is column "Selection" under Sam block but may collide.
+    // So we detect by column index using known layout:
+    // A: (Nathan header), B: Selection, ... I: (Sam header), J: Selection
+    // Papa headers are taken from row 1; easiest is to read raw by taking object values in order.
+    // We'll reconstruct by ordered keys:
+    const keys = Object.keys(picksRows[0] || {});
+    // keys should represent columns A..P headers, but A and I headers are the names
+    // We'll locate Selection columns by index 1 (B) and index 9 (J).
+    const idxNathanSel = 1;
+    const idxSamSel = 9;
+
+    elTbody.innerHTML = "";
+
+    for (let i=0; i<5; i++){
+      const r = picksRows[i] || {};
+      const vals = keys.map(k => r[k]);
+
+      const nSel = safeName(vals[idxNathanSel]).trim();
+      const sSel = safeName(vals[idxSamSel]).trim();
+
+      const n = dataByName.get(nSel) || null;
+      const s = dataByName.get(sSel) || null;
+
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><span class="pickNum">${i+1}</span></td>
+        <td class="nameCell">${nSel ? escapeHtml(nSel) : '<span class="muted">—</span>'}</td>
+        <td class="nameCell">${sSel ? escapeHtml(sSel) : '<span class="muted">—</span>'}</td>
+        <td>${compareText(n?.position, s?.position)}</td>
+        <td>${compareNum(n?.age, s?.age)}</td>
+        <td>${compareNum(n?.points, s?.points)}</td>
+        <td>${compareText(n?.conference, s?.conference)}</td>
+        <td>${compareText(n?.division, s?.division)}</td>
+        <td>${compareText(n?.team, s?.team)}</td>
+      `;
+      elTbody.appendChild(tr);
+    }
+
+    setStatus(true, "Updated");
+  }catch(e){
+    console.error(e);
+    setStatus(false, "Load failed");
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+load();
+</script>
+</body>
+</html>
