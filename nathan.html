@@ -623,12 +623,37 @@ function renderRows(){
     tdPick.innerHTML = `<span class="pickNum">${i}</span>`;
     tr.appendChild(tdPick);
 
-    const tdSel = document.createElement('td');
-    const sel = document.createElement('select');
-    sel.innerHTML = `<option value="">— choose player —</option>` +
-      allNames.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-    tdSel.appendChild(sel);
-    tr.appendChild(tdSel);
+const tdSel = document.createElement('td');
+
+const wrap = document.createElement('div');
+wrap.style.display = "flex";
+wrap.style.gap = "10px";
+wrap.style.alignItems = "center";
+
+const input = document.createElement('input');
+input.type = "text";
+input.placeholder = "— type player name —";
+input.setAttribute("list", `players_${i}`);
+input.autocomplete = "off";
+input.spellcheck = false;
+input.style.width = "260px";
+input.style.maxWidth = "100%";
+input.style.background = "rgba(255,255,255,.07)";
+input.style.border = "1px solid rgba(255,255,255,.16)";
+input.style.color = "rgba(255,255,255,.92)";
+input.style.padding = "10px 10px";
+input.style.borderRadius = "14px";
+input.style.outline = "none";
+
+const dl = document.createElement('datalist');
+dl.id = `players_${i}`;
+dl.innerHTML = allNames.map(n => `<option value="${escapeHtml(n)}"></option>`).join('');
+
+wrap.appendChild(input);
+wrap.appendChild(dl);
+tdSel.appendChild(wrap);
+tr.appendChild(tdSel);
+
 
     const tdPos = document.createElement('td'); tdPos.className="meta mutedText"; tdPos.textContent = "—"; tr.appendChild(tdPos);
     const tdAge = document.createElement('td'); tdAge.className="meta mutedText"; tdAge.textContent = "—"; tr.appendChild(tdAge);
@@ -649,21 +674,32 @@ function renderRows(){
     tr._cells = { tdPos, tdAge, tdPts, tdConf, tdDiv, tdTeam };
     tr._submitted = false;
 
-    sel.addEventListener('change', () => {
-      if (tr._submitted) return;
-      const row = dataByName.get(sel.value);
-      fillRow(tr, row);
-      btn.disabled = !sel.value;
-    });
+function handlePickChange(){
+  if (tr._submitted) return;
+
+  const val = (input.value || "").trim();
+  const row = dataByName.get(val);
+
+  // Only populate meta + enable submit if the typed value matches a real player
+  if (row){
+    fillRow(tr, row);
+    btn.disabled = false;
+  } else {
+    fillRow(tr, null);
+    btn.disabled = true;
+  }
+}
+
+input.addEventListener('input', handlePickChange);
+input.addEventListener('change', handlePickChange);
+
 
     btn.addEventListener('click', async () => {
       if (tr._submitted) return;
 
-      const pickedName = sel.value;
-      if (!pickedName) return;
-
-      const pickedRow = dataByName.get(pickedName);
-      if (!pickedRow) return;
+const pickedName = (input.value || "").trim();
+const pickedRow = dataByName.get(pickedName);
+if (!pickedRow) return; // require an exact match from the list
 
       const sheetRow = i + 1; // row2..row6
       btn.disabled = true;
