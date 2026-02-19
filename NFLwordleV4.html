@@ -400,20 +400,15 @@ async function load(){
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><span class="pickNum">${i+1}</span></td>
+  <td><span class="pickNum">${i+1}</span></td>
 
-        <td class="nameCell">
-          <strong>${escapeHtml(nName)}:</strong>
-          ${nPick ? escapeHtml(nPick) : '<span class="muted">—</span>'}
-        </td>
-        <td>${statusRow(vals, COL_NATHAN_SEL)}</td>
+  <td class="nameCell"><strong>${escapeHtml(nName)}</strong></td>
+  <td>${statusRow(vals, COL_NATHAN_SEL)}</td>
 
-        <td class="nameCell">
-          <strong>${escapeHtml(sName)}:</strong>
-          ${sPick ? escapeHtml(sPick) : '<span class="muted">—</span>'}
-        </td>
-        <td>${statusRow(vals, COL_SAM_SEL)}</td>
-      `;
+  <td class="nameCell"><strong>${escapeHtml(sName)}</strong></td>
+  <td>${statusRow(vals, COL_SAM_SEL)}</td>
+`;
+
       elTbody.appendChild(tr);
     }
 
