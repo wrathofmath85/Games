@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Work NFL Picker – Dashboard</title>
+  <title>Work NFL Picker – Summary</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,17 +16,22 @@
       --bg0:#070A12;
       --bg1:#0B1226;
       --bg2:#101B3A;
+
       --glass: rgba(255,255,255,.10);
       --glass2: rgba(255,255,255,.06);
       --border: rgba(255,255,255,.18);
+
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.68);
+
       --good: rgba(52, 211, 153, 1);
       --bad: rgba(248, 113, 113, 1);
       --warn: rgba(250, 204, 21, 1);
+
       --shadow: 0 18px 55px rgba(0,0,0,.55);
       --radius: 22px;
     }
+
     *{ box-sizing:border-box; }
     body{
       margin:0;
@@ -40,6 +45,7 @@
         linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg2));
       overflow-x:hidden;
     }
+
     .wrap{ max-width: 1250px; margin: 0 auto; padding: 24px 16px 44px; }
 
     .topbar{
@@ -80,12 +86,7 @@
       justify-content: space-between;
       border-bottom:1px solid rgba(255,255,255,.10);
     }
-    .hero .big{
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: .2px;
-      margin:0;
-    }
+    .hero .big{ font-size: 26px; font-weight: 800; letter-spacing: .2px; margin:0; }
     .sub{ color: var(--muted); margin:6px 0 0 0; font-size: 12px; }
 
     .btn{
@@ -136,25 +137,44 @@
     tbody tr:hover td{ background: rgba(255,255,255,.04); }
 
     .pickNum{ font-weight: 800; color: rgba(255,255,255,.82); }
-    .nameCell{ max-width: 280px; overflow:hidden; text-overflow:ellipsis; }
+    .nameCell{ max-width: 320px; overflow:hidden; text-overflow:ellipsis; }
     .muted{ color: var(--muted); }
 
+    .badgerow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     .badge{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-width: 34px;
-      height: 30px;
-      padding: 0 10px;
+      width: 28px;
+      height: 24px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.07);
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: .2px;
+      line-height: 1;
+      user-select:none;
     }
-    .ok{ color: rgba(52,211,153,.98); }
-    .bad{ color: rgba(248,113,113,.98); }
-    .warn{ color: rgba(250,204,21,.98); }
+    .badge.ok{
+      border-color: rgba(52,211,153,.35);
+      background: rgba(52,211,153,.14);
+      color: rgba(52,211,153,1);
+    }
+    .badge.bad{
+      border-color: rgba(248,113,113,.35);
+      background: rgba(248,113,113,.14);
+      color: rgba(248,113,113,1);
+    }
+    .badge.muted{
+      border-color: rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.55);
+    }
 
     .legend{
       display:flex;
@@ -171,6 +191,21 @@
       background: rgba(255,255,255,.06);
       border-radius: 999px;
     }
+
+    .labelPills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+      color: rgba(255,255,255,.70);
+      font-size: 12px;
+    }
+    .labelPills .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
   </style>
 </head>
 
@@ -181,7 +216,7 @@
         <div class="logo"></div>
         <div>
           <h1>Work NFL Picker</h1>
-          <p>Dashboard (Nathan vs Sam)</p>
+          <p>Summary (from Picks CSV only)</p>
         </div>
       </div>
 
@@ -194,8 +229,16 @@
     <div class="card">
       <div class="hero">
         <div>
-          <h2 class="big">Comparison Board</h2>
-          <p class="sub">✅ = matches the other person for that row · Age/Points show ↑/↓ when not equal</p>
+          <h2 class="big">Nathan vs Sam – Pick Results</h2>
+          <p class="sub">This page shows the ✅/✗/↑/↓ that already exist in the Picks CSV (no extra comparison).</p>
+          <div class="labelPills" aria-hidden="true">
+            <span class="pill">Pos</span>
+            <span class="pill">Age</span>
+            <span class="pill">Pts</span>
+            <span class="pill">Conf</span>
+            <span class="pill">Div</span>
+            <span class="pill">Team</span>
+          </div>
         </div>
 
         <div style="display:flex;gap:10px;align-items:center;">
@@ -208,14 +251,10 @@
           <thead>
             <tr>
               <th style="width:80px;">Pick</th>
-              <th style="width:280px;">Nathan</th>
-              <th style="width:280px;">Sam</th>
-              <th>Position</th>
-              <th>Age</th>
-              <th>Points</th>
-              <th>Conference</th>
-              <th>Division</th>
-              <th>Team</th>
+              <th style="width:360px;">Nathan Pick</th>
+              <th style="width:280px;">Nathan Status</th>
+              <th style="width:360px;">Sam Pick</th>
+              <th style="width:280px;">Sam Status</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -224,18 +263,21 @@
     </div>
 
     <div class="legend">
-      <span><span class="badge ok">✅</span> Match</span>
-      <span><span class="badge bad">✕</span> No match</span>
-      <span><span class="badge bad">↑</span> Higher</span>
-      <span><span class="badge bad">↓</span> Lower</span>
-      <span><span class="badge muted">—</span> Missing</span>
+      <span><span class="badge ok">✓</span> TRUE / correct</span>
+      <span><span class="badge bad">✗</span> FALSE / wrong</span>
+      <span><span class="badge bad">↑</span> HIGHER needed</span>
+      <span><span class="badge bad">↓</span> LOWER needed</span>
+      <span><span class="badge muted">—</span> missing / N/A</span>
     </div>
   </div>
 
 <script>
 /*** CONFIG ***/
-const PICKS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
-const DATA_CSV_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=0&single=true&output=csv";
+const PICKS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
+
+// How many pick rows to show (your sheet is 1..5)
+const NUM_PICKS = 5;
 /*** END CONFIG ***/
 
 const elTbody = document.getElementById('tbody');
@@ -243,139 +285,143 @@ const elDot = document.getElementById('dot');
 const elStatus = document.getElementById('statusText');
 document.getElementById('refreshBtn').addEventListener('click', () => load());
 
-let dataByName = new Map();
-
 function setStatus(ok, text){
   elDot.className = "dot " + (ok ? "ok" : "bad");
   elStatus.textContent = text;
 }
 
-function parseCSV(url){
+function withBuster(url){
+  return url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
+}
+
+function parsePicksGrid(url){
   return new Promise((resolve, reject) => {
-    Papa.parse(url, {
+    Papa.parse(withBuster(url), {
       download: true,
-      header: true,
+      header: false,          // IMPORTANT: keep column order
       skipEmptyLines: true,
-      complete: (res) => resolve(res.data),
+      complete: (res) => resolve(res.data || []),
       error: (err) => reject(err)
     });
   });
 }
 
-function buildDataMap(dataRows){
-  const keyFor = (obj, contains) => Object.keys(obj).find(x => x.toLowerCase().includes(contains)) || null;
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
 
-  dataByName.clear();
-  const nameKey = "Name" in (dataRows[0]||{}) ? "Name" : keyFor(dataRows[0]||{}, "name");
-  const posKey  = keyFor(dataRows[0]||{}, "pos");
-  const ageKey  = keyFor(dataRows[0]||{}, "age");
-  const ptsKey  = keyFor(dataRows[0]||{}, "poi");
-  const confKey = keyFor(dataRows[0]||{}, "conf");
-  const divKey  = keyFor(dataRows[0]||{}, "div");
-  const teamKey = keyFor(dataRows[0]||{}, "team");
+function norm(v){
+  return String(v ?? "").trim();
+}
 
-  for (const r of dataRows){
-    const nm = (r[nameKey] || "").trim();
-    if (!nm) continue;
-    dataByName.set(nm, {
-      name: nm,
-      position: (posKey ? (r[posKey]||"") : "").trim(),
-      age: toNum(r[ageKey]),
-      points: toNum(r[ptsKey]),
-      conference: (confKey ? (r[confKey]||"") : "").trim(),
-      division: (divKey ? (r[divKey]||"") : "").trim(),
-      team: (teamKey ? (r[teamKey]||"") : "").trim()
-    });
+function badgeFromCell(v, label){
+  const t = norm(v).toUpperCase();
+
+  // Missing / N/A
+  if (!t || t === "—" || t === "N/A" || t === "#N/A" || t === "NA" || t === "NULL") {
+    return `<span class="badge muted" title="${escapeHtml(label)}: missing">—</span>`;
   }
+
+  if (t === "TRUE"){
+    return `<span class="badge ok" title="${escapeHtml(label)}: TRUE">✓</span>`;
+  }
+  if (t === "FALSE"){
+    return `<span class="badge bad" title="${escapeHtml(label)}: FALSE">✗</span>`;
+  }
+  if (t === "HIGHER"){
+    return `<span class="badge bad" title="${escapeHtml(label)}: HIGHER">↑</span>`;
+  }
+  if (t === "LOWER"){
+    return `<span class="badge bad" title="${escapeHtml(label)}: LOWER">↓</span>`;
+  }
+
+  // If someone typed something else (unexpected), show it muted
+  return `<span class="badge muted" title="${escapeHtml(label)}: ${escapeHtml(t)}">${escapeHtml(t).slice(0,2)}</span>`;
 }
 
-function toNum(v){
-  const n = parseFloat(String(v ?? "").replace(/[^0-9.\-]/g,''));
-  return Number.isFinite(n) ? n : null;
-}
+function statusRow(vals, baseIdx){
+  // baseIdx points at the player's Selection column (B for Nathan, J for Sam)
+  // Order in your screenshot:
+  // Selection, Position, Age, Points, Conference, Division, Team  (7 cols)
+  const labels = ["Pos","Age","Pts","Conf","Div","Team"];
+  const pos = vals[baseIdx + 1];
+  const age = vals[baseIdx + 2];
+  const pts = vals[baseIdx + 3];
+  const conf= vals[baseIdx + 4];
+  const div = vals[baseIdx + 5];
+  const team= vals[baseIdx + 6];
 
-function badge(type, text){
-  const cls = type === "ok" ? "badge ok"
-            : type === "bad" ? "badge bad"
-            : type === "warn" ? "badge warn"
-            : "badge muted";
-  return `<span class="${cls}">${text}</span>`;
+  return `
+    <div class="badgerow" aria-label="Status ${labels.join(', ')}">
+      ${badgeFromCell(pos, labels[0])}
+      ${badgeFromCell(age, labels[1])}
+      ${badgeFromCell(pts, labels[2])}
+      ${badgeFromCell(conf, labels[3])}
+      ${badgeFromCell(div, labels[4])}
+      ${badgeFromCell(team, labels[5])}
+    </div>
+  `;
 }
-
-function compareText(a, b){
-  if (!a || !b) return badge("muted", "—");
-  return (String(a).toUpperCase() === String(b).toUpperCase()) ? badge("ok","✅") : badge("bad","✕");
-}
-
-function compareNum(a, b){
-  if (a == null || b == null) return badge("muted","—");
-  if (a === b) return badge("ok","✅");
-  return (a > b) ? badge("bad","↑") : badge("bad","↓");
-}
-
-function safeName(n){ return n ? String(n) : ""; }
 
 async function load(){
   try{
     setStatus(true, "Loading…");
-
-    const [picksRows, dataRows] = await Promise.all([
-      parseCSV(PICKS_CSV_URL),
-      parseCSV(DATA_CSV_URL)
-    ]);
-
-    buildDataMap(dataRows);
-
-    // Picks CSV shape (from your screenshot):
-    // Nathan selection is column "Selection" under Nathan block (likely header "Selection")
-    // Sam selection is column "Selection" under Sam block but may collide.
-    // So we detect by column index using known layout:
-    // A: (Nathan header), B: Selection, ... I: (Sam header), J: Selection
-    // Papa headers are taken from row 1; easiest is to read raw by taking object values in order.
-    // We'll reconstruct by ordered keys:
-    const keys = Object.keys(picksRows[0] || {});
-    // keys should represent columns A..P headers, but A and I headers are the names
-    // We'll locate Selection columns by index 1 (B) and index 9 (J).
-    const idxNathanSel = 1;
-    const idxSamSel = 9;
-
     elTbody.innerHTML = "";
 
-    for (let i=0; i<5; i++){
-      const r = picksRows[i] || {};
-      const vals = keys.map(k => r[k]);
+    const grid = await parsePicksGrid(PICKS_CSV_URL);
+    if (!grid || grid.length < 2){
+      setStatus(false, "No data");
+      return;
+    }
 
-      const nSel = safeName(vals[idxNathanSel]).trim();
-      const sSel = safeName(vals[idxSamSel]).trim();
+    // Expected columns based on your screenshot:
+    // A: NATHAN header, B: Selection, C: Position, D: Age, E: Points, F: Conference, G: Division, H: Team
+    // I: SAM header,    J: Selection, K: Position, L: Age, M: Points, N: Conference, O: Division, P: Team
+    const COL_NATHAN_HEADER = 0;  // A
+    const COL_NATHAN_SEL    = 1;  // B
+    const COL_SAM_HEADER    = 8;  // I
+    const COL_SAM_SEL       = 9;  // J
 
-      const n = dataByName.get(nSel) || null;
-      const s = dataByName.get(sSel) || null;
+    // Use row 0 headers (names) if present
+    const header = grid[0] || [];
+    const nName = norm(header[COL_NATHAN_HEADER]) || "NATHAN";
+    const sName = norm(header[COL_SAM_HEADER]) || "SAM";
+
+    // Build rows 1..NUM_PICKS (grid row index 1..)
+    for (let i=0; i<NUM_PICKS; i++){
+      const row = grid[i+1] || [];
+      // Pad row to at least 16 cols so indexing doesn't blow up
+      const vals = Array.from({length: 16}, (_, idx) => row[idx] ?? "");
+
+      const nPick = norm(vals[COL_NATHAN_SEL]);
+      const sPick = norm(vals[COL_SAM_SEL]);
 
       const tr = document.createElement('tr');
-
       tr.innerHTML = `
         <td><span class="pickNum">${i+1}</span></td>
-        <td class="nameCell">${nSel ? escapeHtml(nSel) : '<span class="muted">—</span>'}</td>
-        <td class="nameCell">${sSel ? escapeHtml(sSel) : '<span class="muted">—</span>'}</td>
-        <td>${compareText(n?.position, s?.position)}</td>
-        <td>${compareNum(n?.age, s?.age)}</td>
-        <td>${compareNum(n?.points, s?.points)}</td>
-        <td>${compareText(n?.conference, s?.conference)}</td>
-        <td>${compareText(n?.division, s?.division)}</td>
-        <td>${compareText(n?.team, s?.team)}</td>
+
+        <td class="nameCell">
+          <strong>${escapeHtml(nName)}:</strong>
+          ${nPick ? escapeHtml(nPick) : '<span class="muted">—</span>'}
+        </td>
+        <td>${statusRow(vals, COL_NATHAN_SEL)}</td>
+
+        <td class="nameCell">
+          <strong>${escapeHtml(sName)}:</strong>
+          ${sPick ? escapeHtml(sPick) : '<span class="muted">—</span>'}
+        </td>
+        <td>${statusRow(vals, COL_SAM_SEL)}</td>
       `;
       elTbody.appendChild(tr);
     }
 
-    setStatus(true, "Updated");
+    setStatus(true, "Ready");
   }catch(e){
     console.error(e);
     setStatus(false, "Load failed");
   }
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 load();
