@@ -207,12 +207,13 @@
     }
     .mutedText{ color: var(--muted); }
 
+    /* ✅ FIX: keep badge right next to the value (not spaced to the far right) */
     .cellFlex{
-      display:flex;
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      min-width: 110px;
+      justify-content:flex-start;
+      gap:8px;
+      max-width: 100%;
     }
     .value{
       overflow:hidden;
@@ -510,9 +511,9 @@ function renderValueWithBadge(value, badgeHtml){
   return `<div class="cellFlex"><span class="value">${safe}</span>${badgeHtml || ""}</div>`;
 }
 
-function badgeGood(){ return `<span class="badge good">✓</span>`; }
-function badgeBad(){ return `<span class="badge bad">✗</span>`; }
-function badgeArrow(dir){ return `<span class="badge arrow">${dir}</span>`; }
+function badgeGood(title){ return `<span class="badge good" title="${escapeHtml(title||"Match")}">✓</span>`; }
+function badgeBad(title){ return `<span class="badge bad" title="${escapeHtml(title||"No match")}">✗</span>`; }
+function badgeArrow(dir, title){ return `<span class="badge arrow" title="${escapeHtml(title||"Higher/Lower")}">${dir}</span>`; }
 
 function toNumberLoose(v){
   const n = parseFloat(String(v||"").replace(/[^0-9.\-]/g,""));
@@ -521,57 +522,65 @@ function toNumberLoose(v){
 
 function compareAndMark(tr, picked){
   if (!currentSelection){
-    // no current target available; do nothing
     return;
   }
 
   // Position
   tr._cells.tdPos.innerHTML = renderValueWithBadge(
     picked.position,
-    (picked.position && currentSelection.position && picked.position === currentSelection.position) ? badgeGood() : badgeBad()
+    (picked.position && currentSelection.position && picked.position === currentSelection.position)
+      ? badgeGood("Position matches current selection")
+      : badgeBad("Position does not match current selection")
   );
 
   // Conference
   tr._cells.tdConf.innerHTML = renderValueWithBadge(
     picked.conference,
-    (picked.conference && currentSelection.conference && picked.conference === currentSelection.conference) ? badgeGood() : badgeBad()
+    (picked.conference && currentSelection.conference && picked.conference === currentSelection.conference)
+      ? badgeGood("Conference matches current selection")
+      : badgeBad("Conference does not match current selection")
   );
 
   // Division
   tr._cells.tdDiv.innerHTML = renderValueWithBadge(
     picked.division,
-    (picked.division && currentSelection.division && picked.division === currentSelection.division) ? badgeGood() : badgeBad()
+    (picked.division && currentSelection.division && picked.division === currentSelection.division)
+      ? badgeGood("Division matches current selection")
+      : badgeBad("Division does not match current selection")
   );
 
   // Team
   tr._cells.tdTeam.innerHTML = renderValueWithBadge(
     picked.team,
-    (picked.team && currentSelection.team && picked.team === currentSelection.team) ? badgeGood() : badgeBad()
+    (picked.team && currentSelection.team && picked.team === currentSelection.team)
+      ? badgeGood("Team matches current selection")
+      : badgeBad("Team does not match current selection")
   );
 
   // Age (arrow if wrong)
   const aPick = toNumberLoose(picked.age);
   const aCur  = toNumberLoose(currentSelection.age);
   if (aPick != null && aCur != null && aPick === aCur){
-    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeGood());
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeGood("Age matches current selection"));
   } else if (aPick != null && aCur != null){
-    // If current is higher -> show ↑ (meaning "go higher")
     const dir = (aCur > aPick) ? "↑" : "↓";
-    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeArrow(dir));
+    const tip = (aCur > aPick) ? "Current age is higher" : "Current age is lower";
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeArrow(dir, tip));
   } else {
-    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeBad());
+    tr._cells.tdAge.innerHTML = renderValueWithBadge(String(picked.age), badgeBad("Age does not match current selection"));
   }
 
   // Points (arrow if wrong)
   const pPick = toNumberLoose(picked.points);
   const pCur  = toNumberLoose(currentSelection.points);
   if (pPick != null && pCur != null && pPick === pCur){
-    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeGood());
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeGood("Points match current selection"));
   } else if (pPick != null && pCur != null){
     const dir = (pCur > pPick) ? "↑" : "↓";
-    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeArrow(dir));
+    const tip = (pCur > pPick) ? "Current points are higher" : "Current points are lower";
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeArrow(dir, tip));
   } else {
-    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeBad());
+    tr._cells.tdPts.innerHTML = renderValueWithBadge(String(picked.points), badgeBad("Points do not match current selection"));
   }
 }
 
@@ -664,10 +673,8 @@ function renderRows(){
         await sendSubmission({ player: PLAYER_KEY, row: sheetRow, name: pickedName });
         tr._submitted = true;
 
-        // Lock dropdown after submit
         sel.disabled = true;
 
-        // Compare immediately
         compareAndMark(tr, pickedRow);
 
         btn.textContent = "Submitted ✓";
@@ -699,7 +706,6 @@ async function sendSubmission(payload){
     if (!j.ok) throw new Error(j.error || "Server error");
     return true;
   }catch{
-    // fallback
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => resolve(true);
