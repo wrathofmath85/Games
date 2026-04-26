@@ -9,417 +9,500 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
   <style>
     :root{
-      --bg0:#070A12;
-      --bg1:#0B1226;
-      --bg2:#101B3A;
-
-      --glass: rgba(255,255,255,.10);
-      --glass2: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.18);
-
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-
-      --good: rgba(52, 211, 153, 1);
-      --bad: rgba(248, 113, 113, 1);
-      --warn: rgba(250, 204, 21, 1);
-
-      --shadow: 0 18px 55px rgba(0,0,0,.55);
-      --radius: 22px;
+      --bg0:#070A12; --bg1:#0B1226; --bg2:#101B3A;
+      --glass:rgba(255,255,255,.10); --glass2:rgba(255,255,255,.06);
+      --border:rgba(255,255,255,.18);
+      --text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.68);
+      --good:rgba(52,211,153,1); --bad:rgba(248,113,113,1); --warn:rgba(250,204,21,1);
+      --shadow:0 18px 55px rgba(0,0,0,.55); --radius:22px;
     }
-
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text); min-height:100vh; overflow-x:hidden;
       background:
-        radial-gradient(1000px 650px at 20% 20%, rgba(249,115,22,.18), transparent 60%),
-        radial-gradient(900px 650px at 80% 25%, rgba(59,130,246,.18), transparent 55%),
-        radial-gradient(900px 700px at 50% 90%, rgba(168,85,247,.14), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1) 40%, var(--bg2));
-      overflow-x:hidden;
+        radial-gradient(1000px 650px at 20% 20%,rgba(249,115,22,.18),transparent 60%),
+        radial-gradient(900px 650px at 80% 25%,rgba(59,130,246,.18),transparent 55%),
+        radial-gradient(900px 700px at 50% 90%,rgba(168,85,247,.14),transparent 55%),
+        linear-gradient(180deg,var(--bg0),var(--bg1) 40%,var(--bg2));
     }
 
-    .wrap{ max-width: 1250px; margin: 0 auto; padding: 24px 16px 44px; }
+    .wrap{ max-width:1280px; margin:0 auto; padding:24px 16px 44px; }
 
-    .topbar{
-      display:flex; gap:14px; align-items:center; justify-content:space-between;
-      margin-bottom: 16px;
-    }
+    /* ── Top bar ── */
+    .topbar{ display:flex; gap:14px; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; }
     .brand{ display:flex; gap:12px; align-items:center; }
     .logo{
       width:44px; height:44px; border-radius:14px;
-      background: linear-gradient(135deg, rgba(249,115,22,.80), rgba(59,130,246,.72));
-      box-shadow: var(--shadow);
-      border:1px solid rgba(255,255,255,.18);
-      position:relative;
-      overflow:hidden;
+      background:linear-gradient(135deg,rgba(249,115,22,.80),rgba(59,130,246,.72));
+      box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.18);
+      position:relative; overflow:hidden;
     }
     .logo:before{
-      content:"";
-      position:absolute; inset:-30%;
-      background: repeating-linear-gradient(90deg, rgba(255,255,255,.0) 0 18px, rgba(255,255,255,.12) 18px 22px);
-      transform: rotate(12deg);
+      content:""; position:absolute; inset:-30%;
+      background:repeating-linear-gradient(90deg,rgba(255,255,255,.0) 0 18px,rgba(255,255,255,.12) 18px 22px);
+      transform:rotate(12deg);
     }
     .brand h1{ font-size:18px; line-height:1.1; margin:0; font-weight:800; letter-spacing:.4px; }
-    .brand p{ margin:2px 0 0 0; font-size:12px; color:var(--muted); }
-
-    .card{
-      background: linear-gradient(180deg, var(--glass), var(--glass2));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .hero{
-      padding: 18px 18px 16px;
-      display:flex;
-      gap: 14px;
-      align-items:flex-end;
-      justify-content: space-between;
-      border-bottom:1px solid rgba(255,255,255,.10);
-    }
-    .hero .big{ font-size: 26px; font-weight: 800; letter-spacing: .2px; margin:0; }
-    .sub{ color: var(--muted); margin:6px 0 0 0; font-size: 12px; }
-
+    .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+    .topRight{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .statusbar{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px; }
+    .dot{ width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.25); box-shadow:0 0 0 4px rgba(255,255,255,.06); flex-shrink:0; }
+    .dot.ok{ background:rgba(52,211,153,.95); box-shadow:0 0 0 4px rgba(52,211,153,.12); }
+    .dot.bad{ background:rgba(248,113,113,.95); box-shadow:0 0 0 4px rgba(248,113,113,.12); }
+    .tsText{ font-size:11px; color:var(--muted); }
     .btn{
-      cursor:pointer;
-      border: 1px solid rgba(255,255,255,.16);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      color: rgba(255,255,255,.92);
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 700;
-      letter-spacing:.2px;
-      transition: transform .08s ease, border-color .15s ease;
-      user-select:none;
-      white-space:nowrap;
+      cursor:pointer; border:1px solid rgba(255,255,255,.16);
+      background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.06));
+      color:rgba(255,255,255,.92); padding:10px 14px; border-radius:14px;
+      font-weight:700; font-family:inherit; letter-spacing:.2px;
+      transition:transform .08s ease,border-color .15s; user-select:none; white-space:nowrap;
     }
-    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
-    .btn:active{ transform: translateY(0px); }
+    .btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.22); }
+    .btn:active{ transform:translateY(0); }
 
-    .status{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:12px; }
-    .dot{ width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,.25); box-shadow:0 0 0 4px rgba(255,255,255,.06); }
-    .dot.ok{ background: rgba(52,211,153,.95); box-shadow: 0 0 0 4px rgba(52,211,153,.12); }
-    .dot.bad{ background: rgba(248,113,113,.95); box-shadow: 0 0 0 4px rgba(248,113,113,.12); }
-
-    .tableWrap{ overflow:auto; -webkit-overflow-scrolling:touch; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 1100px; }
-    thead th{
-      position: sticky; top:0; z-index: 2;
-      background: rgba(12,18,40,.72);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      font-size: 12px;
-      letter-spacing:.35px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.72);
-      padding: 12px 12px;
-      text-align:left;
-      white-space:nowrap;
+    /* ── Score cards ── */
+    .scoreRow{
+      display:grid; grid-template-columns:1fr auto 1fr;
+      gap:14px; align-items:center; margin-bottom:18px;
     }
-    tbody td{
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      white-space:nowrap;
-      font-size: 13px;
-      color: rgba(255,255,255,.88);
-      vertical-align:middle;
+    .scoreCard{
+      background:linear-gradient(180deg,var(--glass),var(--glass2));
+      border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:18px 20px;
+      display:flex; align-items:center; gap:14px;
     }
-    tbody tr:hover td{ background: rgba(255,255,255,.04); }
+    .scoreCard.leading{ border-color:rgba(52,211,153,.45); box-shadow:0 0 0 1px rgba(52,211,153,.15),var(--shadow); }
+    .avatar{
+      width:46px; height:46px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:800; flex-shrink:0;
+    }
+    .av-n{ background:rgba(59,130,246,.22); color:rgba(147,197,253,1); border:1px solid rgba(59,130,246,.30); }
+    .av-s{ background:rgba(249,115,22,.22); color:rgba(253,186,116,1); border:1px solid rgba(249,115,22,.30); }
+    .scoreInfo{ flex:1; min-width:0; }
+    .scoreName{ font-size:18px; font-weight:800; letter-spacing:.2px; }
+    .scoreSub{ font-size:12px; color:var(--muted); margin-top:3px; }
+    .scoreNum{ text-align:right; flex-shrink:0; }
+    .scoreNumBig{ font-size:32px; font-weight:800; line-height:1; }
+    .scoreNumBig.leading{ color:rgba(52,211,153,1); }
+    .scoreNumBig.trailing{ color:var(--muted); }
+    .scoreNumLabel{ font-size:11px; color:var(--muted); margin-top:2px; text-align:right; }
+    .leaderBadge{
+      font-size:11px; font-weight:700; letter-spacing:.3px; text-transform:uppercase;
+      background:rgba(52,211,153,.18); color:rgba(52,211,153,1);
+      border:1px solid rgba(52,211,153,.28); border-radius:999px;
+      padding:4px 10px; white-space:nowrap; flex-shrink:0;
+    }
+    .vsBadge{
+      font-size:13px; font-weight:800; color:var(--muted);
+      background:var(--glass); border:1px solid var(--border);
+      border-radius:999px; padding:8px 14px; text-align:center; white-space:nowrap;
+    }
 
-    .pickNum{ font-weight: 800; color: rgba(255,255,255,.82); }
-    .nameCell{ max-width: 320px; overflow:hidden; text-overflow:ellipsis; }
-    .muted{ color: var(--muted); }
+    /* ── Main picks card ── */
+    .card{
+      background:linear-gradient(180deg,var(--glass),var(--glass2));
+      border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); overflow:hidden;
+    }
+    .cardHeader{
+      padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .cardTitle{ font-size:14px; font-weight:800; letter-spacing:.3px; text-transform:uppercase; color:var(--muted); }
 
-    .badgerow{
-      display:flex;
-      gap:8px;
+    /* ── Column header row ── */
+    .colHeader{
+      display:grid;
+      grid-template-columns: 50px 1fr 28px 28px 28px 28px 28px 28px 8px 1fr 28px 28px 28px 28px 28px 28px;
+      gap:6px; padding:10px 16px;
+      background:rgba(12,18,40,.55);
+      border-bottom:1px solid rgba(255,255,255,.10);
+      font-size:11px; letter-spacing:.4px; text-transform:uppercase; color:var(--muted);
       align-items:center;
-      flex-wrap:wrap;
     }
+    .colHeader .playerLabel{ font-size:12px; font-weight:700; color:rgba(255,255,255,.75); }
+    .colHeader .attrLabel{ text-align:center; }
+    .colDivider{ width:1px; background:rgba(255,255,255,.10); align-self:stretch; }
+
+    /* ── Pick row ── */
+    .pickRow{
+      display:grid;
+      grid-template-columns: 50px 1fr 28px 28px 28px 28px 28px 28px 8px 1fr 28px 28px 28px 28px 28px 28px;
+      gap:6px; padding:12px 16px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      align-items:center;
+      transition:background .1s;
+    }
+    .pickRow:last-child{ border-bottom:none; }
+    .pickRow:hover{ background:rgba(255,255,255,.03); }
+    .pickNumCircle{
+      width:28px; height:28px; border-radius:50%;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:800; color:rgba(255,255,255,.70);
+    }
+    .playerPickName{
+      font-size:13px; font-weight:600; white-space:nowrap;
+      overflow:hidden; text-overflow:ellipsis;
+      color:rgba(255,255,255,.90);
+    }
+    .playerPickName.pending{ color:var(--muted); font-weight:400; font-style:italic; }
+
+    /* ── Status badges ── */
     .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width: 28px;
-      height: 24px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.07);
-      font-weight: 900;
-      letter-spacing: .2px;
-      line-height: 1;
-      user-select:none;
+      width:26px; height:22px; border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:900; line-height:1;
+      border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:var(--muted);
+      cursor:default;
     }
-    .badge.ok{
-      border-color: rgba(52,211,153,.35);
-      background: rgba(52,211,153,.14);
-      color: rgba(52,211,153,1);
-    }
-    .badge.bad{
-      border-color: rgba(248,113,113,.35);
-      background: rgba(248,113,113,.14);
-      color: rgba(248,113,113,1);
-    }
-    .badge.muted{
-      border-color: rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.55);
-    }
+    .badge.ok{   border-color:rgba(52,211,153,.35); background:rgba(52,211,153,.14); color:rgba(52,211,153,1); }
+    .badge.bad{  border-color:rgba(248,113,113,.35); background:rgba(248,113,113,.14); color:rgba(248,113,113,1); }
+    .badge.arr{  border-color:rgba(250,204,21,.35);  background:rgba(250,204,21,.14);  color:rgba(250,204,21,1); }
+    .badge.muted{ opacity:.45; }
 
-    .legend{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .legend span{
+    /* ── Legend ── */
+    .legend{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .legItem{
       display:inline-flex; gap:8px; align-items:center;
-      padding: 6px 10px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      border-radius: 999px;
+      padding:6px 10px; border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04); border-radius:999px;
+      font-size:12px; color:var(--muted);
     }
 
-    .labelPills{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-      color: rgba(255,255,255,.70);
-      font-size: 12px;
-    }
-    .labelPills .pill{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-    }
+    /* ── No data state ── */
+    .emptyMsg{ padding:32px; text-align:center; color:var(--muted); font-size:14px; }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <h1>Work NFL Picker</h1>
-          <p>Summary (from Picks CSV only)</p>
-        </div>
-      </div>
+<div class="wrap">
 
-      <div class="status">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Work NFL Picker</h1>
+        <p>Summary &amp; Results</p>
+      </div>
+    </div>
+    <div class="topRight">
+      <span class="tsText" id="tsText"></span>
+      <div class="statusbar">
         <span id="dot" class="dot"></span>
         <span id="statusText">Loading…</span>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="hero">
-        <div>
-          <h2 class="big">Nathan vs Sam – Pick Results</h2>
-          <p class="sub">This page shows the ✅/✗/↑/↓ that already exist in the Picks CSV (no extra comparison).</p>
-          <div class="labelPills" aria-hidden="true">
-            <span class="pill">Pos</span>
-            <span class="pill">Age</span>
-            <span class="pill">Pts</span>
-            <span class="pill">Conf</span>
-            <span class="pill">Div</span>
-            <span class="pill">Team</span>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;">
-          <button class="btn" id="refreshBtn">Refresh</button>
-        </div>
-      </div>
-
-      <div class="tableWrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:80px;">Pick</th>
-              <th style="width:360px;">Nathan Pick</th>
-              <th style="width:280px;">Nathan Status</th>
-              <th style="width:360px;">Sam Pick</th>
-              <th style="width:280px;">Sam Status</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="legend">
-      <span><span class="badge ok">✓</span> TRUE / correct</span>
-      <span><span class="badge bad">✗</span> FALSE / wrong</span>
-      <span><span class="badge bad">↑</span> HIGHER needed</span>
-      <span><span class="badge bad">↓</span> LOWER needed</span>
-      <span><span class="badge muted">—</span> missing / N/A</span>
+      <button class="btn" id="refreshBtn">Refresh</button>
     </div>
   </div>
 
+  <!-- Score summary cards -->
+  <div class="scoreRow" id="scoreRow">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- Picks comparison card -->
+  <div class="card">
+    <div class="cardHeader">
+      <span class="cardTitle">Pick-by-pick results</span>
+      <span style="font-size:12px;color:var(--muted);">Hover badges for details · Columns: Pos · Age · Pts · Conf · Div · Team</span>
+    </div>
+
+    <!-- Column headers -->
+    <div class="colHeader">
+      <div></div>
+      <div class="playerLabel" id="nColLabel">NATHAN</div>
+      <div class="attrLabel" title="Position">Po</div>
+      <div class="attrLabel" title="Age">Ag</div>
+      <div class="attrLabel" title="Points">Pt</div>
+      <div class="attrLabel" title="Conference">Co</div>
+      <div class="attrLabel" title="Division">Dv</div>
+      <div class="attrLabel" title="Team">Tm</div>
+      <div class="colDivider"></div>
+      <div class="playerLabel" id="sColLabel">SAM</div>
+      <div class="attrLabel" title="Position">Po</div>
+      <div class="attrLabel" title="Age">Ag</div>
+      <div class="attrLabel" title="Points">Pt</div>
+      <div class="attrLabel" title="Conference">Co</div>
+      <div class="attrLabel" title="Division">Dv</div>
+      <div class="attrLabel" title="Team">Tm</div>
+    </div>
+
+    <div id="pickRows">
+      <div class="emptyMsg">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legItem"><span class="badge ok">✓</span> Correct</div>
+    <div class="legItem"><span class="badge bad">✗</span> Wrong</div>
+    <div class="legItem"><span class="badge arr">↑</span> Need higher</div>
+    <div class="legItem"><span class="badge arr">↓</span> Need lower</div>
+    <div class="legItem"><span class="badge muted">—</span> Not submitted</div>
+  </div>
+
+</div>
+
 <script>
 /*** CONFIG ***/
-const PICKS_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=746956238&single=true&output=csv";
+const SCRIPT_WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbxspTZqBOMoMLSEaVXDL5ibAx5iOhRuv6uwqEx0OC_XKQMCK5XtcSjLifp1XdxTCjlfSA/exec";
 
-// How many pick rows to show (your sheet is 1..5)
 const NUM_PICKS = 5;
+
+// Column indices (0-based) in the raw picks 2-D array returned by Apps Script
+const COL_NATHAN_LABEL = 0;   // A  – Nathan's header/name cell
+const COL_NATHAN_SEL   = 1;   // B  – Nathan's pick name
+const COL_NATHAN_POS   = 2;   // C
+const COL_NATHAN_AGE   = 3;   // D
+const COL_NATHAN_PTS   = 4;   // E
+const COL_NATHAN_CONF  = 5;   // F
+const COL_NATHAN_DIV   = 6;   // G
+const COL_NATHAN_TEAM  = 7;   // H
+
+const COL_SAM_LABEL    = 8;   // I  – Sam's header/name cell
+const COL_SAM_SEL      = 9;   // J
+const COL_SAM_POS      = 10;  // K
+const COL_SAM_AGE      = 11;  // L
+const COL_SAM_PTS      = 12;  // M
+const COL_SAM_CONF     = 13;  // N
+const COL_SAM_DIV      = 14;  // O
+const COL_SAM_TEAM     = 15;  // P
+
+// Auto-refresh every 60 seconds
+const AUTO_REFRESH_MS = 60000;
 /*** END CONFIG ***/
 
-const elTbody = document.getElementById('tbody');
-const elDot = document.getElementById('dot');
-const elStatus = document.getElementById('statusText');
+const elDot        = document.getElementById('dot');
+const elStatus     = document.getElementById('statusText');
+const elTsText     = document.getElementById('tsText');
+const elScoreRow   = document.getElementById('scoreRow');
+const elPickRows   = document.getElementById('pickRows');
+const elNColLabel  = document.getElementById('nColLabel');
+const elSColLabel  = document.getElementById('sColLabel');
+
+let autoRefreshTimer  = null;
+let countdownTimer    = null;
+let countdown         = Math.round(AUTO_REFRESH_MS / 1000);
+
 document.getElementById('refreshBtn').addEventListener('click', () => load());
 
-function setStatus(ok, text){
+/* ── Status ── */
+function setStatus(ok, text) {
   elDot.className = "dot " + (ok ? "ok" : "bad");
   elStatus.textContent = text;
 }
 
-function withBuster(url){
-  return url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
+function updateTimestamp() {
+  const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  elTsText.textContent = "Refreshed " + t;
 }
 
-function parsePicksGrid(url){
-  return new Promise((resolve, reject) => {
-    Papa.parse(withBuster(url), {
-      download: true,
-      header: false,          // IMPORTANT: keep column order
-      skipEmptyLines: true,
-      complete: (res) => resolve(res.data || []),
-      error: (err) => reject(err)
-    });
-  });
+function startCountdown() {
+  clearInterval(countdownTimer);
+  countdown = Math.round(AUTO_REFRESH_MS / 1000);
+  countdownTimer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) {
+      clearInterval(countdownTimer);
+    } else {
+      elTsText.textContent = elTsText.textContent.replace(/ · \d+s/, '') + ' · ' + countdown + 's';
+    }
+  }, 1000);
 }
 
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
+/* ── Fetch live data ── */
+async function fetchLiveData() {
+  const url = new URL(SCRIPT_WEB_APP_URL);
+  url.searchParams.set("action", "getdata");
+  url.searchParams.set("_", String(Date.now()));
+
+  const resp = await fetch(url.toString(), { cache: "no-store" });
+  if (!resp.ok) throw new Error("HTTP " + resp.status);
+  const data = await resp.json();
+  if (!data.ok) throw new Error(data.error || "Server error");
+  return data;
 }
 
-function norm(v){
-  return String(v ?? "").trim();
+/* ── Cell value helper ── */
+function cell(row, idx) {
+  return String((row || [])[idx] ?? '').trim();
 }
 
-function badgeFromCell(v, label){
-  const t = norm(v).toUpperCase();
+/* ── Badge HTML ── */
+function badge(type, symbol, title) {
+  return `<span class="badge ${type}" title="${esc(title)}">${symbol}</span>`;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
-  // Missing / N/A
-  if (!t || t === "—" || t === "N/A" || t === "#N/A" || t === "NA" || t === "NULL") {
-    return `<span class="badge muted" title="${escapeHtml(label)}: missing">—</span>`;
+/* ── Parse a badge value from the picks sheet cell ── */
+// The sheet stores TRUE/FALSE/HIGHER/LOWER in these cells
+function badgeFromSheetValue(v, labelBase) {
+  const t = String(v ?? '').trim().toUpperCase();
+  if (!t || t === '—' || t === 'N/A' || t === '#N/A' || t === 'NA' || t === 'NULL' || t === '') {
+    return badge('muted', '—', labelBase + ': not submitted');
+  }
+  if (t === 'TRUE')   return badge('ok',  '✓', labelBase + ': correct');
+  if (t === 'FALSE')  return badge('bad', '✗', labelBase + ': wrong');
+  if (t === 'HIGHER') return badge('arr', '↑', labelBase + ': need higher');
+  if (t === 'LOWER')  return badge('arr', '↓', labelBase + ': need lower');
+  // Unexpected value — show muted
+  return badge('muted', t.slice(0, 2), labelBase + ': ' + t);
+}
+
+/* ── Score counting ── */
+function countScore(rows, selCol, posCol) {
+  // Count rows 1..NUM_PICKS (skip header row 0) where all 6 attribute cols are TRUE
+  // "correct pick" = Position is TRUE (the pick was right)
+  // We count picks where the player was submitted (selCol not empty)
+  let correct = 0, submitted = 0;
+  for (let i = 1; i <= NUM_PICKS; i++) {
+    const row = rows[i] || [];
+    const name = cell(row, selCol);
+    if (!name) continue;
+    submitted++;
+    // A pick is "fully correct" if ALL 6 attribute badges are TRUE
+    const attrCols = [posCol, posCol+1, posCol+2, posCol+3, posCol+4, posCol+5];
+    const allTrue = attrCols.every(c => String((row || [])[c] ?? '').trim().toUpperCase() === 'TRUE');
+    if (allTrue) correct++;
+  }
+  return { correct, submitted, wrong: submitted - correct };
+}
+
+/* ── Render score cards ── */
+function renderScoreCards(nName, sName, nScore, sScore) {
+  const nLeading = nScore.correct > sScore.correct;
+  const sLeading = sScore.correct > nScore.correct;
+  const tied     = nScore.correct === sScore.correct && (nScore.submitted > 0 || sScore.submitted > 0);
+
+  function card(initial, colorClass, name, score, isLeading) {
+    const numClass = isLeading ? 'leading' : (score.submitted > 0 ? 'trailing' : '');
+    return `
+      <div class="scoreCard ${isLeading ? 'leading' : ''}">
+        <div class="avatar ${colorClass}">${initial}</div>
+        <div class="scoreInfo">
+          <div class="scoreName">${esc(name)}</div>
+          <div class="scoreSub">${score.submitted} submitted · ${score.correct} correct · ${score.wrong} wrong</div>
+        </div>
+        <div class="scoreNum">
+          <div class="scoreNumBig ${numClass}">${score.correct}</div>
+          <div class="scoreNumLabel">correct</div>
+        </div>
+        ${isLeading ? '<div class="leaderBadge">Leader</div>' : ''}
+      </div>`;
   }
 
-  if (t === "TRUE"){
-    return `<span class="badge ok" title="${escapeHtml(label)}: TRUE">✓</span>`;
-  }
-  if (t === "FALSE"){
-    return `<span class="badge bad" title="${escapeHtml(label)}: FALSE">✗</span>`;
-  }
-  if (t === "HIGHER"){
-    return `<span class="badge bad" title="${escapeHtml(label)}: HIGHER">↑</span>`;
-  }
-  if (t === "LOWER"){
-    return `<span class="badge bad" title="${escapeHtml(label)}: LOWER">↓</span>`;
-  }
-
-  // If someone typed something else (unexpected), show it muted
-  return `<span class="badge muted" title="${escapeHtml(label)}: ${escapeHtml(t)}">${escapeHtml(t).slice(0,2)}</span>`;
+  elScoreRow.innerHTML =
+    card('N', 'av-n', nName, nScore, nLeading) +
+    `<div class="vsBadge">${tied ? 'Tied' : 'VS'}</div>` +
+    card('S', 'av-s', sName, sScore, sLeading);
 }
 
-function statusRow(vals, baseIdx){
-  // baseIdx points at the player's Selection column (B for Nathan, J for Sam)
-  // Order in your screenshot:
-  // Selection, Position, Age, Points, Conference, Division, Team  (7 cols)
-  const labels = ["Pos","Age","Pts","Conf","Div","Team"];
-  const pos = vals[baseIdx + 1];
-  const age = vals[baseIdx + 2];
-  const pts = vals[baseIdx + 3];
-  const conf= vals[baseIdx + 4];
-  const div = vals[baseIdx + 5];
-  const team= vals[baseIdx + 6];
+/* ── Render pick rows ── */
+function renderPickRows(rows) {
+  const ATTR_LABELS = ['Position','Age','Points','Conference','Division','Team'];
+  const nAttrStart  = COL_NATHAN_POS;
+  const sAttrStart  = COL_SAM_POS;
 
-  return `
-    <div class="badgerow" aria-label="Status ${labels.join(', ')}">
-      ${badgeFromCell(pos, labels[0])}
-      ${badgeFromCell(age, labels[1])}
-      ${badgeFromCell(pts, labels[2])}
-      ${badgeFromCell(conf, labels[3])}
-      ${badgeFromCell(div, labels[4])}
-      ${badgeFromCell(team, labels[5])}
-    </div>
-  `;
-}
+  let html = '';
 
-async function load(){
-  try{
-    setStatus(true, "Loading…");
-    elTbody.innerHTML = "";
+  for (let i = 1; i <= NUM_PICKS; i++) {
+    const row   = rows[i] || [];
+    const nName = cell(row, COL_NATHAN_SEL);
+    const sName = cell(row, COL_SAM_SEL);
 
-    const grid = await parsePicksGrid(PICKS_CSV_URL);
-    if (!grid || grid.length < 2){
-      setStatus(false, "No data");
-      return;
+    // Nathan badge cells
+    let nBadges = '';
+    for (let a = 0; a < 6; a++) {
+      nBadges += badgeFromSheetValue(cell(row, nAttrStart + a), 'Nathan · ' + ATTR_LABELS[a]);
     }
 
-    // Expected columns based on your screenshot:
-    // A: NATHAN header, B: Selection, C: Position, D: Age, E: Points, F: Conference, G: Division, H: Team
-    // I: SAM header,    J: Selection, K: Position, L: Age, M: Points, N: Conference, O: Division, P: Team
-    const COL_NATHAN_HEADER = 0;  // A
-    const COL_NATHAN_SEL    = 1;  // B
-    const COL_SAM_HEADER    = 8;  // I
-    const COL_SAM_SEL       = 9;  // J
-
-    // Use row 0 headers (names) if present
-    const header = grid[0] || [];
-    const nName = norm(header[COL_NATHAN_HEADER]) || "NATHAN";
-    const sName = norm(header[COL_SAM_HEADER]) || "SAM";
-
-    // Build rows 1..NUM_PICKS (grid row index 1..)
-    for (let i=0; i<NUM_PICKS; i++){
-      const row = grid[i+1] || [];
-      // Pad row to at least 16 cols so indexing doesn't blow up
-      const vals = Array.from({length: 16}, (_, idx) => row[idx] ?? "");
-
-      const nPick = norm(vals[COL_NATHAN_SEL]);
-      const sPick = norm(vals[COL_SAM_SEL]);
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-  <td><span class="pickNum">${i+1}</span></td>
-
-  <td class="nameCell"><strong>${escapeHtml(nName)}</strong></td>
-  <td>${statusRow(vals, COL_NATHAN_SEL)}</td>
-
-  <td class="nameCell"><strong>${escapeHtml(sName)}</strong></td>
-  <td>${statusRow(vals, COL_SAM_SEL)}</td>
-`;
-
-      elTbody.appendChild(tr);
+    // Sam badge cells
+    let sBadges = '';
+    for (let a = 0; a < 6; a++) {
+      sBadges += badgeFromSheetValue(cell(row, sAttrStart + a), 'Sam · ' + ATTR_LABELS[a]);
     }
 
-    setStatus(true, "Ready");
-  }catch(e){
-    console.error(e);
-    setStatus(false, "Load failed");
+    // Nathan pick label: show "Submitted" if they picked someone (name hidden),
+    // or "— not yet —" if nothing submitted
+    const nLabel = nName
+      ? `<span class="playerPickName">Submitted</span>`
+      : `<span class="playerPickName pending">— not yet —</span>`;
+    const sLabel = sName
+      ? `<span class="playerPickName">Submitted</span>`
+      : `<span class="playerPickName pending">— not yet —</span>`;
+
+    html += `
+      <div class="pickRow">
+        <div class="pickNumCircle">${i}</div>
+        ${nLabel}
+        ${nBadges}
+        <div class="colDivider"></div>
+        ${sLabel}
+        ${sBadges}
+      </div>`;
   }
+
+  elPickRows.innerHTML = html || '<div class="emptyMsg">No pick data found.</div>';
+}
+
+/* ── Main load ── */
+async function load() {
+  setStatus(true, 'Loading…');
+  elPickRows.innerHTML = '<div class="emptyMsg">Loading…</div>';
+  elScoreRow.innerHTML = '';
+
+  try {
+    const data  = await fetchLiveData();
+    const picks = data.picks || [];
+
+    // Player names from header row (row 0)
+    const headerRow = picks[0] || [];
+    const nName = String(headerRow[COL_NATHAN_LABEL] || '').trim() || 'NATHAN';
+    const sName = String(headerRow[COL_SAM_LABEL]    || '').trim() || 'SAM';
+
+    // Update column header labels
+    elNColLabel.textContent = nName;
+    elSColLabel.textContent = sName;
+
+    // Scores
+    const nScore = countScore(picks, COL_NATHAN_SEL, COL_NATHAN_POS);
+    const sScore = countScore(picks, COL_SAM_SEL,    COL_SAM_POS);
+    renderScoreCards(nName, sName, nScore, sScore);
+
+    // Pick rows
+    renderPickRows(picks);
+
+    setStatus(true, 'Ready');
+    updateTimestamp();
+    startCountdown();
+
+  } catch (e) {
+    console.error('Load failed:', e);
+    setStatus(false, 'Load failed');
+    elPickRows.innerHTML = '<div class="emptyMsg">Could not load data. Try refreshing.</div>';
+  }
+}
+
+/* ── Auto-refresh ── */
+function scheduleAutoRefresh() {
+  clearTimeout(autoRefreshTimer);
+  autoRefreshTimer = setTimeout(() => {
+    load();
+    scheduleAutoRefresh();
+  }, AUTO_REFRESH_MS);
 }
 
 load();
+scheduleAutoRefresh();
 </script>
 </body>
 </html>
