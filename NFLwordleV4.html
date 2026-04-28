@@ -85,7 +85,6 @@
     .av-s{ background:rgba(249,115,22,.22); color:rgba(253,186,116,1); border:1px solid rgba(249,115,22,.30); }
     .scoreInfo{ flex:1; min-width:0; }
     .scoreName{ font-size:18px; font-weight:800; letter-spacing:.2px; }
-    .scoreSub{ font-size:12px; color:var(--muted); margin-top:3px; }
     .scoreNum{ text-align:right; flex-shrink:0; }
     .scoreNumBig{ font-size:32px; font-weight:800; line-height:1; }
     .scoreNumBig.leading{ color:rgba(52,211,153,1); }
@@ -344,34 +343,33 @@ function esc(s) {
 }
 
 /* ── Parse a badge value from the picks sheet cell ── */
-// The sheet stores TRUE/FALSE/HIGHER/LOWER in these cells
 function badgeFromSheetValue(v, labelBase) {
   const t = String(v ?? '').trim().toUpperCase();
   if (!t || t === '—' || t === 'N/A' || t === '#N/A' || t === 'NA' || t === 'NULL' || t === '') {
     return badge('muted', '—', labelBase + ': not submitted');
   }
-  if (t === 'TRUE')   return badge('ok',  '✓', labelBase + ': correct');
-  if (t === 'FALSE')  return badge('bad', '✗', labelBase + ': wrong');
+  if (t === 'TRUE'  || t === 'YES') return badge('ok',  '✓', labelBase + ': correct');
+  if (t === 'FALSE' || t === 'NO')  return badge('bad', '✗', labelBase + ': wrong');
   if (t === 'HIGHER') return badge('arr', '↑', labelBase + ': need higher');
   if (t === 'LOWER')  return badge('arr', '↓', labelBase + ': need lower');
-  // Unexpected value — show muted
   return badge('muted', t.slice(0, 2), labelBase + ': ' + t);
 }
 
-/* ── Score counting ── */
+/* ── Score counting ──
+   NOTE: A pick is counted as "correct" only when ALL 6 attribute columns are TRUE.
+   If your sheet has a dedicated "winner" column (e.g. column Q/index 16 for Nathan,
+   column R/index 17 for Sam), change the countScore function to check that column instead.
+   Example: const won = String((row||[])[WIN_COL] ?? '').trim().toUpperCase() === 'TRUE';
+*/
 function countScore(rows, selCol, posCol) {
-  // Count rows 1..NUM_PICKS (skip header row 0) where all 6 attribute cols are TRUE
-  // "correct pick" = Position is TRUE (the pick was right)
-  // We count picks where the player was submitted (selCol not empty)
   let correct = 0, submitted = 0;
   for (let i = 1; i <= NUM_PICKS; i++) {
     const row = rows[i] || [];
     const name = cell(row, selCol);
     if (!name) continue;
     submitted++;
-    // A pick is "fully correct" if ALL 6 attribute badges are TRUE
     const attrCols = [posCol, posCol+1, posCol+2, posCol+3, posCol+4, posCol+5];
-    const allTrue = attrCols.every(c => String((row || [])[c] ?? '').trim().toUpperCase() === 'TRUE');
+    const allTrue = attrCols.every(c => { const v = String((row || [])[c] ?? '').trim().toUpperCase(); return v === 'TRUE' || v === 'YES'; });
     if (allTrue) correct++;
   }
   return { correct, submitted, wrong: submitted - correct };
@@ -390,7 +388,6 @@ function renderScoreCards(nName, sName, nScore, sScore) {
         <div class="avatar ${colorClass}">${initial}</div>
         <div class="scoreInfo">
           <div class="scoreName">${esc(name)}</div>
-          <div class="scoreSub">${score.submitted} submitted · ${score.correct} correct · ${score.wrong} wrong</div>
         </div>
         <div class="scoreNum">
           <div class="scoreNumBig ${numClass}">${score.correct}</div>
@@ -419,20 +416,16 @@ function renderPickRows(rows) {
     const nName = cell(row, COL_NATHAN_SEL);
     const sName = cell(row, COL_SAM_SEL);
 
-    // Nathan badge cells
     let nBadges = '';
     for (let a = 0; a < 6; a++) {
       nBadges += badgeFromSheetValue(cell(row, nAttrStart + a), 'Nathan · ' + ATTR_LABELS[a]);
     }
 
-    // Sam badge cells
     let sBadges = '';
     for (let a = 0; a < 6; a++) {
       sBadges += badgeFromSheetValue(cell(row, sAttrStart + a), 'Sam · ' + ATTR_LABELS[a]);
     }
 
-    // Nathan pick label: show "Submitted" if they picked someone (name hidden),
-    // or "— not yet —" if nothing submitted
     const nLabel = nName
       ? `<span class="playerPickName">Submitted</span>`
       : `<span class="playerPickName pending">— not yet —</span>`;
@@ -464,21 +457,17 @@ async function load() {
     const data  = await fetchLiveData();
     const picks = data.picks || [];
 
-    // Player names from header row (row 0)
     const headerRow = picks[0] || [];
     const nName = String(headerRow[COL_NATHAN_LABEL] || '').trim() || 'NATHAN';
     const sName = String(headerRow[COL_SAM_LABEL]    || '').trim() || 'SAM';
 
-    // Update column header labels
     elNColLabel.textContent = nName;
     elSColLabel.textContent = sName;
 
-    // Scores
     const nScore = countScore(picks, COL_NATHAN_SEL, COL_NATHAN_POS);
     const sScore = countScore(picks, COL_SAM_SEL,    COL_SAM_POS);
     renderScoreCards(nName, sName, nScore, sScore);
 
-    // Pick rows
     renderPickRows(picks);
 
     setStatus(true, 'Ready');
