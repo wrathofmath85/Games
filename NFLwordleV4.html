@@ -29,7 +29,6 @@
         radial-gradient(900px 700px at 50% 90%,rgba(168,85,247,.14),transparent 55%),
         linear-gradient(180deg,var(--bg0),var(--bg1) 40%,var(--bg2));
     }
-
     .wrap{ max-width:1280px; margin:0 auto; padding:24px 16px 44px; }
 
     /* ── Top bar ── */
@@ -139,6 +138,22 @@
     }
     .pickRow:last-child{ border-bottom:none; }
     .pickRow:hover{ background:rgba(255,255,255,.03); }
+
+    /* Solved row — both got it right (tie) */
+    .pickRow.solved-tie{
+      background: rgba(250,204,21,.05);
+      border-left: 3px solid rgba(250,204,21,.5);
+    }
+    /* Solved row — only one person got it right */
+    .pickRow.solved-n{
+      background: rgba(52,211,153,.04);
+      border-left: 3px solid rgba(52,211,153,.4);
+    }
+    .pickRow.solved-s{
+      background: rgba(52,211,153,.04);
+      border-left: 3px solid rgba(52,211,153,.4);
+    }
+
     .pickNumCircle{
       width:28px; height:28px; border-radius:50%;
       background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
@@ -151,6 +166,8 @@
       color:rgba(255,255,255,.90);
     }
     .playerPickName.pending{ color:var(--muted); font-weight:400; font-style:italic; }
+    .playerPickName.got-it{ color:rgba(52,211,153,1); }
+    .playerPickName.tied-it{ color:rgba(250,204,21,1); }
 
     /* ── Status badges ── */
     .badge{
@@ -201,9 +218,7 @@
   </div>
 
   <!-- Score summary cards -->
-  <div class="scoreRow" id="scoreRow">
-    <!-- populated by JS -->
-  </div>
+  <div class="scoreRow" id="scoreRow"></div>
 
   <!-- Picks comparison card -->
   <div class="card">
@@ -211,8 +226,6 @@
       <span class="cardTitle">Pick-by-pick results</span>
       <span style="font-size:12px;color:var(--muted);">Hover badges for details · Columns: Pos · Age · Pts · Conf · Div · Team</span>
     </div>
-
-    <!-- Column headers -->
     <div class="colHeader">
       <div></div>
       <div class="playerLabel" id="nColLabel">NATHAN</div>
@@ -231,10 +244,7 @@
       <div class="attrLabel" title="Division">Dv</div>
       <div class="attrLabel" title="Team">Tm</div>
     </div>
-
-    <div id="pickRows">
-      <div class="emptyMsg">Loading…</div>
-    </div>
+    <div id="pickRows"><div class="emptyMsg">Loading…</div></div>
   </div>
 
   <!-- Legend -->
@@ -253,53 +263,45 @@
 const SCRIPT_WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbygBfNQAiyWaKf69z-0mJ58JfHZRmn1nX7iJ9gv0UxXDxxBNzDo9XQ83BeErmhrIqr3VQ/exec";
 
+// Public CSV for the running scoreboard (Nathan col A row 2, Sam col B row 2)
+const SCORES_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7-NfeL-PNHti9NS4z2Rk_i1MRyNwcrF8yYTA6VzpvFcdg3j5KxHQp2SPltrkuhgNXB9Q3vE0iU75K/pub?gid=224409268&single=true&output=csv";
+
 const NUM_PICKS = 5;
 
-// Column indices (0-based) in the raw picks 2-D array returned by Apps Script
-const COL_NATHAN_LABEL = 0;   // A  – Nathan's header/name cell
-const COL_NATHAN_SEL   = 1;   // B  – Nathan's pick name
-const COL_NATHAN_POS   = 2;   // C
-const COL_NATHAN_AGE   = 3;   // D
-const COL_NATHAN_PTS   = 4;   // E
-const COL_NATHAN_CONF  = 5;   // F
-const COL_NATHAN_DIV   = 6;   // G
-const COL_NATHAN_TEAM  = 7;   // H
+// Column indices (0-based) in the picks sheet
+const COL_NATHAN_LABEL = 0;
+const COL_NATHAN_SEL   = 1;
+const COL_NATHAN_POS   = 2;
 
-const COL_SAM_LABEL    = 8;   // I  – Sam's header/name cell
-const COL_SAM_SEL      = 9;   // J
-const COL_SAM_POS      = 10;  // K
-const COL_SAM_AGE      = 11;  // L
-const COL_SAM_PTS      = 12;  // M
-const COL_SAM_CONF     = 13;  // N
-const COL_SAM_DIV      = 14;  // O
-const COL_SAM_TEAM     = 15;  // P
+const COL_SAM_LABEL    = 8;
+const COL_SAM_SEL      = 9;
+const COL_SAM_POS      = 10;
 
-// Auto-refresh every 60 seconds
 const AUTO_REFRESH_MS = 60000;
 /*** END CONFIG ***/
 
-const elDot        = document.getElementById('dot');
-const elStatus     = document.getElementById('statusText');
-const elTsText     = document.getElementById('tsText');
-const elScoreRow   = document.getElementById('scoreRow');
-const elPickRows   = document.getElementById('pickRows');
-const elNColLabel  = document.getElementById('nColLabel');
-const elSColLabel  = document.getElementById('sColLabel');
+const elDot       = document.getElementById('dot');
+const elStatus    = document.getElementById('statusText');
+const elTsText    = document.getElementById('tsText');
+const elScoreRow  = document.getElementById('scoreRow');
+const elPickRows  = document.getElementById('pickRows');
+const elNColLabel = document.getElementById('nColLabel');
+const elSColLabel = document.getElementById('sColLabel');
 
-let autoRefreshTimer  = null;
-let countdownTimer    = null;
-let countdown         = Math.round(AUTO_REFRESH_MS / 1000);
+let autoRefreshTimer = null;
+let countdownTimer   = null;
+let countdown        = Math.round(AUTO_REFRESH_MS / 1000);
 
 document.getElementById('refreshBtn').addEventListener('click', () => load());
 
-/* ── Status ── */
 function setStatus(ok, text) {
   elDot.className = "dot " + (ok ? "ok" : "bad");
   elStatus.textContent = text;
 }
 
 function updateTimestamp() {
-  const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const t = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
   elTsText.textContent = "Refreshed " + t;
 }
 
@@ -308,20 +310,16 @@ function startCountdown() {
   countdown = Math.round(AUTO_REFRESH_MS / 1000);
   countdownTimer = setInterval(() => {
     countdown--;
-    if (countdown <= 0) {
-      clearInterval(countdownTimer);
-    } else {
-      elTsText.textContent = elTsText.textContent.replace(/ · \d+s/, '') + ' · ' + countdown + 's';
-    }
+    if (countdown <= 0) { clearInterval(countdownTimer); }
+    else { elTsText.textContent = elTsText.textContent.replace(/ · \d+s/, '') + ' · ' + countdown + 's'; }
   }, 1000);
 }
 
-/* ── Fetch live data ── */
-async function fetchLiveData() {
+/* ── Fetch picks from Apps Script ── */
+async function fetchPicksData() {
   const url = new URL(SCRIPT_WEB_APP_URL);
   url.searchParams.set("action", "getdata");
   url.searchParams.set("_", String(Date.now()));
-
   const resp = await fetch(url.toString(), { cache: "no-store" });
   if (!resp.ok) throw new Error("HTTP " + resp.status);
   const data = await resp.json();
@@ -329,23 +327,36 @@ async function fetchLiveData() {
   return data;
 }
 
-/* ── Cell value helper ── */
+/* ── Fetch running scores from CSV ── */
+async function fetchScoresCSV() {
+  const url = SCORES_CSV_URL + "&cachebust=" + Date.now();
+  const resp = await fetch(url, { cache: "no-store" });
+  if (!resp.ok) throw new Error("Scores CSV HTTP " + resp.status);
+  const text = await resp.text();
+  // Parse CSV: row 0 = headers (Nathan, Sam), row 1 = scores
+  const rows = text.trim().split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
+  const nName  = (rows[0] && rows[0][0]) ? rows[0][0] : 'NATHAN';
+  const sName  = (rows[0] && rows[0][1]) ? rows[0][1] : 'SAM';
+  const nScore = (rows[1] && rows[1][0]) ? parseInt(rows[1][0], 10) : 0;
+  const sScore = (rows[1] && rows[1][1]) ? parseInt(rows[1][1], 10) : 0;
+  return { nName, sName, nScore: isNaN(nScore) ? 0 : nScore, sScore: isNaN(sScore) ? 0 : sScore };
+}
+
 function cell(row, idx) {
   return String((row || [])[idx] ?? '').trim();
 }
 
-/* ── Badge HTML ── */
-function badge(type, symbol, title) {
-  return `<span class="badge ${type}" title="${esc(title)}">${symbol}</span>`;
-}
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* ── Parse a badge value from the picks sheet cell ── */
+function badge(type, symbol, title) {
+  return `<span class="badge ${type}" title="${esc(title)}">${symbol}</span>`;
+}
+
 function badgeFromSheetValue(v, labelBase) {
   const t = String(v ?? '').trim().toUpperCase();
-  if (!t || t === '—' || t === 'N/A' || t === '#N/A' || t === 'NA' || t === 'NULL' || t === '') {
+  if (!t || t === '—' || t === 'N/A' || t === '#N/A' || t === 'NA' || t === 'NULL') {
     return badge('muted', '—', labelBase + ': not submitted');
   }
   if (t === 'TRUE'  || t === 'YES') return badge('ok',  '✓', labelBase + ': correct');
@@ -355,34 +366,23 @@ function badgeFromSheetValue(v, labelBase) {
   return badge('muted', t.slice(0, 2), labelBase + ': ' + t);
 }
 
-/* ── Score counting ──
-   NOTE: A pick is counted as "correct" only when ALL 6 attribute columns are TRUE.
-   If your sheet has a dedicated "winner" column (e.g. column Q/index 16 for Nathan,
-   column R/index 17 for Sam), change the countScore function to check that column instead.
-   Example: const won = String((row||[])[WIN_COL] ?? '').trim().toUpperCase() === 'TRUE';
-*/
-function countScore(rows, selCol, posCol) {
-  let correct = 0, submitted = 0;
-  for (let i = 1; i <= NUM_PICKS; i++) {
-    const row = rows[i] || [];
-    const name = cell(row, selCol);
-    if (!name) continue;
-    submitted++;
-    const attrCols = [posCol, posCol+1, posCol+2, posCol+3, posCol+4, posCol+5];
-    const allTrue = attrCols.every(c => { const v = String((row || [])[c] ?? '').trim().toUpperCase(); return v === 'TRUE' || v === 'YES'; });
-    if (allTrue) correct++;
+/* Returns true if all 6 attribute cols for this row are YES/TRUE */
+function isAllCorrect(row, posCol) {
+  for (let a = 0; a < 6; a++) {
+    const v = String((row || [])[posCol + a] ?? '').trim().toUpperCase();
+    if (v !== 'TRUE' && v !== 'YES') return false;
   }
-  return { correct, submitted, wrong: submitted - correct };
+  return true;
 }
 
-/* ── Render score cards ── */
+/* ── Render score cards (numbers come from CSV) ── */
 function renderScoreCards(nName, sName, nScore, sScore) {
-  const nLeading = nScore.correct > sScore.correct;
-  const sLeading = sScore.correct > nScore.correct;
-  const tied     = nScore.correct === sScore.correct && (nScore.submitted > 0 || sScore.submitted > 0);
+  const nLeading = nScore > sScore;
+  const sLeading = sScore > nScore;
+  const tied     = nScore === sScore;
 
   function card(initial, colorClass, name, score, isLeading) {
-    const numClass = isLeading ? 'leading' : (score.submitted > 0 ? 'trailing' : '');
+    const numClass = isLeading ? 'leading' : 'trailing';
     return `
       <div class="scoreCard ${isLeading ? 'leading' : ''}">
         <div class="avatar ${colorClass}">${initial}</div>
@@ -390,7 +390,7 @@ function renderScoreCards(nName, sName, nScore, sScore) {
           <div class="scoreName">${esc(name)}</div>
         </div>
         <div class="scoreNum">
-          <div class="scoreNumBig ${numClass}">${score.correct}</div>
+          <div class="scoreNumBig ${numClass}">${score}</div>
           <div class="scoreNumLabel">correct</div>
         </div>
         ${isLeading ? '<div class="leaderBadge">Leader</div>' : ''}
@@ -406,8 +406,6 @@ function renderScoreCards(nName, sName, nScore, sScore) {
 /* ── Render pick rows ── */
 function renderPickRows(rows) {
   const ATTR_LABELS = ['Position','Age','Points','Conference','Division','Team'];
-  const nAttrStart  = COL_NATHAN_POS;
-  const sAttrStart  = COL_SAM_POS;
 
   let html = '';
 
@@ -416,25 +414,46 @@ function renderPickRows(rows) {
     const nName = cell(row, COL_NATHAN_SEL);
     const sName = cell(row, COL_SAM_SEL);
 
-    let nBadges = '';
+    const nCorrect = nName ? isAllCorrect(row, COL_NATHAN_POS) : false;
+    const sCorrect = sName ? isAllCorrect(row, COL_SAM_POS)    : false;
+    const bothCorrect = nCorrect && sCorrect;
+
+    // Row highlight class
+    let rowClass = 'pickRow';
+    if (bothCorrect)       rowClass += ' solved-tie';
+    else if (nCorrect)     rowClass += ' solved-n';
+    else if (sCorrect)     rowClass += ' solved-s';
+
+    let nBadges = '', sBadges = '';
     for (let a = 0; a < 6; a++) {
-      nBadges += badgeFromSheetValue(cell(row, nAttrStart + a), 'Nathan · ' + ATTR_LABELS[a]);
+      nBadges += badgeFromSheetValue(cell(row, COL_NATHAN_POS + a), 'Nathan · ' + ATTR_LABELS[a]);
+      sBadges += badgeFromSheetValue(cell(row, COL_SAM_POS    + a), 'Sam · '    + ATTR_LABELS[a]);
     }
 
-    let sBadges = '';
-    for (let a = 0; a < 6; a++) {
-      sBadges += badgeFromSheetValue(cell(row, sAttrStart + a), 'Sam · ' + ATTR_LABELS[a]);
+    // Pick label — show "Got it! 🎉" if all correct, "Tied 🤝" if both got it, otherwise "Submitted"
+    let nLabel, sLabel;
+    if (!nName) {
+      nLabel = `<span class="playerPickName pending">— not yet —</span>`;
+    } else if (bothCorrect) {
+      nLabel = `<span class="playerPickName tied-it">Tied 🤝</span>`;
+    } else if (nCorrect) {
+      nLabel = `<span class="playerPickName got-it">Got it! 🎉</span>`;
+    } else {
+      nLabel = `<span class="playerPickName">Submitted</span>`;
     }
 
-    const nLabel = nName
-      ? `<span class="playerPickName">Submitted</span>`
-      : `<span class="playerPickName pending">— not yet —</span>`;
-    const sLabel = sName
-      ? `<span class="playerPickName">Submitted</span>`
-      : `<span class="playerPickName pending">— not yet —</span>`;
+    if (!sName) {
+      sLabel = `<span class="playerPickName pending">— not yet —</span>`;
+    } else if (bothCorrect) {
+      sLabel = `<span class="playerPickName tied-it">Tied 🤝</span>`;
+    } else if (sCorrect) {
+      sLabel = `<span class="playerPickName got-it">Got it! 🎉</span>`;
+    } else {
+      sLabel = `<span class="playerPickName">Submitted</span>`;
+    }
 
     html += `
-      <div class="pickRow">
+      <div class="${rowClass}">
         <div class="pickNumCircle">${i}</div>
         ${nLabel}
         ${nBadges}
@@ -454,19 +473,21 @@ async function load() {
   elScoreRow.innerHTML = '';
 
   try {
-    const data  = await fetchLiveData();
-    const picks = data.picks || [];
+    // Fetch both sources in parallel
+    const [picksData, scoresData] = await Promise.all([fetchPicksData(), fetchScoresCSV()]);
 
+    const picks     = picksData.picks || [];
     const headerRow = picks[0] || [];
-    const nName = String(headerRow[COL_NATHAN_LABEL] || '').trim() || 'NATHAN';
-    const sName = String(headerRow[COL_SAM_LABEL]    || '').trim() || 'SAM';
+
+    // Names: prefer picks sheet header, fall back to scores CSV
+    const nName = String(headerRow[COL_NATHAN_LABEL] || '').trim() || scoresData.nName;
+    const sName = String(headerRow[COL_SAM_LABEL]    || '').trim() || scoresData.sName;
 
     elNColLabel.textContent = nName;
     elSColLabel.textContent = sName;
 
-    const nScore = countScore(picks, COL_NATHAN_SEL, COL_NATHAN_POS);
-    const sScore = countScore(picks, COL_SAM_SEL,    COL_SAM_POS);
-    renderScoreCards(nName, sName, nScore, sScore);
+    // Scores always come from the CSV
+    renderScoreCards(nName, sName, scoresData.nScore, scoresData.sScore);
 
     renderPickRows(picks);
 
@@ -481,13 +502,9 @@ async function load() {
   }
 }
 
-/* ── Auto-refresh ── */
 function scheduleAutoRefresh() {
   clearTimeout(autoRefreshTimer);
-  autoRefreshTimer = setTimeout(() => {
-    load();
-    scheduleAutoRefresh();
-  }, AUTO_REFRESH_MS);
+  autoRefreshTimer = setTimeout(() => { load(); scheduleAutoRefresh(); }, AUTO_REFRESH_MS);
 }
 
 load();
