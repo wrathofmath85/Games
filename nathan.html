@@ -417,23 +417,14 @@ function compareAndMark(tr, picked) {
 }
 
 /* ── Fill row with player attributes (pre-submit preview) ── */
+/* NOTE: Player info is intentionally hidden before submit so players
+   cannot check attributes before committing to a guess. */
 function fillRow(tr, row) {
   const c = tr._cells;
-  if (!row) {
-    ['tdPos','tdAge','tdPts','tdConf','tdDiv','tdTeam'].forEach(k => {
-      c[k].textContent = '—';
-      c[k].className = 'meta mutedText';
-    });
-    return;
-  }
-  c.tdPos.textContent  = row.position   || '—';
-  c.tdAge.textContent  = row.age        || '—';
-  c.tdPts.textContent  = row.points     || '—';
-  c.tdConf.textContent = row.conference || '—';
-  c.tdDiv.textContent  = row.division   || '—';
-  c.tdTeam.textContent = row.team       || '—';
+  // Always show dashes — never reveal player info before submission
   ['tdPos','tdAge','tdPts','tdConf','tdDiv','tdTeam'].forEach(k => {
-    c[k].className = 'meta';
+    c[k].textContent = '—';
+    c[k].className = 'meta mutedText';
   });
 }
 

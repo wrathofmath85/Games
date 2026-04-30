@@ -327,19 +327,58 @@ async function fetchPicksData() {
   return data;
 }
 
-/* ── Fetch running scores from CSV ── */
+/* ── Fetch running scores — tries Apps Script first (no cache lag), falls back to CSV ── */
 async function fetchScoresCSV() {
-  const url = SCORES_CSV_URL + "&cachebust=" + Date.now();
-  const resp = await fetch(url, { cache: "no-store" });
-  if (!resp.ok) throw new Error("Scores CSV HTTP " + resp.status);
-  const text = await resp.text();
-  // Parse CSV: row 0 = headers (Nathan, Sam), row 1 = scores
-  const rows = text.trim().split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
-  const nName  = (rows[0] && rows[0][0]) ? rows[0][0] : 'NATHAN';
-  const sName  = (rows[0] && rows[0][1]) ? rows[0][1] : 'SAM';
-  const nScore = (rows[1] && rows[1][0]) ? parseInt(rows[1][0], 10) : 0;
-  const sScore = (rows[1] && rows[1][1]) ? parseInt(rows[1][1], 10) : 0;
-  return { nName, sName, nScore: isNaN(nScore) ? 0 : nScore, sScore: isNaN(sScore) ? 0 : sScore };
+  let nName = 'NATHAN', sName = 'SAM', nScore = 0, sScore = 0;
+
+  // Primary: Apps Script getscores action — always fresh, bypasses Google Sheets publish cache
+  try {
+    const url = new URL(SCRIPT_WEB_APP_URL);
+    url.searchParams.set("action", "getscores");
+    url.searchParams.set("_", String(Date.now()));
+    const resp = await fetch(url.toString(), { cache: "no-store" });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.ok && data.scores) {
+        nName  = data.scores.nName  || nName;
+        sName  = data.scores.sName  || sName;
+        nScore = parseInt(data.scores.nScore, 10) || 0;
+        sScore = parseInt(data.scores.sScore, 10) || 0;
+        // Cache freshly-fetched scores so page refreshes don't flicker to stale data
+        try { sessionStorage.setItem('nflScores', JSON.stringify({ nName, sName, nScore, sScore, ts: Date.now() })); } catch(_) {}
+        return { nName, sName, nScore, sScore };
+      }
+    }
+  } catch(e) {
+    console.warn('Apps Script getscores failed, falling back to CSV:', e);
+  }
+
+  // Fallback: CSV export (Google Sheets publish cache can be up to ~5 min stale)
+  try {
+    const csvUrl = SCORES_CSV_URL + "&cachebust=" + Date.now();
+    const resp2  = await fetch(csvUrl, { cache: "no-store" });
+    if (resp2.ok) {
+      const text = await resp2.text();
+      const rows = text.trim().split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
+      nName  = (rows[0] && rows[0][0]) ? rows[0][0] : nName;
+      sName  = (rows[0] && rows[0][1]) ? rows[0][1] : sName;
+      nScore = parseInt((rows[1] && rows[1][0]) || '0', 10);
+      sScore = parseInt((rows[1] && rows[1][1]) || '0', 10);
+      return { nName, sName, nScore: isNaN(nScore) ? 0 : nScore, sScore: isNaN(sScore) ? 0 : sScore };
+    }
+  } catch(e2) {
+    console.warn('CSV scores fallback also failed:', e2);
+  }
+
+  // Last resort: use sessionStorage cache if it's recent (< 5 min old)
+  try {
+    const cached = JSON.parse(sessionStorage.getItem('nflScores') || 'null');
+    if (cached && (Date.now() - cached.ts) < 300000) {
+      return { nName: cached.nName, sName: cached.sName, nScore: cached.nScore, sScore: cached.sScore };
+    }
+  } catch(_) {}
+
+  return { nName, sName, nScore: 0, sScore: 0 };
 }
 
 function cell(row, idx) {
@@ -407,6 +446,20 @@ function renderScoreCards(nName, sName, nScore, sScore) {
 function renderPickRows(rows) {
   const ATTR_LABELS = ['Position','Age','Points','Conference','Division','Team'];
 
+  // Count how many picks each person has submitted (non-empty selection cell)
+  let nPickCount = 0, sPickCount = 0;
+  for (let i = 1; i <= NUM_PICKS; i++) {
+    const row = rows[i] || [];
+    if (cell(row, COL_NATHAN_SEL)) nPickCount++;
+    if (cell(row, COL_SAM_SEL))    sPickCount++;
+  }
+
+  // For each round, we need to know: at what pick# did each person get it right?
+  // A player's name is revealed for round i only when:
+  //   - that player got it right on pick i (isAllCorrect)
+  //   - AND both players have made at least i picks total (equal pick count >= i)
+  // OR if neither got it right yet, show "Submitted" (no name) as before.
+
   let html = '';
 
   for (let i = 1; i <= NUM_PICKS; i++) {
@@ -417,6 +470,11 @@ function renderPickRows(rows) {
     const nCorrect = nName ? isAllCorrect(row, COL_NATHAN_POS) : false;
     const sCorrect = sName ? isAllCorrect(row, COL_SAM_POS)    : false;
     const bothCorrect = nCorrect && sCorrect;
+
+    // Can we reveal names for this round?
+    // Reveal is allowed once BOTH players have >= i picks submitted.
+    const bothHaveReachedThisRound = nPickCount >= i && sPickCount >= i;
+    const canReveal = bothHaveReachedThisRound;
 
     // Row highlight class
     let rowClass = 'pickRow';
@@ -430,26 +488,36 @@ function renderPickRows(rows) {
       sBadges += badgeFromSheetValue(cell(row, COL_SAM_POS    + a), 'Sam · '    + ATTR_LABELS[a]);
     }
 
-    // Pick label — show "Got it! 🎉" if all correct, "Tied 🤝" if both got it, otherwise "Submitted"
+    // Pick label logic:
+    // - If not submitted yet: "— not yet —"
+    // - If submitted but can't reveal yet: "Submitted" (no player name)
+    // - If can reveal AND correct: show player name + "Got it! 🎉" or "Tied 🤝"
+    // - If can reveal AND not correct: show player name (so you can see what they guessed)
     let nLabel, sLabel;
+
     if (!nName) {
       nLabel = `<span class="playerPickName pending">— not yet —</span>`;
-    } else if (bothCorrect) {
-      nLabel = `<span class="playerPickName tied-it">Tied 🤝</span>`;
-    } else if (nCorrect) {
-      nLabel = `<span class="playerPickName got-it">Got it! 🎉</span>`;
-    } else {
+    } else if (!canReveal) {
+      // Submitted but other player hasn't caught up — hide name
       nLabel = `<span class="playerPickName">Submitted</span>`;
+    } else if (bothCorrect) {
+      nLabel = `<span class="playerPickName tied-it" title="${esc(nName)}">${esc(nName)} · Tied 🤝</span>`;
+    } else if (nCorrect) {
+      nLabel = `<span class="playerPickName got-it" title="${esc(nName)}">${esc(nName)} · Got it! 🎉</span>`;
+    } else {
+      nLabel = `<span class="playerPickName" title="${esc(nName)}">${esc(nName)}</span>`;
     }
 
     if (!sName) {
       sLabel = `<span class="playerPickName pending">— not yet —</span>`;
-    } else if (bothCorrect) {
-      sLabel = `<span class="playerPickName tied-it">Tied 🤝</span>`;
-    } else if (sCorrect) {
-      sLabel = `<span class="playerPickName got-it">Got it! 🎉</span>`;
-    } else {
+    } else if (!canReveal) {
       sLabel = `<span class="playerPickName">Submitted</span>`;
+    } else if (bothCorrect) {
+      sLabel = `<span class="playerPickName tied-it" title="${esc(sName)}">${esc(sName)} · Tied 🤝</span>`;
+    } else if (sCorrect) {
+      sLabel = `<span class="playerPickName got-it" title="${esc(sName)}">${esc(sName)} · Got it! 🎉</span>`;
+    } else {
+      sLabel = `<span class="playerPickName" title="${esc(sName)}">${esc(sName)}</span>`;
     }
 
     html += `
