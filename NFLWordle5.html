@@ -512,26 +512,34 @@ function renderPickRows(rows) {
     const allThreeCorrect = nCorrect && sCorrect && bCorrect;
     const anyCorrect      = nCorrect || sCorrect || bCorrect;
 
-    // Reveal names once ALL three have reached this round
-    const allHaveReachedThisRound = nPickCount >= i && sPickCount >= i && bPickCount >= i;
-    const canReveal = allHaveReachedThisRound;
+    // Reveal logic:
+    // Names are hidden until BOTH of the following are true:
+    //   1) At least one player has gotten this round correct
+    //   2) All 3 players have submitted at least as many picks as the
+    //      earliest correct guess (i.e. everyone has "reached" this round)
+    // This prevents spoiling who guessed what while others are still playing.
+    const canReveal = anyCorrect && (nPickCount >= i && sPickCount >= i && bPickCount >= i);
 
     let rowClass = 'pickRow';
     if (allThreeCorrect) rowClass += ' solved-tie';
-    else if (anyCorrect) rowClass += ' solved-any';
+    else if (anyCorrect && canReveal) rowClass += ' solved-any';
 
+    // Only show badges once reveal is unlocked; show muted dashes before that
     let nBadges = '', sBadges = '', bBadges = '';
     for (let a = 0; a < 6; a++) {
-      nBadges += badgeFromSheetValue(cell(row, COL_NATHAN_POS  + a), 'Nathan · '  + ATTR_LABELS[a]);
-      sBadges += badgeFromSheetValue(cell(row, COL_SAM_POS     + a), 'Sam · '     + ATTR_LABELS[a]);
-      bBadges += badgeFromSheetValue(cell(row, COL_BRANDON_POS + a), 'Brandon · ' + ATTR_LABELS[a]);
+      const showN = canReveal && nName;
+      const showS = canReveal && sName;
+      const showB = canReveal && bName;
+      nBadges += showN ? badgeFromSheetValue(cell(row, COL_NATHAN_POS  + a), 'Nathan · '  + ATTR_LABELS[a]) : badge('muted', '—', 'Nathan · ' + ATTR_LABELS[a] + ': hidden');
+      sBadges += showS ? badgeFromSheetValue(cell(row, COL_SAM_POS     + a), 'Sam · '     + ATTR_LABELS[a]) : badge('muted', '—', 'Sam · '    + ATTR_LABELS[a] + ': hidden');
+      bBadges += showB ? badgeFromSheetValue(cell(row, COL_BRANDON_POS + a), 'Brandon · ' + ATTR_LABELS[a]) : badge('muted', '—', 'Brandon · '+ ATTR_LABELS[a] + ': hidden');
     }
 
     function makeLabel(submitted, name, correct, allCorrect) {
-      if (!submitted) return `<span class="playerPickName pending">— not yet —</span>`;
-      if (!canReveal) return `<span class="playerPickName">Submitted</span>`;
-      if (allCorrect) return `<span class="playerPickName tied-it" title="${esc(name)}">${esc(name)} · Tied 🤝</span>`;
-      if (correct)    return `<span class="playerPickName got-it"  title="${esc(name)}">${esc(name)} · Got it! 🎉</span>`;
+      if (!submitted)  return `<span class="playerPickName pending">— not yet —</span>`;
+      if (!canReveal)  return `<span class="playerPickName pending" style="font-style:normal">Submitted</span>`;
+      if (allCorrect)  return `<span class="playerPickName tied-it" title="${esc(name)}">${esc(name)} · Tied 🤝</span>`;
+      if (correct)     return `<span class="playerPickName got-it"  title="${esc(name)}">${esc(name)} · Got it! 🎉</span>`;
       return `<span class="playerPickName" title="${esc(name)}">${esc(name)}</span>`;
     }
 
@@ -543,13 +551,13 @@ function renderPickRows(rows) {
       <div class="${rowClass}">
         <div class="pickNumCircle">${i}</div>
         ${nLabel}
-        <span class="attrCols">${nBadges}</span>
-        <div class="colDivider attrCols"></div>
+        ${nBadges}
+        <div class="colDivider"></div>
         ${sLabel}
-        <span class="attrCols">${sBadges}</span>
-        <div class="colDivider attrCols"></div>
+        ${sBadges}
+        <div class="colDivider"></div>
         ${bLabel}
-        <span class="attrCols">${bBadges}</span>
+        ${bBadges}
       </div>`;
   }
 
