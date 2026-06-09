@@ -349,12 +349,38 @@ async function fetchPicksData() {
   return data;
 }
 
-/* ── Fetch running scores — Apps Script first, CSV fallback ── */
+/* ── Fetch running scores — CSV (the sheet you edit) first, Apps Script fallback ── */
 async function fetchScoresCSV() {
   let nName = 'NATHAN', sName = 'SAM', bName = 'BRANDON';
   let nScore = 0, sScore = 0, bScore = 0;
 
-  // Primary: Apps Script getscores action
+  // Primary: published CSV export — this is the sheet you actually edit.
+  // Expected CSV: row 1 = Nathan,Sam,Brandon  row 2 = score,score,score
+  if (SCORES_CSV_URL && SCORES_CSV_URL !== 'REPLACE_WITH_YOUR_NEW_SCORES_CSV_URL') {
+    try {
+      const csvUrl = SCORES_CSV_URL + "&cachebust=" + Date.now();
+      const resp2  = await fetch(csvUrl, { cache: "no-store" });
+      if (resp2.ok) {
+        const text = await resp2.text();
+        const rows = text.trim().split(/\r?\n/).map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
+        nName  = (rows[0] && rows[0][0]) ? rows[0][0] : nName;
+        sName  = (rows[0] && rows[0][1]) ? rows[0][1] : sName;
+        bName  = (rows[0] && rows[0][2]) ? rows[0][2] : bName;
+        nScore = parseInt((rows[1] && rows[1][0]) || '0', 10);
+        sScore = parseInt((rows[1] && rows[1][1]) || '0', 10);
+        bScore = parseInt((rows[1] && rows[1][2]) || '0', 10);
+        nScore = isNaN(nScore) ? 0 : nScore;
+        sScore = isNaN(sScore) ? 0 : sScore;
+        bScore = isNaN(bScore) ? 0 : bScore;
+        try { sessionStorage.setItem('nflScores', JSON.stringify({ nName, sName, bName, nScore, sScore, bScore, ts: Date.now() })); } catch(_) {}
+        return { nName, sName, bName, nScore, sScore, bScore };
+      }
+    } catch(e2) {
+      console.warn('CSV scores fetch failed, falling back to Apps Script:', e2);
+    }
+  }
+
+  // Fallback: Apps Script getscores action
   try {
     const url = new URL(SCRIPT_WEB_APP_URL);
     url.searchParams.set("action", "getscores");
@@ -374,34 +400,7 @@ async function fetchScoresCSV() {
       }
     }
   } catch(e) {
-    console.warn('Apps Script getscores failed, falling back to CSV:', e);
-  }
-
-  // Fallback: CSV export
-  // Expected CSV: row 1 = Nathan,Sam,Brandon  row 2 = score,score,score
-  if (SCORES_CSV_URL && SCORES_CSV_URL !== 'REPLACE_WITH_YOUR_NEW_SCORES_CSV_URL') {
-    try {
-      const csvUrl = SCORES_CSV_URL + "&cachebust=" + Date.now();
-      const resp2  = await fetch(csvUrl, { cache: "no-store" });
-      if (resp2.ok) {
-        const text = await resp2.text();
-        const rows = text.trim().split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g,'')));
-        nName  = (rows[0] && rows[0][0]) ? rows[0][0] : nName;
-        sName  = (rows[0] && rows[0][1]) ? rows[0][1] : sName;
-        bName  = (rows[0] && rows[0][2]) ? rows[0][2] : bName;
-        nScore = parseInt((rows[1] && rows[1][0]) || '0', 10);
-        sScore = parseInt((rows[1] && rows[1][1]) || '0', 10);
-        bScore = parseInt((rows[1] && rows[1][2]) || '0', 10);
-        return {
-          nName, sName, bName,
-          nScore: isNaN(nScore) ? 0 : nScore,
-          sScore: isNaN(sScore) ? 0 : sScore,
-          bScore: isNaN(bScore) ? 0 : bScore
-        };
-      }
-    } catch(e2) {
-      console.warn('CSV scores fallback also failed:', e2);
-    }
+    console.warn('Apps Script getscores also failed:', e);
   }
 
   // Last resort: sessionStorage cache
