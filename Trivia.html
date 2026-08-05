@@ -115,7 +115,7 @@
 
   /* Tokens */
   .token{
-    position:absolute;top:0;left:0;width:44%;height:44%;border-radius:50%;
+    position:absolute;top:0;left:0;width:24px;height:24px;border-radius:50%;
     border:3px solid #fff;z-index:5;
     box-shadow:0 4px 10px -2px rgba(0,0,0,.6);
     transition:transform .45s cubic-bezier(.34,1.2,.5,1);
@@ -152,7 +152,7 @@
   .answer .btn{flex:1;padding:14px 0}
   .btn.correct{background:var(--c-green);color:#062a13}
   .btn.wrong{background:var(--p1);color:#3a0002}
-  .hidden{display:none}
+  .hidden{display:none !important}
   .btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
 
   /* Win overlay */
@@ -273,6 +273,9 @@
 
   function placeToken(el, index, isP1){
     const sq = squares[index];
+    const size = sq.offsetWidth * 0.44;
+    el.style.width = size + "px";
+    el.style.height = size + "px";
     // inset so two tokens on the same square don't fully overlap
     const insetA = sq.offsetWidth * 0.07;
     const insetB = sq.offsetWidth * 0.49;
