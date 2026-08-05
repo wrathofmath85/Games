@@ -32,6 +32,11 @@
   h1 .d:nth-child(2){background:var(--c-yellow)}
   h1 .d:nth-child(3){background:var(--c-green)}
   .sub{color:var(--muted);font-size:14px;margin-top:8px;max-width:60ch;line-height:1.5}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:14px;max-width:520px}
+  .leghead{font-family:'Fredoka',sans-serif;font-weight:600;font-size:12px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+  .legrow{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);padding:3px 0}
+  .legrow .sw{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 6px -1px currentColor}
 
   .players{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
   .pcard{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;
@@ -107,18 +112,31 @@
 <div class="wrap">
   <header class="title">
     <h1><span class="d"></span><span class="d"></span><span class="d"></span>Trivia Trail</h1>
-    <p class="sub">Race to collect all six colors. Each turn starts with a question for the color you're standing on &mdash; you read it aloud and mark it right or wrong. Right keeps your turn; wrong passes it. Answer right on a color to claim it; nail a wild and pick any color you still need.</p>
+    <div class="legend">
+      <div class="legcol">
+        <div class="leghead">The Office</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-blue)"></span>Characters</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-pink)"></span>Quotes</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-yellow)"></span>Trivia</div>
+      </div>
+      <div class="legcol">
+        <div class="leghead">Curb Your Enthusiasm</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-green)"></span>Characters</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-orange)"></span>Quotes</div>
+        <div class="legrow"><span class="sw" style="background:var(--c-purple)"></span>Trivia</div>
+      </div>
+    </div>
   </header>
 
   <div class="players">
     <div class="pcard active" data-p="1" id="pc1">
       <div class="top"><span class="chip"></span>
-        <input class="pname" id="n1" value="Player 1" maxlength="16" aria-label="Player 1 name"></div>
+        <input class="pname" id="n1" value="Mario" maxlength="16" aria-label="Player 1 name"></div>
       <div class="wedges" id="w1"></div>
     </div>
     <div class="pcard" data-p="2" id="pc2">
       <div class="top"><span class="chip"></span>
-        <input class="pname" id="n2" value="Player 2" maxlength="16" aria-label="Player 2 name"></div>
+        <input class="pname" id="n2" value="Sam" maxlength="16" aria-label="Player 2 name"></div>
       <div class="wedges" id="w2"></div>
     </div>
   </div>
@@ -158,12 +176,12 @@
   "use strict";
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const COLORS = [
-    {key:"blue",   label:"Blue",   c:"var(--c-blue)"},
-    {key:"pink",   label:"Pink",   c:"var(--c-pink)"},
-    {key:"yellow", label:"Yellow", c:"var(--c-yellow)"},
-    {key:"green",  label:"Green",  c:"var(--c-green)"},
-    {key:"orange", label:"Orange", c:"var(--c-orange)"},
-    {key:"purple", label:"Purple", c:"var(--c-purple)"}
+    {key:"blue",   label:"Blue",   c:"var(--c-blue)",   cat:"The Office: Characters"},
+    {key:"pink",   label:"Pink",   c:"var(--c-pink)",   cat:"The Office: Quotes"},
+    {key:"yellow", label:"Yellow", c:"var(--c-yellow)", cat:"The Office: Trivia"},
+    {key:"green",  label:"Green",  c:"var(--c-green)",  cat:"Curb Your Enthusiasm: Characters"},
+    {key:"orange", label:"Orange", c:"var(--c-orange)", cat:"Curb Your Enthusiasm: Quotes"},
+    {key:"purple", label:"Purple", c:"var(--c-purple)", cat:"Curb Your Enthusiasm: Trivia"}
   ];
   const byKey = {}; COLORS.forEach(c => byKey[c.key] = c);
 
@@ -277,8 +295,8 @@
       setStatus("<b>"+pname(p)+"</b> is on the <b>wild</b> spot &mdash; ask <b>any</b> question. Did they get it right?");
     } else {
       const c = byKey[sp.key];
-      setStatus("<b>"+pname(p)+"</b> is on <span class='dotc' style='background:"+c.c+"'></span><b>"+c.label+
-        "</b> &mdash; ask a "+c.label+" question. Right?");
+      setStatus("<b>"+pname(p)+"</b> landed <span class='dotc' style='background:"+c.c+"'></span><b>"+c.cat+
+        "</b> &mdash; ask that question. Right?");
     }
     showControls(); renderTrackers();
   }
