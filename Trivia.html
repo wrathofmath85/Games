@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trivia Trail — Collect All Six</title>
+<title>Trivia Trail — The Office &amp; Curb</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,21 +17,17 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{
-    font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);
     background:radial-gradient(1200px 600px at 50% -10%, #1c3a43 0%, transparent 60%),
       linear-gradient(160deg, var(--table) 0%, var(--table-2) 100%);
-    min-height:100vh;padding:clamp(14px,3vw,32px);display:flex;justify-content:center;
-  }
+    min-height:100vh;padding:clamp(14px,3vw,32px);display:flex;justify-content:center}
   .wrap{width:100%;max-width:820px}
   header.title{margin-bottom:16px}
   h1{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(28px,6vw,44px);
      letter-spacing:.5px;margin:0;line-height:1;display:flex;align-items:center;gap:.4em}
   h1 .d{width:.4em;height:.4em;border-radius:50%;display:inline-block}
-  h1 .d:nth-child(1){background:var(--c-pink)}
-  h1 .d:nth-child(2){background:var(--c-yellow)}
+  h1 .d:nth-child(1){background:var(--c-pink)} h1 .d:nth-child(2){background:var(--c-yellow)}
   h1 .d:nth-child(3){background:var(--c-green)}
-  .sub{color:var(--muted);font-size:14px;margin-top:8px;max-width:60ch;line-height:1.5}
   .legend{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:14px;max-width:520px}
   .leghead{font-family:'Fredoka',sans-serif;font-weight:600;font-size:12px;color:var(--muted);
     text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
@@ -43,8 +39,7 @@
     padding:12px 14px;position:relative;overflow:hidden;transition:border-color .2s, box-shadow .2s}
   .pcard .top{display:flex;align-items:center;gap:10px}
   .chip{width:22px;height:22px;border-radius:50%;border:3px solid #fff;flex:none}
-  .pcard[data-p="1"] .chip{background:var(--p1)}
-  .pcard[data-p="2"] .chip{background:var(--p2)}
+  .pcard[data-p="1"] .chip{background:var(--p1)} .pcard[data-p="2"] .chip{background:var(--p2)}
   .pname{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;background:transparent;
     border:none;color:var(--ink);width:100%;border-bottom:1px dashed transparent;padding:2px 0}
   .pname:focus{outline:none;border-bottom-color:var(--panel-line)}
@@ -74,26 +69,31 @@
   .controls{background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;
     padding:18px;margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:14px}
   .status{font-size:15px;color:var(--ink);text-align:center;min-height:22px;line-height:1.5}
-  .status b{color:var(--ink)}
   .dotc{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle;margin:0 5px}
-  .answer{display:flex;gap:12px;width:100%;max-width:360px}
-  .answer .btn{flex:1}
   .picker{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;max-width:360px}
+  .cbtn{font-family:'Fredoka';font-weight:600;font-size:15px;border:none;border-radius:11px;
+    padding:13px 0;cursor:pointer;transition:transform .08s, opacity .15s}
+  .cbtn:active{transform:translateY(2px)} .cbtn:disabled{opacity:.28;cursor:not-allowed}
+
+  .qcard{width:100%;max-width:430px;background:var(--table-2);border:1px solid var(--panel-line);
+    border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px}
+  .qcat{font-family:'Fredoka';font-weight:600;font-size:12px;letter-spacing:.5px;color:var(--muted);
+    display:flex;align-items:center;text-transform:uppercase}
+  .qtext{font-size:17px;line-height:1.45;color:var(--ink)}
+  .qans{font-size:16px;line-height:1.4;color:#c6f5d5;background:rgba(39,174,96,.14);
+    border:1px solid rgba(39,174,96,.4);border-radius:10px;padding:10px 12px}
+  .qmeta{font-size:11px;color:var(--muted)}
+  .answer{display:flex;gap:12px;width:100%} .answer .btn{flex:1}
+
   .rollGroup{display:flex;align-items:center;gap:16px}
   .die{width:64px;height:64px;border-radius:14px;background:#fff;color:#12242a;font-family:'Fredoka';
     font-weight:700;font-size:34px;display:flex;align-items:center;justify-content:center;
     box-shadow:inset 0 -4px 0 rgba(0,0,0,.12),0 6px 16px -6px rgba(0,0,0,.5)}
   .btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;border:none;border-radius:12px;
     padding:14px 26px;cursor:pointer;color:#0e1a1e;transition:transform .08s, filter .15s, opacity .15s}
-  .btn:active{transform:translateY(2px)}
-  .btn:disabled{opacity:.32;cursor:not-allowed}
-  .btn.roll{background:var(--wild)}
-  .btn.correct{background:var(--c-green);color:#062a13}
-  .btn.wrong{background:var(--p1);color:#3a0002}
-  .cbtn{font-family:'Fredoka';font-weight:600;font-size:15px;border:none;border-radius:11px;
-    padding:13px 0;cursor:pointer;transition:transform .08s, opacity .15s}
-  .cbtn:active{transform:translateY(2px)}
-  .cbtn:disabled{opacity:.28;cursor:not-allowed}
+  .btn:active{transform:translateY(2px)} .btn:disabled{opacity:.32;cursor:not-allowed}
+  .btn.roll{background:var(--wild)} .btn.reveal{background:#e8eeec;width:100%}
+  .btn.correct{background:var(--c-green);color:#062a13} .btn.wrong{background:var(--p1);color:#3a0002}
   .btn:focus-visible,.cbtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
   .hidden{display:none !important}
 
@@ -101,10 +101,25 @@
     display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
   .overlay .card{background:var(--panel);border:1px solid var(--panel-line);border-radius:20px;
     padding:34px 30px;text-align:center;max-width:380px;width:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
-  .overlay h2{font-family:'Fredoka';font-size:30px;margin:0 0 6px}
-  .overlay p{color:var(--muted);margin:0 0 22px}
+  .overlay h2{font-family:'Fredoka';font-size:30px;margin:0 0 6px} .overlay p{color:var(--muted);margin:0 0 22px}
   .overlay .btn{background:var(--wild);width:100%}
-  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:18px}
+  .foot{text-align:center;margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .foot p{color:var(--muted);font-size:12px;margin:0}
+  .linkbtn{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);background:transparent;
+    border:1px solid var(--panel-line);border-radius:8px;padding:7px 14px;cursor:pointer;transition:color .15s, border-color .15s}
+  .linkbtn:hover{color:var(--ink);border-color:var(--muted)}
+  .linkbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(160deg,var(--table) 0%,var(--table-2) 100%)}
+  .gatecard{background:var(--panel);border:1px solid var(--panel-line);border-radius:20px;padding:34px 30px;
+    text-align:center;max-width:360px;width:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
+  .gatecard h2{font-family:'Fredoka';font-size:30px;margin:0 0 6px}
+  .gatecard p{color:var(--muted);margin:0 0 18px;font-size:14px}
+  .gate input{width:100%;font-size:16px;padding:12px 14px;border-radius:11px;border:1px solid var(--panel-line);
+    background:var(--table-2);color:var(--ink);text-align:center;margin-bottom:12px}
+  .gate input:focus{outline:none;border-color:var(--wild)}
+  .gate .btn{width:100%;background:var(--wild)}
+  .gateErr{color:#ff8a8e;font-size:13px;margin-top:12px}
   @media (prefers-reduced-motion: reduce){.token{transition:none}.btn:active,.cbtn:active{transform:none}}
 </style>
 </head>
@@ -149,18 +164,38 @@
 
   <div class="controls">
     <div class="status" id="status" aria-live="polite"></div>
-    <div class="answer hidden" id="answer">
-      <button class="btn correct" id="correctBtn">Correct &#10003;</button>
-      <button class="btn wrong" id="wrongBtn">Wrong &#10007;</button>
-    </div>
     <div class="picker hidden" id="picker"></div>
+    <div class="qcard hidden" id="qcard">
+      <div class="qcat" id="qcat"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="qans hidden" id="qans"></div>
+      <div class="qmeta" id="qmeta"></div>
+      <button class="btn reveal" id="revealBtn">Reveal answer</button>
+      <div class="answer hidden" id="answer">
+        <button class="btn correct" id="correctBtn">Correct &#10003;</button>
+        <button class="btn wrong" id="wrongBtn">Wrong &#10007;</button>
+      </div>
+    </div>
     <div class="rollGroup hidden" id="rollGroup">
       <div class="die" id="die">&ndash;</div>
       <button class="btn roll" id="rollBtn">Roll dice</button>
     </div>
   </div>
 
-  <p class="foot">Tap a name to rename. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
+  <div class="foot">
+    <p>Tap a name to rename. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
+    <button class="linkbtn" id="resetBtn">Reset asked questions</button>
+  </div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gatecard">
+    <h2>Trivia Trail</h2>
+    <p>Enter the password to play.</p>
+    <input type="password" id="gatePass" placeholder="Password" autocomplete="off" aria-label="Password">
+    <button class="btn" id="gateBtn">Enter</button>
+    <div class="gateErr hidden" id="gateErr">Incorrect password &mdash; try again.</div>
+  </div>
 </div>
 
 <div class="overlay hidden" id="overlay">
@@ -171,33 +206,41 @@
   </div>
 </div>
 
+<script src="questions.js"></script>
 <script>
 (function(){
   "use strict";
+
+  /* ============ SET YOUR PASSWORD HERE ============ */
+  const GAME_PASSWORD = "changeme";
+  /* ================================================ */
+
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const SRC = (window.QUESTIONS || {});   // questions live in questions.js
   const COLORS = [
     {key:"blue",   label:"Blue",   c:"var(--c-blue)",   cat:"The Office: Characters"},
     {key:"pink",   label:"Pink",   c:"var(--c-pink)",   cat:"The Office: Quotes"},
     {key:"yellow", label:"Yellow", c:"var(--c-yellow)", cat:"The Office: Trivia"},
-    {key:"green",  label:"Green",  c:"var(--c-green)",  cat:"Curb Your Enthusiasm: Characters"},
-    {key:"orange", label:"Orange", c:"var(--c-orange)", cat:"Curb Your Enthusiasm: Quotes"},
-    {key:"purple", label:"Purple", c:"var(--c-purple)", cat:"Curb Your Enthusiasm: Trivia"}
+    {key:"green",  label:"Green",  c:"var(--c-green)",  cat:"Curb: Characters"},
+    {key:"orange", label:"Orange", c:"var(--c-orange)", cat:"Curb: Quotes"},
+    {key:"purple", label:"Purple", c:"var(--c-purple)", cat:"Curb: Trivia"}
   ];
   const byKey = {}; COLORS.forEach(c => byKey[c.key] = c);
 
-  // 14 spots: wild, 6 colors, wild, 6 colors
   const spots = [];
   spots.push({type:"wild"});
   COLORS.forEach(c => spots.push({type:"color", key:c.key}));
   spots.push({type:"wild"});
   COLORS.forEach(c => spots.push({type:"color", key:c.key}));
-  const N = spots.length; // 14
+  const N = spots.length;
 
   const board = document.getElementById("board");
   const t1 = document.getElementById("t1"), t2 = document.getElementById("t2");
   const statusEl = document.getElementById("status");
-  const answerEl = document.getElementById("answer");
   const pickerEl = document.getElementById("picker");
+  const qcardEl = document.getElementById("qcard");
+  const answerEl = document.getElementById("answer");
+  const revealBtn = document.getElementById("revealBtn");
   const rollGroup = document.getElementById("rollGroup");
   const die = document.getElementById("die");
   const rollBtn = document.getElementById("rollBtn");
@@ -213,70 +256,76 @@
 
   const players = [ {pos:0, colors:new Set()}, {pos:0, colors:new Set()} ];
   let current = 0;
-  let phase = "question";  // question | pickcolor | roll | won
-  let keepTurn = false;
-  let rolling = false;
+  let phase = "question";   // attemptpick | question | reveal | roll | won
+  let keepTurn = false, rolling = false, currentQ = null;
+
+  // --- question decks: shuffle once, pop for no-repeats until exhausted ---
+  const queues = {};
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+  function buildQueues(){ COLORS.forEach(c => queues[c.key] = shuffle((SRC[c.key]||[]).slice())); }
+  function drawQuestion(key){
+    const src = SRC[key] || [];
+    if (!src.length) return {key, q:"(No questions loaded for this category yet \u2014 add some in questions.js.)", a:"\u2014"};
+    if (!queues[key] || queues[key].length === 0) queues[key] = shuffle(src.slice());
+    const item = queues[key].pop();
+    return {key, q:item.q, a:item.a};
+  }
+  buildQueues();
 
   function buildWedges(id){
     const cont = document.getElementById(id);
-    COLORS.forEach(c => {
-      const s = document.createElement("span");
-      s.className = "wedge"; s.dataset.key = c.key; s.style.setProperty("--wc", c.c);
-      cont.appendChild(s);
-    });
+    COLORS.forEach(c => { const s=document.createElement("span");
+      s.className="wedge"; s.dataset.key=c.key; s.style.setProperty("--wc", c.c); cont.appendChild(s); });
   }
   buildWedges("w1"); buildWedges("w2");
 
   COLORS.forEach(c => {
     const b = document.createElement("button");
     b.className = "cbtn"; b.dataset.key = c.key; b.textContent = c.label;
-    b.style.background = c.c;
-    b.style.color = (c.key === "yellow") ? "#3a2f00" : "#fff";
-    b.addEventListener("click", () => onPick(c.key));
+    b.style.background = c.c; b.style.color = (c.key === "yellow") ? "#3a2f00" : "#fff";
+    b.addEventListener("click", () => onAttemptPick(c.key));
     pickerEl.appendChild(b);
   });
 
   function pname(p){ return (document.getElementById(p===0?"n1":"n2").value.trim()) || ("Player "+(p+1)); }
   function setStatus(html){ statusEl.innerHTML = html; }
+  function dot(c){ return "<span class='dotc' style='background:"+c+"'></span>"; }
 
   // geometry
   let cx=[], cy=[], tokenSize=20;
   function layout(){
-    const S = board.clientWidth;
-    if (!S) return;
-    const centerX = S/2, centerY = S/2, R = S*0.40, spotSize = S*0.155;
-    tokenSize = spotSize*0.5;
-    cx = []; cy = [];
+    const S = board.clientWidth; if (!S) return;
+    const centerX=S/2, centerY=S/2, R=S*0.40, spotSize=S*0.155; tokenSize=spotSize*0.5;
+    cx=[]; cy=[];
     for (let i=0;i<N;i++){
-      const ang = -Math.PI/2 + i*(2*Math.PI/N);
-      const x = centerX + R*Math.cos(ang), y = centerY + R*Math.sin(ang);
+      const ang=-Math.PI/2 + i*(2*Math.PI/N);
+      const x=centerX+R*Math.cos(ang), y=centerY+R*Math.sin(ang);
       cx.push(x); cy.push(y);
-      const el = spotEls[i];
-      el.style.width = spotSize+"px"; el.style.height = spotSize+"px";
-      el.style.left = (x-spotSize/2)+"px"; el.style.top = (y-spotSize/2)+"px";
-      el.style.fontSize = spotSize+"px";
+      const el=spotEls[i];
+      el.style.width=spotSize+"px"; el.style.height=spotSize+"px";
+      el.style.left=(x-spotSize/2)+"px"; el.style.top=(y-spotSize/2)+"px"; el.style.fontSize=spotSize+"px";
     }
-    const ring = document.getElementById("ring");
-    ring.style.width = (2*R)+"px"; ring.style.height = (2*R)+"px";
-    ring.style.left = (centerX-R)+"px"; ring.style.top = (centerY-R)+"px";
-    t1.style.width = t2.style.width = tokenSize+"px";
-    t1.style.height = t2.style.height = tokenSize+"px";
+    const ring=document.getElementById("ring");
+    ring.style.width=(2*R)+"px"; ring.style.height=(2*R)+"px";
+    ring.style.left=(centerX-R)+"px"; ring.style.top=(centerY-R)+"px";
+    t1.style.width=t2.style.width=tokenSize+"px"; t1.style.height=t2.style.height=tokenSize+"px";
     placeToken(0,false); placeToken(1,false);
   }
   function placeToken(p, animate){
     if (!cx.length) return;
     const el = p===0 ? t1 : t2;
-    if (!animate) el.style.transition = "none";
-    const i = players[p].pos;
-    const off = tokenSize*0.36*(p===0 ? -1 : 1);
-    const x = cx[i]-tokenSize/2+off, y = cy[i]-tokenSize/2+off;
-    el.style.transform = "translate("+x+"px,"+y+"px)";
-    if (!animate){ void el.offsetWidth; el.style.transition = ""; }
+    if (!animate) el.style.transition="none";
+    const i=players[p].pos, off=tokenSize*0.36*(p===0?-1:1);
+    el.style.transform="translate("+(cx[i]-tokenSize/2+off)+"px,"+(cy[i]-tokenSize/2+off)+"px)";
+    if (!animate){ void el.offsetWidth; el.style.transition=""; }
   }
 
-  function showControls(){
-    answerEl.classList.toggle("hidden", phase!=="question");
-    pickerEl.classList.toggle("hidden", phase!=="pickcolor");
+  function showPhase(){
+    pickerEl.classList.toggle("hidden", phase!=="attemptpick");
+    qcardEl.classList.toggle("hidden", !(phase==="question"||phase==="reveal"));
+    revealBtn.classList.toggle("hidden", phase!=="question");
+    answerEl.classList.toggle("hidden", phase!=="reveal");
+    document.getElementById("qans").classList.toggle("hidden", phase!=="reveal");
     rollGroup.classList.toggle("hidden", phase!=="roll");
   }
   function renderTrackers(){
@@ -289,104 +338,126 @@
   }
 
   function startTurn(){
-    phase = "question";
-    const p = current, sp = spots[players[p].pos];
+    const p=current, sp=spots[players[p].pos];
     if (sp.type === "wild"){
-      setStatus("<b>"+pname(p)+"</b> is on the <b>wild</b> spot &mdash; ask <b>any</b> question. Did they get it right?");
+      phase="attemptpick"; currentQ=null;
+      [...pickerEl.children].forEach(b => b.disabled = players[p].colors.has(b.dataset.key));
+      setStatus("<b>"+pname(p)+"</b> is on a <b>wild</b> &mdash; pick a category to attempt.");
+      showPhase();
     } else {
-      const c = byKey[sp.key];
-      setStatus("<b>"+pname(p)+"</b> landed <span class='dotc' style='background:"+c.c+"'></span><b>"+c.cat+
-        "</b> &mdash; ask that question. Right?");
+      askQuestion(sp.key);
     }
-    showControls(); renderTrackers();
+    renderTrackers();
+  }
+  function onAttemptPick(key){ if (phase==="attemptpick") askQuestion(key); }
+
+  function qmetaText(key){
+    const left=(queues[key]?queues[key].length:0);
+    return left+" more in this category before it recycles";
+  }
+  function askQuestion(key){
+    currentQ = drawQuestion(key);
+    phase="question";
+    const c=byKey[key];
+    setStatus("<b>"+pname(current)+"</b>'s turn &mdash; read the question aloud.");
+    document.getElementById("qcat").innerHTML = dot(c.c)+c.cat;
+    document.getElementById("qtext").textContent = currentQ.q;
+    document.getElementById("qans").textContent = "Answer: "+currentQ.a;
+    document.getElementById("qmeta").textContent = qmetaText(key);
+    showPhase();
   }
 
+  revealBtn.addEventListener("click", () => {
+    if (phase!=="question") return;
+    phase="reveal";
+    setStatus("Did <b>"+pname(current)+"</b> get it right?");
+    showPhase();
+  });
+
   function onAnswer(correct){
-    if (phase !== "question") return;
-    const p = current, sp = spots[players[p].pos];
+    if (phase !== "reveal") return;
+    const p=current, key=currentQ.key;
     if (correct){
-      if (sp.type === "wild"){
-        phase = "pickcolor";
-        [...pickerEl.children].forEach(b => b.disabled = players[p].colors.has(b.dataset.key));
-        setStatus("<b>"+pname(p)+"</b> nailed the wild! Pick a color to collect.");
-        showControls();
-        return;
-      }
-      if (collect(p, sp.key)) return;   // returns true if that win
-      keepTurn = true; goRoll(true, null);
-    } else {
-      keepTurn = false; goRoll(false, null);
-    }
-  }
-  function onPick(key){
-    if (phase !== "pickcolor") return;
-    const p = current;
-    if (collect(p, key)) return;
-    keepTurn = true; goRoll(true, byKey[key].label);
+      const label=byKey[key].label;
+      if (collect(p, key)) return;       // win
+      keepTurn=true; goRoll(true, label);
+    } else { keepTurn=false; goRoll(false, null); }
   }
   function collect(p, key){
-    players[p].colors.add(key);
-    renderTrackers();
+    players[p].colors.add(key); renderTrackers();
     if (players[p].colors.size === COLORS.length){ win(p); return true; }
     return false;
   }
-  function goRoll(correct, pickedLabel){
-    phase = "roll";
-    if (correct){
-      const lead = pickedLabel ? ("Collected "+pickedLabel+"! ") : "Correct! ";
-      setStatus(lead+"<b>"+pname(current)+"</b> rolls again &mdash; still your turn.");
-    } else {
-      setStatus("No luck. <b>"+pname(current)+"</b> rolls, then it's the other player.");
-    }
-    die.textContent = "\u2013";
-    rollBtn.disabled = false;
-    showControls();
+  function goRoll(correct, label){
+    phase="roll";
+    if (correct) setStatus("Correct! Collected <b>"+label+"</b>. <b>"+pname(current)+"</b> rolls again.");
+    else setStatus("No luck. <b>"+pname(current)+"</b> rolls, then it's the other player.");
+    die.textContent="\u2013"; rollBtn.disabled=false; showPhase();
   }
   function doRoll(){
-    if (phase !== "roll" || rolling) return;
-    rolling = true; rollBtn.disabled = true;
-    const result = 1 + Math.floor(Math.random()*6);
-    const settle = () => {
-      die.textContent = result;
-      const p = current;
-      players[p].pos = (players[p].pos + result) % N;
-      placeToken(p, true);
-      const after = () => {
-        rolling = false;
-        if (!keepTurn) current = current===0 ? 1 : 0;
-        startTurn();
-      };
-      if (reduce) after(); else setTimeout(after, 500);
+    if (phase!=="roll" || rolling) return;
+    rolling=true; rollBtn.disabled=true;
+    const result=1+Math.floor(Math.random()*6);
+    const settle=()=>{
+      die.textContent=result;
+      const p=current; players[p].pos=(players[p].pos+result)%N; placeToken(p,true);
+      const after=()=>{ rolling=false; if(!keepTurn) current=current===0?1:0; startTurn(); };
+      if (reduce) after(); else setTimeout(after,500);
     };
     if (reduce){ settle(); return; }
-    let ticks = 0;
-    const iv = setInterval(() => {
-      die.textContent = 1 + Math.floor(Math.random()*6);
-      if (++ticks >= 9){ clearInterval(iv); settle(); }
-    }, 55);
+    let ticks=0;
+    const iv=setInterval(()=>{ die.textContent=1+Math.floor(Math.random()*6); if(++ticks>=9){clearInterval(iv);settle();} },55);
   }
   function win(p){
-    phase = "won"; showControls(); renderTrackers();
-    document.getElementById("winTitle").textContent = pname(p)+" wins!";
-    document.getElementById("winSub").textContent = "Collected all six colors.";
+    phase="won"; showPhase(); renderTrackers();
+    document.getElementById("winTitle").textContent=pname(p)+" wins!";
+    document.getElementById("winSub").textContent="Collected all six colors.";
     overlay.classList.remove("hidden");
   }
   function newGame(){
-    players.forEach(pl => { pl.pos = 0; pl.colors.clear(); });
-    current = 0; phase = "question"; keepTurn = false; rolling = false;
-    die.textContent = "\u2013";
+    players.forEach(pl => { pl.pos=0; pl.colors.clear(); });
+    current=0; phase="question"; keepTurn=false; rolling=false; currentQ=null;
+    buildQueues(); die.textContent="\u2013";
     overlay.classList.add("hidden");
     placeToken(0,false); placeToken(1,false);
     startTurn();
   }
 
+  // Manual reset of the "already asked" tracking (for testing). Reshuffles
+  // every category so all questions become available again, mid-game safe.
+  function resetDecks(){
+    buildQueues();
+    if (currentQ && (phase==="question"||phase==="reveal")){
+      document.getElementById("qmeta").textContent = qmetaText(currentQ.key);
+    }
+  }
+  window.resetQuestions = resetDecks;   // also callable from the console
+
   document.getElementById("correctBtn").addEventListener("click", () => onAnswer(true));
   document.getElementById("wrongBtn").addEventListener("click", () => onAnswer(false));
   rollBtn.addEventListener("click", doRoll);
   document.getElementById("newGameBtn").addEventListener("click", newGame);
+  const resetBtn = document.getElementById("resetBtn");
+  resetBtn.addEventListener("click", () => {
+    resetDecks();
+    const old = resetBtn.textContent;
+    resetBtn.textContent = "All questions reset \u2713";
+    setTimeout(() => { resetBtn.textContent = old; }, 1500);
+  });
   ["n1","n2"].forEach(id => document.getElementById(id).addEventListener("input", () => {
-    if (phase === "question") startTurn();
+    if (phase==="attemptpick") startTurn();
   }));
+
+  // password gate (deters casual snooping only — not real security)
+  const gate=document.getElementById("gate"), gatePass=document.getElementById("gatePass"),
+        gateErr=document.getElementById("gateErr");
+  function tryUnlock(){
+    if (gatePass.value === GAME_PASSWORD){ gate.classList.add("hidden"); gateErr.classList.add("hidden"); gatePass.value=""; }
+    else { gateErr.classList.remove("hidden"); gatePass.value=""; gatePass.focus(); }
+  }
+  document.getElementById("gateBtn").addEventListener("click", tryUnlock);
+  gatePass.addEventListener("keydown", e => { if (e.key==="Enter") tryUnlock(); });
+  gatePass.focus();
 
   if (window.ResizeObserver) new ResizeObserver(() => layout()).observe(board);
   window.addEventListener("resize", layout);
