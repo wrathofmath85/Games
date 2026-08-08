@@ -75,8 +75,10 @@
     padding:13px 0;cursor:pointer;transition:transform .08s, opacity .15s}
   .cbtn:active{transform:translateY(2px)} .cbtn:disabled{opacity:.28;cursor:not-allowed}
 
-  .qcard{width:100%;max-width:430px;background:var(--table-2);border:1px solid var(--panel-line);
-    border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:13px}
+  .qcard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;
+    width:min(84%,340px);background:rgba(11,23,28,.96);border:1px solid var(--panel-line);
+    border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;
+    box-shadow:0 22px 55px -12px rgba(0,0,0,.8)}
   .qcat{font-family:'Fredoka';font-weight:600;font-size:12px;letter-spacing:.5px;color:var(--muted);
     display:flex;align-items:center;text-transform:uppercase}
   .qtext{font-size:17px;line-height:1.45;color:var(--ink)}
@@ -156,15 +158,10 @@
     </div>
   </div>
 
-  <div class="board" id="board" aria-hidden="true">
+  <div class="board" id="board">
     <div class="ring" id="ring"></div>
     <div class="token" id="t1"></div>
     <div class="token" id="t2"></div>
-  </div>
-
-  <div class="controls">
-    <div class="status" id="status" aria-live="polite"></div>
-    <div class="picker hidden" id="picker"></div>
     <div class="qcard hidden" id="qcard">
       <div class="qcat" id="qcat"></div>
       <div class="qtext" id="qtext"></div>
@@ -176,6 +173,11 @@
         <button class="btn wrong" id="wrongBtn">Wrong &#10007;</button>
       </div>
     </div>
+  </div>
+
+  <div class="controls">
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="picker hidden" id="picker"></div>
     <div class="rollGroup hidden" id="rollGroup">
       <div class="die" id="die">&ndash;</div>
       <button class="btn roll" id="rollBtn">Roll dice</button>
