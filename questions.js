@@ -64,9 +64,9 @@ window.QUESTIONS = {
   pink: [ // The Office — Quotes
     {q:"Complete the Michael quote: 'I'm not superstitious, ___' ", a:"but I am a little stitious"},
     {q:"Complete the Michael quote: 'I DECLARE ___' ", a:"BANKRUPTCY!"},
-    {q:"Complete the Michael quote: 'Would I rather be feared or loved? Easy. Both. I want people ___", a:"to be afraid of how much they love me."},
+    {q:"Complete the Michael quote: 'Would I rather be feared or loved? Easy. Both. I want people ___' ", a:"to be afraid of how much they love me."},
     {q:"Complete the Michael quote: 'I knew exactly what to do. But in a much more real sense, ___' ", a:"I had no idea what to do."},
-    {q:"Complete the Michael quote: 'I am ___, always."", a:"Beyoncé"}
+    {q:"Complete the Michael quote: 'I am ___, always.' ", a:"Beyoncé"}
   ],
   yellow: [ // The Office — Trivia
     {q:"In what Pennsylvania city is the main branch located?", a:"Scranton"},
