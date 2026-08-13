@@ -229,6 +229,10 @@
   <div class="card">
     <h2 id="winTitle">Winner!</h2>
     <p id="winSub">Collected all six colors.</p>
+    <div class="logBtns" style="margin-bottom:12px">
+      <button class="btn ghost" id="winViewLogBtn">View log</button>
+      <button class="btn ghost" id="winDownloadBtn">Download CSV</button>
+    </div>
     <button class="btn" id="newGameBtn">New game</button>
   </div>
 </div>
@@ -507,7 +511,10 @@
     return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
   }
   function openLog(){ renderLog(); logOverlay.classList.remove("hidden"); }
-  function closeLog(){ logOverlay.classList.add("hidden"); }
+  function closeLog(){
+    logOverlay.classList.add("hidden");
+    if (phase === "won") overlay.classList.remove("hidden");   // back to the win screen, not the board
+  }
   function csvField(s){ return '"'+String(s).replace(/"/g,'""')+'"'; }
   function downloadLog(){
     const rows = [["#","Player","Category","Question","Answer","Result","Time"]];
@@ -540,6 +547,10 @@
   document.getElementById("logBtn").addEventListener("click", openLog);
   document.getElementById("logCloseBtn").addEventListener("click", closeLog);
   document.getElementById("logDownloadBtn").addEventListener("click", downloadLog);
+  document.getElementById("winViewLogBtn").addEventListener("click", () => {
+    overlay.classList.add("hidden"); openLog();
+  });
+  document.getElementById("winDownloadBtn").addEventListener("click", downloadLog);
   const resetBtn = document.getElementById("resetBtn");
   resetBtn.addEventListener("click", () => {
     resetDecks();
