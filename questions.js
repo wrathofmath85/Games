@@ -134,7 +134,7 @@ window.QUESTIONS = {
     { q: "Complete the Kelly quote: 'I talk a lot, so ___'", a: "I've learned to tune myself out" },
     { q: "Complete the Phyllis quote: 'As a person who buys a lot of ___, it just feels good to be represented on one.'", a: "erotic cakes" },
     { q: "Complete the Stanley quote: 'Life is short. Drive fast and ___. That's one of my mottos.'", a: "leave a sexy corpse" },
-    { q: "Complete the Michael quote: 'I'm always thinking one step ahead. Like ___'", a: "a carpenter who makes stairs" },
+    { q: "Complete the Dwight quote: 'I'm always thinking one step ahead. Like ___'", a: "a carpenter who makes stairs" },
     { q: "Complete the Michael quote: 'You know what they say: fool me once, strike one. But fool me twice... ___'", a: "strike three" },
     { q: "Complete the Michael quote: 'I feel like all my kids grew up, and then they married each other. It's ___'", a: "every parent's dream" },
     { q: "Complete the Dwight quote: 'Reject a woman, and she will never let it go. ___'", a: "One of the many defects of their kind" },
@@ -183,11 +183,11 @@ window.QUESTIONS = {
     { q: "What food does Dwight bring to the dinner party in a large container?", a: "Beet salad" },
     { q: "What song does Hunter sing on the CD Jan plays during the dinner party?", a: "That One Night" },
     { q: "What object does Jan throw at Michael's plasma TV?", a: "A Dundie" },
-    { q: "What is Michael's username on the dating website where he meets Carol?", a: "LittleKidLover" },
+    { q: "What is Michael's username on the dating website?", a: "LittleKidLover" },
     { q: "Where does Michael propose to Carol?", a: "Kelly's Diwali celebration" },
     { q: "On what occasion does Michael break up with Pam's mother?", a: "Her birthday" },
     { q: "What Dundie does Ryan receive?", a: "Hottest in the Office" },
-    { q: "What Dundie does Kevin receive that year?", a: "Don't Go in There After Me" },
+    { q: "What Dundie does Kevin receive?", a: "Don't Go in There After Me" },
     { q: "What Dundie does Kelly receive?", a: "Spicy Curry Award" },
     { q: "What is the wedding date Roy announces on the Booze Cruise?", a: "June 10th" },
     { q: "What video game do the Stamford employees regularly play at work?", a: "Call of Duty" },
@@ -202,7 +202,7 @@ window.QUESTIONS = {
     { q: "Where does Angela buy clothes because the clothes at Gap Kids are too flashy?", a: "American Girl" },
     { q: "What is Creed's New Year's resolution?", a: "To do a cartwheel" },
     { q: "What does Michael say is the difference between a salesman and saleswoman", a: "Boobs" },
-    { q: "Andy cannot remember the end of a jingle to what product?", a: "Kit Kat" },
+    { q: "Andy cannot remember the end of a jingle for what product?", a: "Kit Kat" },
     { q: "Michael believe he plants weed in Toby's desk but it turns out to be what?", a: "Caprese Salad" }
   ],
 
@@ -255,7 +255,14 @@ window.QUESTIONS = {
     { q: "What does Larry call an unwanted sidewalk chat with an acquaintance?", a: "A stop and chat" },
     { q: "What does Larry call himself when saying rude truths for others?", a: "A social assassin" },
     { q: "What does Larry call cutting in line under cover of chatting with a friend?", a: "A chat and cut" },
-    { q: "What does Larry demand people show his nice furniture?", a: "Respect the wood" }
+    { q: "What does Larry demand people show his nice furniture?", a: "Respect the wood" },
+    { q: "Complete the Larry quote: 'I don't like talking to... to ___, but ___, I have no problem with'", a: "People I know and strangers." },
+    { q: "Complete the Larry quote: 'I guess I had a different plan fr eternity.  I thought ___'", a: "I'd be single again" },
+    { q: "Complete the Larry quote: 'It's hard to talk to a blind guy, you have ___'", a: "no references" },
+    { q: "Who says: 'Do you crap standing up?'", a: "Marty Funkhouser" },
+    { q: "Who says: 'That was a dry sneeze, Larry'", a: "Ben Stiller" },
+    { q: "Complete the Larry quote: 'Here's a question for Who Wants to be a Millionaire - what kind of an idiot is running ___'", a: "ABC" },
+    { q: "Complete the Larry quote: 'It's not every day that you get to be affectionate around something ___, it just doesn't happen that often'", a: "German" }
   ],
 
   // ===== Curb Your Enthusiasm — Trivia =====
