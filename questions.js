@@ -257,7 +257,7 @@ window.QUESTIONS = {
     { q: "What does Larry call cutting in line under cover of chatting with a friend?", a: "A chat and cut" },
     { q: "What does Larry demand people show his nice furniture?", a: "Respect the wood" },
     { q: "Complete the Larry quote: 'I don't like talking to... to ___, but ___, I have no problem with'", a: "People I know and strangers." },
-    { q: "Complete the Larry quote: 'I guess I had a different plan fr eternity.  I thought ___'", a: "I'd be single again" },
+    { q: "Complete the Larry quote: 'I guess I had a different plan for eternity.  I thought ___'", a: "I'd be single again" },
     { q: "Complete the Larry quote: 'It's hard to talk to a blind guy, you have ___'", a: "no references" },
     { q: "Who says: 'Do you crap standing up?'", a: "Marty Funkhouser" },
     { q: "Who says: 'That was a dry sneeze, Larry'", a: "Ben Stiller" },
