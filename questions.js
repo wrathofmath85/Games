@@ -201,7 +201,9 @@ window.QUESTIONS = {
     { q: "What does Dwight inherit from his Aunt Shirley?", a: "Her 80-acre beet farm" },
     { q: "Where does Angela buy clothes because the clothes at Gap Kids are too flashy?", a: "American Girl" },
     { q: "What is Creed's New Year's resolution?", a: "To do a cartwheel" },
-    { q: "What does Michael say is the difference between a salesman and saleswoman", a: "Boobs" }
+    { q: "What does Michael say is the difference between a salesman and saleswoman", a: "Boobs" },
+    { q: "Andy cannot remember the end of a jingle to what product?", a: "Kit Kat" },
+    { q: "Michael believe he plants weed in Toby's desk but it turns out to be what?", a: "Caprese Salad" }
   ],
 
   // ===== Curb Your Enthusiasm — Characters =====
@@ -216,6 +218,7 @@ window.QUESTIONS = {
     { q: "Who plays Becky?", a: "Kaitlin Olson" },
     { q: "Who plays Dr. Saul Funkhouser?", a: "Saul Rubinek" },
     { q: "Who plays Mocha Joe?", a: "Saverio Guerra" },
+    { q: "Who plays Bam Bam Funkhouser, Marty's mental sister?", a: "Catherine O'Hara" },
     { q: "Which recurring blind character does Larry repeatedly clash with?", a: "Michael (the blind man)" },
     { q: "What is the name of the executive's young daughter whose doll's hair Larry cuts off?", a: "Tara" },
     { q: "What is the name of Larry's manager and best friend?", a: "Jeff Greene" },
