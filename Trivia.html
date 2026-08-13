@@ -122,6 +122,28 @@
   .gate input:focus{outline:none;border-color:var(--wild)}
   .gate .btn{width:100%;background:var(--wild)}
   .gateErr{color:#ff8a8e;font-size:13px;margin-top:12px}
+
+  .logOverlay .card{max-width:520px;text-align:left;max-height:82vh;display:flex;flex-direction:column}
+  .logOverlay h2{text-align:center}
+  .logSub{color:var(--muted);font-size:12px;text-align:center;margin:0 0 16px}
+  .logEmpty{color:var(--muted);font-size:14px;text-align:center;padding:20px 0}
+  .logList{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;margin-bottom:16px;
+    padding-right:4px}
+  .logRow{display:flex;gap:10px;align-items:flex-start;background:var(--table-2);
+    border:1px solid var(--panel-line);border-radius:10px;padding:9px 11px}
+  .logRow .num{font-family:'Fredoka';font-weight:600;font-size:12px;color:var(--muted);flex:none;width:1.4em}
+  .logRow .dotc{margin:.2em 0 0 0;flex:none}
+  .logRow .body{flex:1;min-width:0}
+  .logRow .lcat{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+  .logRow .lq{font-size:13.5px;color:var(--ink);margin-top:2px;line-height:1.4}
+  .logRow .la{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .logRow .mark{flex:none;font-family:'Fredoka';font-weight:600;font-size:12px;border-radius:6px;
+    padding:2px 8px;height:fit-content}
+  .logRow.right .mark{background:rgba(39,174,96,.18);color:#7bdca0}
+  .logRow.wrong .mark{background:rgba(255,90,95,.18);color:#ff9a9d}
+  .logBtns{display:flex;gap:10px}
+  .logBtns .btn{flex:1;width:auto}
+  .btn.ghost{background:transparent;border:1px solid var(--panel-line);color:var(--ink)}
   @media (prefers-reduced-motion: reduce){.token{transition:none}.btn:active,.cbtn:active{transform:none}}
 </style>
 </head>
@@ -186,7 +208,10 @@
 
   <div class="foot">
     <p>Tap a name to rename. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
-    <button class="linkbtn" id="resetBtn">Reset asked questions</button>
+    <div style="display:flex;gap:10px">
+      <button class="linkbtn" id="logBtn">Question log</button>
+      <button class="linkbtn" id="resetBtn">Reset asked questions</button>
+    </div>
   </div>
 </div>
 
@@ -205,6 +230,19 @@
     <h2 id="winTitle">Winner!</h2>
     <p id="winSub">Collected all six colors.</p>
     <button class="btn" id="newGameBtn">New game</button>
+  </div>
+</div>
+
+<div class="overlay logOverlay hidden" id="logOverlay">
+  <div class="card">
+    <h2>Question Log</h2>
+    <p class="logSub">Every question asked this game, in order.</p>
+    <div class="logEmpty hidden" id="logEmpty">No questions asked yet this game.</div>
+    <div class="logList" id="logList"></div>
+    <div class="logBtns">
+      <button class="btn ghost" id="logDownloadBtn">Download CSV</button>
+      <button class="btn" id="logCloseBtn">Close</button>
+    </div>
   </div>
 </div>
 
@@ -247,6 +285,9 @@
   const die = document.getElementById("die");
   const rollBtn = document.getElementById("rollBtn");
   const overlay = document.getElementById("overlay");
+  const logOverlay = document.getElementById("logOverlay");
+  const logListEl = document.getElementById("logList");
+  const logEmptyEl = document.getElementById("logEmpty");
 
   const spotEls = spots.map(sp => {
     const el = document.createElement("div");
@@ -260,6 +301,7 @@
   let current = 0;
   let phase = "question";   // attemptpick | question | reveal | roll | won
   let keepTurn = false, rolling = false, currentQ = null;
+  let questionHistory = [];   // {n, player, cat, catColor, q, a, correct, time}
 
   // --- question decks: shuffle once, pop for no-repeats until exhausted ---
   const queues = {};
@@ -376,9 +418,23 @@
     showPhase();
   });
 
+  function logQuestion(p, key, correct){
+    const c = byKey[key];
+    questionHistory.push({
+      n: questionHistory.length + 1,
+      player: pname(p),
+      cat: c.cat,
+      catColor: c.c,
+      q: currentQ.q,
+      a: currentQ.a,
+      correct: correct,
+      time: new Date()
+    });
+  }
   function onAnswer(correct){
     if (phase !== "reveal") return;
     const p=current, key=currentQ.key;
+    logQuestion(p, key, correct);
     if (correct){
       const label=byKey[key].label;
       if (collect(p, key)) return;       // win
@@ -419,10 +475,52 @@
   function newGame(){
     players.forEach(pl => { pl.pos=0; pl.colors.clear(); });
     current=0; phase="question"; keepTurn=false; rolling=false; currentQ=null;
+    questionHistory=[];
     buildQueues(); die.textContent="\u2013";
     overlay.classList.add("hidden");
     placeToken(0,false); placeToken(1,false);
     startTurn();
+  }
+
+  // --- Question log: view + export what's been asked, and right/wrong ---
+  function renderLog(){
+    logListEl.innerHTML = "";
+    const has = questionHistory.length > 0;
+    logEmptyEl.classList.toggle("hidden", has);
+    logListEl.classList.toggle("hidden", !has);
+    questionHistory.slice().reverse().forEach(entry => {
+      const row = document.createElement("div");
+      row.className = "logRow " + (entry.correct ? "right" : "wrong");
+      row.innerHTML =
+        "<span class='num'>#"+entry.n+"</span>"+
+        "<span class='dotc' style='background:"+entry.catColor+"'></span>"+
+        "<div class='body'>"+
+          "<div class='lcat'><span>"+entry.cat+"</span><span>"+entry.player+"</span></div>"+
+          "<div class='lq'>"+escapeHtml(entry.q)+"</div>"+
+          "<div class='la'>Answer: "+escapeHtml(entry.a)+"</div>"+
+        "</div>"+
+        "<span class='mark'>"+(entry.correct ? "Correct" : "Wrong")+"</span>";
+      logListEl.appendChild(row);
+    });
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+  function openLog(){ renderLog(); logOverlay.classList.remove("hidden"); }
+  function closeLog(){ logOverlay.classList.add("hidden"); }
+  function csvField(s){ return '"'+String(s).replace(/"/g,'""')+'"'; }
+  function downloadLog(){
+    const rows = [["#","Player","Category","Question","Answer","Result","Time"]];
+    questionHistory.forEach(e => rows.push([
+      e.n, e.player, e.cat, e.q, e.a, e.correct ? "Correct" : "Wrong", e.time.toLocaleString()
+    ]));
+    const csv = rows.map(r => r.map(csvField).join(",")).join("\r\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "trivia-trail-log.csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   // Manual reset of the "already asked" tracking (for testing). Reshuffles
@@ -439,6 +537,9 @@
   document.getElementById("wrongBtn").addEventListener("click", () => onAnswer(false));
   rollBtn.addEventListener("click", doRoll);
   document.getElementById("newGameBtn").addEventListener("click", newGame);
+  document.getElementById("logBtn").addEventListener("click", openLog);
+  document.getElementById("logCloseBtn").addEventListener("click", closeLog);
+  document.getElementById("logDownloadBtn").addEventListener("click", downloadLog);
   const resetBtn = document.getElementById("resetBtn");
   resetBtn.addEventListener("click", () => {
     resetDecks();
