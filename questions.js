@@ -270,7 +270,8 @@ window.QUESTIONS = {
     { q: "Who says: 'Had an uncle with a wobbly leg, couldn't stand that motherfucker, always leaning on shit!'", a: "Leon Black" },
     { q: "Who says: 'What - you scrounging around in the bleachers looking for asses?'", a: "Wanda Sykes" },
     { q: "Complete the Larry quote after eating a cookie in the shape of baby Jesus: 'I thought he was a ___'", a: "monkey" },
-    { q: "Complete the Larry quote: 'I'm Larry David, and I happen to enjoy wearing ___'", a: "women's panties" }
+    { q: "Complete the Larry quote: 'I'm Larry David, and I happen to enjoy wearing ___'", a: "women's panties" },
+    { q: "What play on the title of a Herman Melville novel does Leon use to describe Larry's depression after Cheryl leaves him?", a: "Mopey Dick" }
   ],
 
   // ===== Curb Your Enthusiasm — Trivia =====
