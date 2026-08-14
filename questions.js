@@ -262,7 +262,15 @@ window.QUESTIONS = {
     { q: "Who says: 'Do you crap standing up?'", a: "Marty Funkhouser" },
     { q: "Who says: 'That was a dry sneeze, Larry'", a: "Ben Stiller" },
     { q: "Complete the Larry quote: 'Here's a question for Who Wants to be a Millionaire - what kind of an idiot is running ___'", a: "ABC" },
-    { q: "Complete the Larry quote: 'It's not every day that you get to be affectionate around something ___, it just doesn't happen that often'", a: "German" }
+    { q: "Complete the Larry quote: 'It's not every day that you get to be affectionate around something ___, it just doesn't happen that often'", a: "German" },
+    { q: "Who says: 'If you weren't my best friend I'd pop your head off'", a: "Marty Funhouser" },
+    { q: "Who says: 'Not your business, Larry, you misanthropic moron'", a: "Susie Greene" },
+    { q: "Who says: 'I can't STAND your water.  It's like I've stuck a straw up a frog's ass'", a: "Marty Funkhouser" },
+    { q: "Who says: 'You look like Einsten's gardener'", a: "Richard Lewis" },
+    { q: "Who says: 'Had an uncle with a wobbly leg, couldn't stand that motherfucker, always leaning on shit!'", a: "Leon Black" },
+    { q: "Who says: 'What - you scrounging around in the bleachers looking for asses?'", a: "Wanda Sykes" },
+    { q: "Complete the Larry quote after eating a cookie in the shape of baby Jesus: 'I thought he was a ___'", a: "monkey" },
+    { q: "Complete the Larry quote: 'I'm Larry David, and I happen to enjoy wearing ___'", a: "women's panties" }
   ],
 
   // ===== Curb Your Enthusiasm — Trivia =====
@@ -313,7 +321,8 @@ window.QUESTIONS = {
     { q: "Wanda Sykes's rapper fiancé in season 3 goes by what name?", a: "Krazee-Eyez Killa" },
     { q: "Leon nicknames Larry's wheelchair-using girlfriend a what?", a: "A 'wheelie'" },
     { q: "What is the name of the coffee shop owner Larry feuds with in season 10?", a: "Mocha Joe" },
-    { q: "Larry alone knows the true subject of which Alanis Morissette song?", a: "'You Oughta Know'" }
+    { q: "Larry alone knows the true subject of which Alanis Morissette song?", a: "'You Oughta Know'" },
+    { q: "What tennis star does Karry drive around in a limo?", a: "'John McEnroe'" }
   ]
 
 };
