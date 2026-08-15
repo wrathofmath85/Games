@@ -82,11 +82,21 @@
   .qcat{font-family:'Fredoka';font-weight:600;font-size:12px;letter-spacing:.5px;color:var(--muted);
     display:flex;align-items:center;text-transform:uppercase}
   .qtext{font-size:17px;line-height:1.45;color:var(--ink)}
+  .qtimer{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .qtimerNum{font-family:'Fredoka',sans-serif;font-weight:700;font-size:30px;color:var(--ink);
+    min-width:1.6em;text-align:center;transition:color .3s}
+  .qtimerNum.low{color:var(--p1)}
+  .qtimerTrack{width:100%;height:8px;background:var(--table-2);border:1px solid var(--panel-line);
+    border-radius:6px;overflow:hidden}
+  .qtimerBar{height:100%;width:100%;background:var(--c-green);border-radius:6px;
+    transition:width 1s linear, background-color .3s}
+  .qtimerBar.low{background:var(--p1)}
   .qans{font-size:16px;line-height:1.4;color:#c6f5d5;background:rgba(39,174,96,.14);
     border:1px solid rgba(39,174,96,.4);border-radius:10px;padding:10px 12px}
   .qmeta{font-size:11px;color:var(--muted)}
   .answer{display:flex;gap:12px;width:100%} .answer .btn{flex:1}
 
+  .displayGroup{display:flex;justify-content:center;width:100%}
   .rollGroup{display:flex;align-items:center;gap:16px}
   .die{width:64px;height:64px;border-radius:14px;background:#fff;color:#12242a;font-family:'Fredoka';
     font-weight:700;font-size:34px;display:flex;align-items:center;justify-content:center;
@@ -95,6 +105,7 @@
     padding:14px 26px;cursor:pointer;color:#0e1a1e;transition:transform .08s, filter .15s, opacity .15s}
   .btn:active{transform:translateY(2px)} .btn:disabled{opacity:.32;cursor:not-allowed}
   .btn.roll{background:var(--wild)} .btn.reveal{background:#e8eeec;width:100%}
+  .btn.display{background:var(--c-blue);color:#fff;width:100%;max-width:300px}
   .btn.correct{background:var(--c-green);color:#062a13} .btn.wrong{background:var(--p1);color:#3a0002}
   .btn:focus-visible,.cbtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
   .hidden{display:none !important}
@@ -187,6 +198,10 @@
     <div class="qcard hidden" id="qcard">
       <div class="qcat" id="qcat"></div>
       <div class="qtext" id="qtext"></div>
+      <div class="qtimer hidden" id="qtimer">
+        <span class="qtimerNum" id="qtimerNum">25</span>
+        <div class="qtimerTrack"><div class="qtimerBar" id="qtimerBar"></div></div>
+      </div>
       <div class="qans hidden" id="qans"></div>
       <div class="qmeta" id="qmeta"></div>
       <button class="btn reveal" id="revealBtn">Reveal answer</button>
@@ -200,6 +215,9 @@
   <div class="controls">
     <div class="status" id="status" aria-live="polite"></div>
     <div class="picker hidden" id="picker"></div>
+    <div class="displayGroup hidden" id="displayGroup">
+      <button class="btn display" id="displayBtn">Display Question</button>
+    </div>
     <div class="rollGroup hidden" id="rollGroup">
       <div class="die" id="die">&ndash;</div>
       <button class="btn roll" id="rollBtn">Roll dice</button>
@@ -207,7 +225,7 @@
   </div>
 
   <div class="foot">
-    <p>Tap a name to rename. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
+    <p>Tap a name to rename. Press Display Question to start the 25s clock. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
     <div style="display:flex;gap:10px">
       <button class="linkbtn" id="logBtn">Question log</button>
       <button class="linkbtn" id="resetBtn">Reset asked questions</button>
@@ -285,6 +303,11 @@
   const qcardEl = document.getElementById("qcard");
   const answerEl = document.getElementById("answer");
   const revealBtn = document.getElementById("revealBtn");
+  const displayGroup = document.getElementById("displayGroup");
+  const displayBtn = document.getElementById("displayBtn");
+  const qtimerEl = document.getElementById("qtimer");
+  const qtimerNumEl = document.getElementById("qtimerNum");
+  const qtimerBarEl = document.getElementById("qtimerBar");
   const rollGroup = document.getElementById("rollGroup");
   const die = document.getElementById("die");
   const rollBtn = document.getElementById("rollBtn");
@@ -303,9 +326,11 @@
 
   const players = [ {pos:0, colors:new Set()}, {pos:0, colors:new Set()} ];
   let current = 0;
-  let phase = "question";   // attemptpick | question | reveal | roll | won
+  let phase = "question";   // attemptpick | ready | question | reveal | roll | won
   let keepTurn = false, rolling = false, currentQ = null;
   let questionHistory = [];   // {n, player, cat, catColor, q, a, correct, time}
+  const COUNTDOWN_SECONDS = 25;
+  let countdownTimer = null;
 
   // --- question decks: shuffle once, pop for no-repeats until exhausted ---
   const queues = {};
@@ -370,8 +395,10 @@
 
   function showPhase(){
     pickerEl.classList.toggle("hidden", phase!=="attemptpick");
+    displayGroup.classList.toggle("hidden", phase!=="ready");
     qcardEl.classList.toggle("hidden", !(phase==="question"||phase==="reveal"));
     revealBtn.classList.toggle("hidden", phase!=="question");
+    qtimerEl.classList.toggle("hidden", phase!=="question");
     answerEl.classList.toggle("hidden", phase!=="reveal");
     document.getElementById("qans").classList.toggle("hidden", phase!=="reveal");
     rollGroup.classList.toggle("hidden", phase!=="roll");
@@ -393,30 +420,88 @@
       setStatus("<b>"+pname(p)+"</b> is on a <b>wild</b> &mdash; pick a category to attempt.");
       showPhase();
     } else {
-      askQuestion(sp.key);
+      prepareQuestion(sp.key);
     }
     renderTrackers();
   }
-  function onAttemptPick(key){ if (phase==="attemptpick") askQuestion(key); }
+  function onAttemptPick(key){ if (phase==="attemptpick") prepareQuestion(key); }
 
   function qmetaText(key){
     const left=(queues[key]?queues[key].length:0);
     return left+" more in this category before it recycles";
   }
-  function askQuestion(key){
+
+  // Question is drawn now (so it's locked in) but stays hidden until the
+  // host presses "Display Question" — keeps the answer off-screen until
+  // everyone's ready and the countdown should start.
+  function prepareQuestion(key){
+    clearCountdown();
     currentQ = drawQuestion(key);
-    phase="question";
+    currentQ.key = key;
+    phase="ready";
     const c=byKey[key];
+    setStatus("<b>"+pname(current)+"</b>'s turn "+dot(c.c)+"<b>"+c.cat+"</b> &mdash; press Display Question when ready.");
+    showPhase();
+  }
+
+  function showQuestion(){
+    if (phase!=="ready") return;
+    phase="question";
+    const c=byKey[currentQ.key];
     setStatus("<b>"+pname(current)+"</b>'s turn &mdash; read the question aloud.");
     document.getElementById("qcat").innerHTML = dot(c.c)+c.cat;
     document.getElementById("qtext").textContent = currentQ.q;
     document.getElementById("qans").textContent = "Answer: "+currentQ.a;
-    document.getElementById("qmeta").textContent = qmetaText(key);
+    document.getElementById("qmeta").textContent = qmetaText(currentQ.key);
+    showPhase();
+    startCountdown();
+  }
+  displayBtn.addEventListener("click", showQuestion);
+
+  function startCountdown(){
+    clearCountdown();
+    let remaining = COUNTDOWN_SECONDS;
+    qtimerNumEl.textContent = remaining;
+    qtimerNumEl.classList.remove("low");
+    qtimerBarEl.classList.remove("low");
+    if (reduce){
+      qtimerBarEl.style.transition = "none";
+      qtimerBarEl.style.width = "100%";
+    } else {
+      qtimerBarEl.style.transition = "none";
+      qtimerBarEl.style.width = "100%";
+      void qtimerBarEl.offsetWidth;
+      qtimerBarEl.style.transition = "width "+COUNTDOWN_SECONDS+"s linear, background-color .3s";
+      requestAnimationFrame(() => { qtimerBarEl.style.width = "0%"; });
+    }
+    countdownTimer = setInterval(() => {
+      remaining--;
+      if (remaining <= 0){
+        qtimerNumEl.textContent = "0";
+        clearCountdown();
+        timeUp();
+        return;
+      }
+      qtimerNumEl.textContent = remaining;
+      if (remaining <= 5){
+        qtimerNumEl.classList.add("low"); qtimerBarEl.classList.add("low");
+      }
+      if (reduce) qtimerBarEl.style.width = Math.round(remaining/COUNTDOWN_SECONDS*100)+"%";
+    }, 1000);
+  }
+  function clearCountdown(){
+    if (countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
+  }
+  function timeUp(){
+    if (phase!=="question") return;
+    phase="reveal";
+    setStatus("&#9200; Time's up! Did <b>"+pname(current)+"</b> get it right?");
     showPhase();
   }
 
   revealBtn.addEventListener("click", () => {
     if (phase!=="question") return;
+    clearCountdown();
     phase="reveal";
     setStatus("Did <b>"+pname(current)+"</b> get it right?");
     showPhase();
@@ -471,12 +556,14 @@
     const iv=setInterval(()=>{ die.textContent=1+Math.floor(Math.random()*6); if(++ticks>=9){clearInterval(iv);settle();} },55);
   }
   function win(p){
+    clearCountdown();
     phase="won"; showPhase(); renderTrackers();
     document.getElementById("winTitle").textContent=pname(p)+" wins!";
     document.getElementById("winSub").textContent="Collected all six colors.";
     overlay.classList.remove("hidden");
   }
   function newGame(){
+    clearCountdown();
     players.forEach(pl => { pl.pos=0; pl.colors.clear(); });
     current=0; phase="question"; keepTurn=false; rolling=false; currentQ=null;
     questionHistory=[];
