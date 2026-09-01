@@ -152,6 +152,10 @@
     padding:2px 8px;height:fit-content}
   .logRow.right .mark{background:rgba(39,174,96,.18);color:#7bdca0}
   .logRow.wrong .mark{background:rgba(255,90,95,.18);color:#ff9a9d}
+  .firstBtns{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+  .firstBtns .btn{width:100%}
+  #first1{background:var(--p1);color:#3a0002} #first2{background:var(--p2);color:#062a2e}
+  #firstRandom{width:100%}
   .logBtns{display:flex;gap:10px}
   .logBtns .btn{flex:1;width:auto}
   .btn.ghost{background:transparent;border:1px solid var(--panel-line);color:var(--ink)}
@@ -243,6 +247,18 @@
   </div>
 </div>
 
+<div class="overlay hidden" id="firstOverlay">
+  <div class="card">
+    <h2>Who goes first?</h2>
+    <p>Pick a player to start &mdash; or let the coin decide.</p>
+    <div class="firstBtns">
+      <button class="btn" id="first1">Player 1</button>
+      <button class="btn" id="first2">Player 2</button>
+    </div>
+    <button class="btn ghost" id="firstRandom">Random</button>
+  </div>
+</div>
+
 <div class="overlay hidden" id="overlay">
   <div class="card">
     <h2 id="winTitle">Winner!</h2>
@@ -326,7 +342,7 @@
 
   const players = [ {pos:0, colors:new Set()}, {pos:0, colors:new Set()} ];
   let current = 0;
-  let phase = "question";   // attemptpick | ready | question | reveal | roll | won
+  let phase = "setup";   // setup | attemptpick | ready | question | reveal | roll | won
   let keepTurn = false, rolling = false, currentQ = null;
   let questionHistory = [];   // {n, player, cat, catColor, q, a, correct, time}
   const COUNTDOWN_SECONDS = 25;
@@ -408,8 +424,9 @@
       [...document.getElementById(id).children].forEach(sp =>
         sp.classList.toggle("have", players[p].colors.has(sp.dataset.key)));
     });
-    document.getElementById("pc1").classList.toggle("active", current===0 && phase!=="won");
-    document.getElementById("pc2").classList.toggle("active", current===1 && phase!=="won");
+    const live = phase!=="won" && phase!=="setup";
+    document.getElementById("pc1").classList.toggle("active", current===0 && live);
+    document.getElementById("pc2").classList.toggle("active", current===1 && live);
   }
 
   function startTurn(){
@@ -565,13 +582,32 @@
   function newGame(){
     clearCountdown();
     players.forEach(pl => { pl.pos=0; pl.colors.clear(); });
-    current=0; phase="question"; keepTurn=false; rolling=false; currentQ=null;
+    current=0; phase="setup"; keepTurn=false; rolling=false; currentQ=null;
     questionHistory=[];
     buildQueues(); die.textContent="\u2013";
     overlay.classList.add("hidden");
     placeToken(0,false); placeToken(1,false);
-    startTurn();
+    showPhase(); renderTrackers();
+    askWhoGoesFirst();
   }
+
+  // --- who goes first: asked at the start of every game ---
+  const firstOverlay = document.getElementById("firstOverlay");
+  function askWhoGoesFirst(){
+    document.getElementById("first1").textContent = pname(0);
+    document.getElementById("first2").textContent = pname(1);
+    setStatus("Choose who goes first.");
+    firstOverlay.classList.remove("hidden");
+  }
+  function beginGame(p, wasRandom){
+    firstOverlay.classList.add("hidden");
+    current = p;
+    startTurn();
+    if (wasRandom) setStatus("\ud83e\ude99 Coin flip: <b>"+pname(p)+"</b> goes first. "+statusEl.innerHTML);
+  }
+  document.getElementById("first1").addEventListener("click", () => beginGame(0,false));
+  document.getElementById("first2").addEventListener("click", () => beginGame(1,false));
+  document.getElementById("firstRandom").addEventListener("click", () => beginGame(Math.random()<0.5?0:1, true));
 
   // --- Question log: view + export what's been asked, and right/wrong ---
   function renderLog(){
@@ -653,7 +689,10 @@
   const gate=document.getElementById("gate"), gatePass=document.getElementById("gatePass"),
         gateErr=document.getElementById("gateErr");
   function tryUnlock(){
-    if (gatePass.value === GAME_PASSWORD){ gate.classList.add("hidden"); gateErr.classList.add("hidden"); gatePass.value=""; }
+    if (gatePass.value === GAME_PASSWORD){
+      gate.classList.add("hidden"); gateErr.classList.add("hidden"); gatePass.value="";
+      askWhoGoesFirst();
+    }
     else { gateErr.classList.remove("hidden"); gatePass.value=""; gatePass.focus(); }
   }
   document.getElementById("gateBtn").addEventListener("click", tryUnlock);
@@ -664,7 +703,7 @@
   window.addEventListener("resize", layout);
   window.addEventListener("load", layout);
   requestAnimationFrame(() => requestAnimationFrame(layout));
-  startTurn();
+  showPhase(); renderTrackers(); setStatus("");
 })();
 </script>
 </body>
