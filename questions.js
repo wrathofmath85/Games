@@ -10,12 +10,15 @@
      orange -> Curb Your Enthusiasm: Quotes
      purple -> Curb Your Enthusiasm: Trivia
 
+   Generated from Trivia_Trail_Questions.xlsx — unanswered questions only
+   (rows with a value in the "Answered" column are excluded).
+
    This file must be loaded BEFORE the game script (index.html already does
    this with <script src="questions.js"></script>).
    ========================================================================= */
 window.QUESTIONS = {
 
-  // ===== The Office — Characters =====
+  // ===== The Office — Characters (57) =====
   blue: [
     { q: "Who plays Michael Scott?", a: "Steve Carell" },
     { q: "Who plays Jim Halpert?", a: "John Krasinski" },
@@ -28,7 +31,6 @@ window.QUESTIONS = {
     { q: "Who plays Stanley Hudson?", a: "Leslie David Baker" },
     { q: "Who plays Phyllis Vance?", a: "Phyllis Smith" },
     { q: "Who plays Meredith Palmer?", a: "Kate Flannery" },
-    { q: "Who plays Creed Bratton?", a: "Creed Bratton" },
     { q: "Who plays Ryan Howard?", a: "B.J. Novak" },
     { q: "Who plays Kelly Kapoor?", a: "Mindy Kaling" },
     { q: "Who plays Toby Flenderson?", a: "Paul Lieberstein" },
@@ -41,27 +43,12 @@ window.QUESTIONS = {
     { q: "Who plays David Wallace?", a: "Andy Buckley" },
     { q: "Who plays Robert California?", a: "James Spader" },
     { q: "Who plays Nellie Bertram?", a: "Catherine Tate" },
-    { q: "Who plays Pete Miller?", a: "Jake Lacy" },
-    { q: "Who plays Clark Green?", a: "Clark Duke" },
     { q: "Who plays Charles Miner?", a: "Idris Elba" },
     { q: "Who plays Deangelo Vickers?", a: "Will Ferrell" },
     { q: "Who plays Todd Packer?", a: "David Koechner" },
     { q: "Who plays Karen Filippelli?", a: "Rashida Jones" },
-    { q: "Who plays Bob Vance?", a: "Robert R. Shafer" },
-    { q: "Who plays Mose Schrute?", a: "Michael Schur" },
-    { q: "Who plays Nate Nickerson?", a: "Mark Proksch" },
-    { q: "Who plays Senator Robert Lipton?", a: "Jack Coleman" },
-    { q: "Who plays Hank the security guard?", a: "Hugh Dane" },
-    { q: "Who plays Hidetoshi Hasagawa?", a: "Hidetoshi Imura" },
-    { q: "Who plays Cathy Simms?", a: "Lindsey Broad" },
-    { q: "Who plays Jordan Garfield?", a: "Cody Horn" },
-    { q: "Who plays Val Johnson?", a: "Ameenah Kaplan" },
-    { q: "Who plays Isabel Poreba?", a: "Kelen Coleman" },
     { q: "Who plays Jo Bennett?", a: "Kathy Bates" },
     { q: "Who plays Helene Beesly?", a: "Linda Purl" },
-    { q: "Who plays Carol Stills?", a: "Nancy Carell" },
-    { q: "Who plays Katy?", a: "Amy Adams" },
-    { q: "Who plays Danny Cordray?", a: "Timothy Olyphant" },
     { q: "Who does Holly date from the Nashua Branch?", a: "AJ" },
     { q: "What is the name of the tech support employee that Michael mistakes for a terrorist?", a: "Sadiq" },
     { q: "What is Dwight's full name, including middle name and suffix?", a: "Dwight Kurt Schrute III" },
@@ -77,7 +64,6 @@ window.QUESTIONS = {
     { q: "Which warehouse worker becomes Darryl's love interest?", a: "Val" },
     { q: "What is the Scranton Strangler suspect's name?", a: "George Howard Skub" },
     { q: "Which documentary crew member becomes a brief love interest for Pam?", a: "Brian" },
-    { q: "What is the name of Kelly's fiance in the finale?", a: "Ravi" },
     { q: "What is the name of Dwight's brother?", a: "Jeb" },
     { q: "What is the name of Dwight's sister?", a: "Fannie" },
     { q: "What is the name of Dwight's nephew?", a: "Cameron Whitman" },
@@ -88,11 +74,12 @@ window.QUESTIONS = {
     { q: "What is the name of Michael's imaginary childhood friend?", a: "Jeff" },
     { q: "What is the name of the booze cruise captain?", a: "Captain Jack" },
     { q: "What is the name of Jim's boss at the Stamford branch?", a: "Josh Porter" },
-    { q: "What is the name of the paper mill employee Creed gets fired?", a: "Debbie Brown" },
-    { q: "Who does the senator publicly announce he is in love with?", a: "Wesley Silver" }
+    { q: "What is the name of the paper mill employee Creed gets fired when inappropriate images appear on paper?", a: "Debbie Brown" },
+    { q: "Who does the senator publicly announce he is in love with?", a: "Wesley Silver" },
+    { q: "Who hits Toby in the eye during the paper airplane competition?", a: "Pam" }
   ],
 
-  // ===== The Office — Quotes =====
+  // ===== The Office — Quotes (38) =====
   pink: [
     { q: "Complete the Michael quote: 'I'm not superstitious, ___'", a: "but I am a little stitious" },
     { q: "Complete the Michael quote: 'I DECLARE ___'", a: "BANKRUPTCY!" },
@@ -105,7 +92,6 @@ window.QUESTIONS = {
     { q: "Complete the Michael quote: 'I'm an early bird and I'm a night owl. So ___'", a: "I'm wise and I have worms." },
     { q: "Complete the Michael quote: 'Dwight, ___'", a: "You ignorant slut" },
     { q: "Complete the Michael quote: 'You don't call retarded people retards. It's bad taste. You ___'", a: "call your friends retards when they're acting retarded." },
-    { q: "Complete the Dwight quote: '___ is not a joke, Jim! Millions of families suffer every year!'", a: "Identity theft" },
     { q: "Complete the Dwight quote: 'R is among the most menacing of sounds. That's why they call it murder, not ___'", a: "muckduck" },
     { q: "Complete the Dwight quote: 'Whenever I'm about to do something, I think, would an ___ do that? And if they would, I do not do that thing.'", a: "idiot" },
     { q: "Complete the Dwight quote: 'Through concentration, I can raise and lower my ___ at will'", a: "cholesterol" },
@@ -116,16 +102,12 @@ window.QUESTIONS = {
     { q: "Complete the Pam quote: 'I feel ___ in this Chili's tonight.'", a: "God" },
     { q: "Complete the Kevin quote: 'Why waste time say lot word when ___?'", a: "few word do trick" },
     { q: "Complete the Kevin quote: 'I just want to lie on the beach and ___. That's all I've ever wanted.'", a: "eat hot dogs" },
-    { q: "Complete the Creed quote: 'I've been involved in a number of cults, both as a leader and a follower. You ___'", a: "have more fun as a follower, but you make more money as a leader." },
-    { q: "Complete the Creed quote: 'The only difference between me and a homeless man is ___'", a: "this job" },
     { q: "Complete the Creed quote: 'If I can't ___, then what's this all been about? What am I working toward?'", a: "scuba" },
     { q: "Complete the Stanley quote: 'Did I ___'", a: "stutter?" },
-    { q: "Complete the Michael quote: 'Guess what, I have flaws. What are they? ___'", a: "I sing in the shower. Sometimes I spend too much time volunteering." },
     { q: "Complete the Dwight quote: 'How would I describe myself? Three words: ___'", a: "hard-working, alpha male, jackhammer, merciless, insatiable." },
     { q: "Complete the Phyllis quote: 'Close your mouth sweetie. You look like a ___'", a: "Trout" },
     { q: "Complete the Pam quote: 'No, no... cause then the ice melts and it's like ___'", a: "second drink" },
     { q: "Complete the Michael quote: 'I want you to rub butter on my foot. Pam please! I have ___'", a: "Country Crock" },
-    { q: "Complete the Stanley quote: 'I wake up every morning in a bed that's too small, drive my daughter to a school that's too expensive, and then I go to work to a job for which I get paid too little. But on ___? Well, I like ___.'", a: "Pretzel Day" },
     { q: "Complete the Kelly quote: 'Darryl Philbin is the most complicated man I've ever met. I mean... who says ___?'", a: "exactly what they're thinking" },
     { q: "Complete the Phyllis quote: 'I wonder what people like about me. Probably ___'", a: "my jugs" },
     { q: "Complete the Michael quote: 'Sometimes I'll start a sentence and I don't even know where it's going. I just hope I find it along the way, like an improv conversation... ___'", a: "an improversation" },
@@ -134,16 +116,13 @@ window.QUESTIONS = {
     { q: "Complete the Kelly quote: 'I talk a lot, so ___'", a: "I've learned to tune myself out" },
     { q: "Complete the Phyllis quote: 'As a person who buys a lot of ___, it just feels good to be represented on one.'", a: "erotic cakes" },
     { q: "Complete the Stanley quote: 'Life is short. Drive fast and ___. That's one of my mottos.'", a: "leave a sexy corpse" },
-    { q: "Complete the Dwight quote: 'I'm always thinking one step ahead. Like ___'", a: "a carpenter who makes stairs" },
     { q: "Complete the Michael quote: 'You know what they say: fool me once, strike one. But fool me twice... ___'", a: "strike three" },
     { q: "Complete the Michael quote: 'I feel like all my kids grew up, and then they married each other. It's ___'", a: "every parent's dream" },
-    { q: "Complete the Dwight quote: 'Reject a woman, and she will never let it go. ___'", a: "One of the many defects of their kind" },
     { q: "Complete the Michael quote: 'Abraham Lincoln once said that, ___'", a: "If you're a racist, I will attack you with the North." }
   ],
 
-  // ===== The Office — Trivia =====
+  // ===== The Office — Trivia (68) =====
   yellow: [
-    { q: "What color is the JELL-O Jim puts Dwight's stapler in?", a: "Yellow" },
     { q: "What Dundie does Pam win in the episode 'The Dundies'?", a: "Whitest Sneaker Award" },
     { q: "According to the song his employees sing, how many minutes has Michael worked at Dunder Mifflin?", a: "9,986,000" },
     { q: "What Pennsylvania county is Scranton located in (where Dwight is a volunteer sheriff's deputy)?", a: "Lackawanna County" },
@@ -151,16 +130,12 @@ window.QUESTIONS = {
     { q: "In what city is Sabre headquartered?", a: "Tallahassee, Florida" },
     { q: "What is the name of the bar the office frequents?", a: "Poor Richard's" },
     { q: "Which branch merges with Scranton in season 3, sending over Andy and Karen?", a: "Stamford" },
-    { q: "In what city is Athlead based?", a: "Philadelphia" },
     { q: "What is Andy's a cappella group at Cornell called?", a: "Here Comes Treble" },
     { q: "What is Andy's self-appointed nickname?", a: "Nard Dog" },
-    { q: "What martial art does Dwight practice under his sensei Ira?", a: "Goju-ryu karate" },
     { q: "What is Creed's official job title at Dunder Mifflin?", a: "Director of Quality Assurance" },
     { q: "What candle business does Jan start in Michael's condo?", a: "Serenity by Jan" },
     { q: "What is the name of Michael's secret-agent character in Threat Level Midnight?", a: "Michael Scarn" },
     { q: "What is the villain's name, played by Jim in Threat Level Midnight?", a: "Goldenface" },
-    { q: "What is the signature dance in the film Threat Level Midnight?", a: "The Scarn" },
-    { q: "What character does Dwight play in the movie Threat Level Midnight?", a: "Samuel L. Chang" },
     { q: "How does Michael injure his foot in 'The Injury'?", a: "He grills it on a George Foreman grill" },
     { q: "What Office Olympics event involves shuffling in boxes of paper like snowshoes?", a: "Flonkerton" },
     { q: "In 'Scott's Tots,' what does Michael actually give the students instead of tuition?", a: "Laptop batteries" },
@@ -177,7 +152,6 @@ window.QUESTIONS = {
     { q: "What does the in-universe documentary turn out to be titled?", a: "The Office: An American Workplace" },
     { q: "What is the name of Angela's beloved cat that Dwight freezes?", a: "Sprinkles" },
     { q: "What 'memorial fun run' does Michael organize after hitting Meredith with his car?", a: "The Michael Scott's Dunder Mifflin Scranton Meredith Palmer Memorial Celebrity Rabies Awareness Fun Run Race for the Cure" },
-    { q: "What is Meredith's job at Dunder Mifflin?", a: "Supplier Relations" },
     { q: "What ailment does Meredith contract after Michael's car accident?", a: "Rabies" },
     { q: "What is the name of the cat Dwight gives Angela?", a: "Garbage" },
     { q: "What food does Dwight bring to the dinner party in a large container?", a: "Beet salad" },
@@ -195,7 +169,6 @@ window.QUESTIONS = {
     { q: "What is Jim's username?", a: "JimHalpert" },
     { q: "What nickname does Andy repeatedly call Jim after meeting him?", a: "Big Tuna" },
     { q: "What nickname did Andy have in his college a cappella group?", a: "Boner Champ" },
-    { q: "What famous Police song does Kevin's band perform at Phyllis's wedding?", a: "Roxanne" },
     { q: "According to Kevin, what is the trick to his chili?", a: "Undercook the onions" },
     { q: "What does Creed grow in a desk drawer?", a: "Mung beans" },
     { q: "What does Dwight inherit from his Aunt Shirley?", a: "Her 80-acre beet farm" },
@@ -203,24 +176,32 @@ window.QUESTIONS = {
     { q: "What is Creed's New Year's resolution?", a: "To do a cartwheel" },
     { q: "What does Michael say is the difference between a salesman and saleswoman", a: "Boobs" },
     { q: "Andy cannot remember the end of a jingle for what product?", a: "Kit Kat" },
-    { q: "Michael believe he plants weed in Toby's desk but it turns out to be what?", a: "Caprese Salad" }
+    { q: "In the episode Gossip, what rumor does Michael spread about Pam?", a: "She is pregnant" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Andy?", a: "He is gay" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Angela?", a: "She is dating an 81 year old billionaire who owns a Quiznos franchise" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Kelly?", a: "She has an eating disorder/anorexia" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Dwight?", a: "He uses store-bought fertilizer/manure" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Creed?", a: "He has asthma" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Kevin?", a: "There is another smaller person inside of his body controlling him with controls" },
+    { q: "In the episode Gossip, what rumor does Michael spread about Toby?", a: "He is a virgin" },
+    { q: "During a morning paper delivery drive, Pam asks Michael for coffee and he hands her a thermos with what in it?", a: "Milk and Sugar" },
+    { q: "Dwight claims paper is the manure and what is the soil in which the seeds of business grow?", a: "On-time delivery" },
+    { q: "Who books the Honeymoon Suite the night before Jim and Pam's wedding?", a: "Andy" },
+    { q: "What song does Andy dance to after making the warehouse workers leave?", a: "Footloose" },
+    { q: "What was the name of the food truck outside the courthouse for both the Scranton Strangler trial and Jim's hit and run trial?", a: "Ernesto's" },
+    { q: "What is Kevin's dogs name?", a: "Ruby" },
+    { q: "What farm equipment does Henry Bruegger want to co-own with Dwight in exchange for letting him marry his daughter Esther?", a: "Auger" }
   ],
 
-  // ===== Curb Your Enthusiasm — Characters =====
+  // ===== Curb Your Enthusiasm — Characters (23) =====
   green: [
-    { q: "Who plays Cheryl David?", a: "Cheryl Hines" },
     { q: "Who plays Jeff Greene?", a: "Jeff Garlin" },
     { q: "Who plays Susie Greene?", a: "Susie Essman" },
     { q: "Who plays Leon Black?", a: "J.B. Smoove" },
     { q: "Who plays Marty Funkhouser?", a: "Bob Einstein" },
     { q: "Who plays Nat David?", a: "Shelley Berman" },
     { q: "Who plays Loretta Black?", a: "Vivica A. Fox" },
-    { q: "Who plays Becky?", a: "Kaitlin Olson" },
-    { q: "Who plays Dr. Saul Funkhouser?", a: "Saul Rubinek" },
-    { q: "Who plays Mocha Joe?", a: "Saverio Guerra" },
     { q: "Who plays Bam Bam Funkhouser, Marty's mental sister?", a: "Catherine O'Hara" },
-    { q: "Which recurring blind character does Larry repeatedly clash with?", a: "Michael (the blind man)" },
-    { q: "What is the name of the executive's young daughter whose doll's hair Larry cuts off?", a: "Tara" },
     { q: "What is the name of Larry's manager and best friend?", a: "Jeff Greene" },
     { q: "What is the name of Jeff's wife?", a: "Susie Greene" },
     { q: "What is the first name of Jeff and Susie's daughter?", a: "Sammi" },
@@ -230,28 +211,23 @@ window.QUESTIONS = {
     { q: "Who is Larry's accidental long-term houseguest?", a: "Leon Black" },
     { q: "Which outspoken comedian appears as herself as a friend of Larry?", a: "Wanda Sykes" },
     { q: "Who plays George Costanza?", a: "Jason Alexander" },
-    { q: "Who plays Elaine Benes?", a: "Julia Louis-Dreyfus" },
     { q: "Who plays Cosmo Kramer?", a: "Michael Richards" },
     { q: "Which actress does Jerry first suggest for the ex-wife role?", a: "Meg Ryan" },
     { q: "Which Back to the Future star feuds with Larry in season 8?", a: "Michael J. Fox" },
     { q: "Which legendary Goodfellas director appears as himself?", a: "Martin Scorsese" },
     { q: "Which 'Boss' musician guest-stars in the final season?", a: "Bruce Springsteen" },
-    { q: "Which actor nearly loses an eye while cast alongside Larry in 'The Producers'?", a: "Ben Stiller" },
-    { q: "Which Friends star replaces Ben Stiller in 'The Producers'?", a: "David Schwimmer" }
+    { q: "Which Friends star replaces Ben Stiller in 'The Producers'?", a: "David Schwimmer" },
+    { q: "Who is Larry talking about when he says 'Everything is 'heaven' with him'?", a: "Ted Danson" }
   ],
 
-  // ===== Curb Your Enthusiasm — Quotes =====
+  // ===== Curb Your Enthusiasm — Quotes (22) =====
   orange: [
     { q: "Who says: 'Get in that ass, Larry!'", a: "Leon Black" },
-    { q: "Who says: 'You four-eyed f***! You fat piece of s***!'", a: "Susie Greene" },
     { q: "Who says: 'Get the f*** out of my house, Larry!'", a: "Susie Greene" },
-    { q: "Who declares: 'Barack Obama! I'm the president of hittin' that ass!'", a: "Leon Black" },
     { q: "Who says: 'If you're gonna be a maniac, pyro's not a good maniac.'", a: "Jeff Greene" },
     { q: "Who brags: 'I brings the ruckus to the ladies.'", a: "Leon Black" },
     { q: "Who snaps: 'F*** you... and f*** your tea.' after Larry rejects a sequined shirt?", a: "Susie Greene" },
-    { q: "Who justifies eating at the Palestinian chicken spot by comparing himself to Rabin breaking bread with Arafat?", a: "Marty Funkhouser" },
     { q: "Who is famous for saving phone contacts under names like 'Nancy Big T**s'?", a: "Leon Black" },
-    { q: "Who mispronounces 'ejaculate' as 'a-jack-a-lit'?", a: "Leon Black" },
     { q: "What does Larry call an unwanted sidewalk chat with an acquaintance?", a: "A stop and chat" },
     { q: "What does Larry call himself when saying rude truths for others?", a: "A social assassin" },
     { q: "What does Larry call cutting in line under cover of chatting with a friend?", a: "A chat and cut" },
@@ -262,28 +238,22 @@ window.QUESTIONS = {
     { q: "Who says: 'Do you crap standing up?'", a: "Marty Funkhouser" },
     { q: "Who says: 'That was a dry sneeze, Larry'", a: "Ben Stiller" },
     { q: "Complete the Larry quote: 'Here's a question for Who Wants to be a Millionaire - what kind of an idiot is running ___'", a: "ABC" },
-    { q: "Complete the Larry quote: 'It's not every day that you get to be affectionate around something ___, it just doesn't happen that often'", a: "German" },
     { q: "Who says: 'If you weren't my best friend I'd pop your head off'", a: "Marty Funhouser" },
     { q: "Who says: 'Not your business, Larry, you misanthropic moron'", a: "Susie Greene" },
     { q: "Who says: 'I can't STAND your water.  It's like I've stuck a straw up a frog's ass'", a: "Marty Funkhouser" },
-    { q: "Who says: 'You look like Einsten's gardener'", a: "Richard Lewis" },
     { q: "Who says: 'Had an uncle with a wobbly leg, couldn't stand that motherfucker, always leaning on shit!'", a: "Leon Black" },
     { q: "Who says: 'What - you scrounging around in the bleachers looking for asses?'", a: "Wanda Sykes" },
-    { q: "Complete the Larry quote after eating a cookie in the shape of baby Jesus: 'I thought he was a ___'", a: "monkey" },
-    { q: "Complete the Larry quote: 'I'm Larry David, and I happen to enjoy wearing ___'", a: "women's panties" },
-    { q: "What play on the title of a Herman Melville novel does Leon use to describe Larry's depression after Cheryl leaves him?", a: "Mopey Dick" }
+    { q: "Complete the Larry quote: 'I'm Larry David, and I happen to enjoy wearing ___'", a: "women's panties" }
   ],
 
-  // ===== Curb Your Enthusiasm — Trivia =====
+  // ===== Curb Your Enthusiasm — Trivia (54) =====
   purple: [
     { q: "What is the satirical name of the hurricane that brings the Black family to Larry's home?", a: "Hurricane Edna" },
     { q: "In 'The Anonymous Donor,' who is actually responsible for the ejaculate stain on the blanket?", a: "Jeff" },
-    { q: "What kind of company does Susie launch in season 9?", a: "An organic soap company" },
     { q: "In the season 7 premiere, Jeff sleeps with whose sister?", a: "Marty Funkhouser's" },
     { q: "Larry gets everyone kicked out of the country club after taking what out of Leo Funkhouser's coffin?", a: "A golf club (a 5-wood)" },
     { q: "What does Susie almost always wear, a running visual gag?", a: "Animal print" },
     { q: "In 'The Ski Lift,' Larry pretends to be Orthodox to get Richard Lewis what?", a: "A kidney" },
-    { q: "What is wrong with Larry and Cheryl's first house?", a: "Electrical wire in the backyard" },
     { q: "What's wrong with Larry and Cheryl's second house?", a: "House sounds" },
     { q: "Why does Larry bring a sex worker to the baseball game?", a: "To use the carpool lane" },
     { q: "In season 2, what does Shaq try to count as a dairy product in Scattergories?", a: "Peanut Butter" },
@@ -296,12 +266,10 @@ window.QUESTIONS = {
     { q: "What does Larry throw away in another man's garbage can?", a: "An apple core" },
     { q: "What is Richard Lewis's girlfriend allergic to?", a: "Peanuts" },
     { q: "What does the acupuncturist send Larry that leads him to not return?", a: "Flowers" },
-    { q: "Why does Larry fire the second chef?", a: "He wore a toupee" },
     { q: "What does Larry accidentally give the maitre d' to bribe him for an immediate table?", a: "Cheryl's prescription" },
     { q: "What does Larry say his name is at the incest survivors group?", a: "Todd" },
     { q: "In what year did Curb Your Enthusiasm premiere?", a: "2000" },
     { q: "What is the name of the show's theme song?", a: "Frolic" },
-    { q: "In which California city is the show primarily set?", a: "Los Angeles" },
     { q: "What is the surname of the family that moves in after a hurricane?", a: "Black" },
     { q: "In 'The Doll,' what does Larry cut off a child's doll?", a: "Its hair" },
     { q: "What is the name of the restaurant Larry, Jeff, and Ted open in season 3?", a: "Bobo's" },
@@ -315,15 +283,25 @@ window.QUESTIONS = {
     { q: "What role does Larry play in 'The Producers'?", a: "Max Bialystock" },
     { q: "Who casts Larry in 'The Producers,' secretly hoping he'll flop?", a: "Mel Brooks" },
     { q: "What illness is Loretta diagnosed with in season 7?", a: "Cancer" },
-    { q: "What role does Larry write for Cheryl in the reunion?", a: "George's ex-wife" },
     { q: "In the fictional reunion, George gets rich from an app called what?", a: "iToilet" },
     { q: "In the finale, Larry is arrested for giving water to someone waiting to do what?", a: "Vote" },
     { q: "In which city does Larry stand trial in the final season?", a: "Atlanta" },
     { q: "Wanda Sykes's rapper fiancé in season 3 goes by what name?", a: "Krazee-Eyez Killa" },
     { q: "Leon nicknames Larry's wheelchair-using girlfriend a what?", a: "A 'wheelie'" },
     { q: "What is the name of the coffee shop owner Larry feuds with in season 10?", a: "Mocha Joe" },
-    { q: "Larry alone knows the true subject of which Alanis Morissette song?", a: "'You Oughta Know'" },
-    { q: "What tennis star does Karry drive around in a limo?", a: "'John McEnroe'" }
+    { q: "What tennis star does Karry drive around in a limo?", a: "'John McEnroe'" },
+    { q: "While Jeff is driving his parents and talking to Larry on Speakerphone, what term does Larry use to refer to Cheryl that leaves Jeff's parents outraged?", a: "Hitler" },
+    { q: "After a mix-up over which night it was actually happening, Larry ends up attending this event with Mary's mother instead of Ted and Mary in their luxury box.", a: "Paul Simon Concert" },
+    { q: "What article of clothing does Larry have stolen at the bowling alley?", a: "Shoes" },
+    { q: "What does Jeff ask Larry to retrieve from his house while he undergos a bypass surgery?", a: "Porn Stash" },
+    { q: "At Gil Thilander's party, what does Larry break that leads to Larry and Cheryl being asked to leave?", a: "Lamp" },
+    { q: "What is Larry attemping to buy at a jewelry store to make amends with Cheryl when he is denied entry due to his appearance?", a: "Platinum and Diamond bracelet" },
+    { q: "Why does Larry fire the interior decorator?", a: "She refuses to give him Diane Keaton's phone number (even though Diane attempted to leave her number on the answering machine)" },
+    { q: "Who does David's neighbor Dean insist on meeting before he will sign anything to bury the telephone wire?", a: "Julia Louis-Dreyfus" },
+    { q: "Larry causes road rage by confusing the double honk in what company radio commercial for the car behind them?", a: "AAMCO" },
+    { q: "What is the name of Elizabeth Bank's cat?", a: "Mr. Noodle" },
+    { q: "What name does Larry give at the incest survivor group?", a: "Todd" },
+    { q: "What is the name of the doll whose haircut Larry is blamed for ruining?", a: "Judy" }
   ]
 
 };
