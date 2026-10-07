@@ -217,6 +217,10 @@
         <button class="btn correct" id="correctBtn">Correct &#10003;</button>
         <button class="btn wrong" id="wrongBtn">Wrong &#10007;</button>
       </div>
+      <div class="answer hidden" id="stealBtns">
+        <button class="btn correct" id="stealYesBtn">Stole it &#10003;</button>
+        <button class="btn wrong" id="stealNoBtn">No &#10007;</button>
+      </div>
     </div>
   </div>
 
@@ -233,7 +237,7 @@
   </div>
 
   <div class="foot">
-    <p>Tap a name to rename. Press Display Question to start the 25s clock. Correct &rarr; same player rolls again. Wrong &rarr; roll, then turn passes.</p>
+    <p>Tap a name to rename. Press Display Question to start the 25s clock. Correct &rarr; same player rolls again. Wrong &rarr; the other player can steal the color if they don't have it yet; then roll and the turn passes.</p>
     <div style="display:flex;gap:10px">
       <button class="linkbtn" id="logBtn">Question log</button>
       <button class="linkbtn" id="resetBtn">Reset asked questions</button>
@@ -346,8 +350,12 @@
 
   const players = [ {pos:0, colors:new Set()}, {pos:0, colors:new Set()} ];
   let current = 0;
-  let phase = "setup";   // setup | attemptpick | ready | question | reveal | roll | won
+  let phase = "setup";   // setup | attemptpick | ready | question | reveal | judge | steal | roll | won
   let keepTurn = false, rolling = false, currentQ = null;
+  // stealable: the other player doesn't have this color yet, so if the
+  // current player misses, the answer stays hidden and they get a shot at it.
+  let stealable = false;
+  const other = p => (p === 0 ? 1 : 0);
   let questionHistory = [];   // {n, player, cat, catColor, q, a, correct, time}
   const COUNTDOWN_SECONDS = 25;
   let countdownTimer = null;
@@ -416,10 +424,11 @@
   function showPhase(){
     pickerEl.classList.toggle("hidden", phase!=="attemptpick");
     displayGroup.classList.toggle("hidden", phase!=="ready");
-    qcardEl.classList.toggle("hidden", !(phase==="question"||phase==="reveal"));
+    qcardEl.classList.toggle("hidden", !["question","reveal","judge","steal"].includes(phase));
     revealBtn.classList.toggle("hidden", phase!=="question");
     qtimerEl.classList.toggle("hidden", phase!=="question");
-    answerEl.classList.toggle("hidden", phase!=="reveal");
+    answerEl.classList.toggle("hidden", !(phase==="reveal"||phase==="judge"));
+    document.getElementById("stealBtns").classList.toggle("hidden", phase!=="steal");
     document.getElementById("qans").classList.toggle("hidden", phase!=="reveal");
     rollGroup.classList.toggle("hidden", phase!=="roll");
   }
@@ -469,7 +478,10 @@
     if (phase!=="ready") return;
     phase="question";
     const c=byKey[currentQ.key];
-    setStatus("<b>"+pname(current)+"</b>'s turn &mdash; read the question aloud.");
+    stealable = !players[other(current)].colors.has(currentQ.key);
+    revealBtn.textContent = stealable ? "Stop clock" : "Reveal answer";
+    setStatus("<b>"+pname(current)+"</b>'s turn &mdash; read the question aloud."+
+      (stealable ? " <b>"+pname(other(current))+"</b> can steal on a miss." : ""));
     document.getElementById("qcat").innerHTML = dot(c.c)+c.cat;
     document.getElementById("qtext").textContent = currentQ.q;
     document.getElementById("qans").textContent = "Answer: "+currentQ.a;
@@ -513,9 +525,11 @@
   function clearCountdown(){
     if (countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
   }
+  // When a steal is possible the answer stays hidden ("judge" phase) so the
+  // other player can still take a shot at it.
   function timeUp(){
     if (phase!=="question") return;
-    phase="reveal";
+    phase = stealable ? "judge" : "reveal";
     setStatus("&#9200; Time's up! Did <b>"+pname(current)+"</b> get it right?");
     showPhase();
   }
@@ -523,12 +537,12 @@
   revealBtn.addEventListener("click", () => {
     if (phase!=="question") return;
     clearCountdown();
-    phase="reveal";
+    phase = stealable ? "judge" : "reveal";
     setStatus("Did <b>"+pname(current)+"</b> get it right?");
     showPhase();
   });
 
-  function logQuestion(p, key, correct){
+  function logQuestion(p, key, correct, steal){
     const c = byKey[key];
     questionHistory.push({
       n: questionHistory.length + 1,
@@ -538,28 +552,50 @@
       q: currentQ.q,
       a: currentQ.a,
       correct: correct,
+      steal: !!steal,
       time: new Date()
     });
   }
+  function ansLine(){ return "<br><span style='color:var(--muted)'>Answer: "+escapeHtml(currentQ.a)+"</span>"; }
   function onAnswer(correct){
-    if (phase !== "reveal") return;
-    const p=current, key=currentQ.key;
-    logQuestion(p, key, correct);
+    if (phase !== "reveal" && phase !== "judge") return;
+    const p=current, key=currentQ.key, hidden=(phase==="judge");
+    logQuestion(p, key, correct, false);
     if (correct){
       const label=byKey[key].label;
       if (collect(p, key)) return;       // win
-      keepTurn=true; goRoll(true, label);
-    } else { keepTurn=false; goRoll(false, null); }
+      keepTurn=true;
+      goRoll("Correct! Collected <b>"+label+"</b>. <b>"+pname(p)+"</b> rolls again."+(hidden?ansLine():""));
+    } else if (hidden){
+      // missed, and the other player still needs this color -> steal chance
+      phase="steal";
+      setStatus("Missed! Did <b>"+pname(other(p))+"</b> steal it?");
+      showPhase();
+    } else {
+      keepTurn=false;
+      goRoll("No luck. <b>"+pname(p)+"</b> rolls, then it's the other player.");
+    }
+  }
+  function onSteal(stole){
+    if (phase !== "steal") return;
+    const p=current, o=other(p), key=currentQ.key, label=byKey[key].label;
+    logQuestion(o, key, stole, true);
+    keepTurn=false;
+    if (stole){
+      if (collect(o, key)) return;       // a steal can win the game
+      goRoll("<b>"+pname(o)+"</b> stole <b>"+label+"</b>! <b>"+pname(p)+"</b> rolls, then it's <b>"+pname(o)+"</b>'s turn."+ansLine());
+    } else {
+      goRoll("Nobody got it. <b>"+pname(p)+"</b> rolls, then it's <b>"+pname(o)+"</b>'s turn."+ansLine());
+    }
   }
   function collect(p, key){
     players[p].colors.add(key); renderTrackers();
     if (players[p].colors.size === COLORS.length){ win(p); return true; }
     return false;
   }
-  function goRoll(correct, label){
+  function goRoll(msg){
     phase="roll";
-    if (correct) setStatus("Correct! Collected <b>"+label+"</b>. <b>"+pname(current)+"</b> rolls again.");
-    else setStatus("No luck. <b>"+pname(current)+"</b> rolls, then it's the other player.");
+    setStatus(msg);
     die.textContent="\u2013"; rollBtn.disabled=false; showPhase();
   }
   function doRoll(){
@@ -586,7 +622,7 @@
   function newGame(){
     clearCountdown();
     players.forEach(pl => { pl.pos=0; pl.colors.clear(); });
-    current=0; phase="setup"; keepTurn=false; rolling=false; currentQ=null;
+    current=0; phase="setup"; keepTurn=false; rolling=false; currentQ=null; stealable=false;
     questionHistory=[];
     // Decks are NOT rebuilt here, so questions asked in earlier games this
     // session stay out of play. A category only reshuffles once its deck is
@@ -629,7 +665,7 @@
         "<span class='num'>#"+entry.n+"</span>"+
         "<span class='dotc' style='background:"+entry.catColor+"'></span>"+
         "<div class='body'>"+
-          "<div class='lcat'><span>"+entry.cat+"</span><span>"+entry.player+"</span></div>"+
+          "<div class='lcat'><span>"+entry.cat+"</span><span>"+entry.player+(entry.steal ? " &middot; steal" : "")+"</span></div>"+
           "<div class='lq'>"+escapeHtml(entry.q)+"</div>"+
           "<div class='la'>Answer: "+escapeHtml(entry.a)+"</div>"+
         "</div>"+
@@ -647,9 +683,9 @@
   }
   function csvField(s){ return '"'+String(s).replace(/"/g,'""')+'"'; }
   function downloadLog(){
-    const rows = [["#","Player","Category","Question","Answer","Result","Time"]];
+    const rows = [["#","Player","Category","Question","Answer","Result","Time","Steal"]];
     questionHistory.forEach(e => rows.push([
-      e.n, e.player, e.cat, e.q, e.a, e.correct ? "Correct" : "Wrong", e.time.toLocaleString()
+      e.n, e.player, e.cat, e.q, e.a, e.correct ? "Correct" : "Wrong", e.time.toLocaleString(), e.steal ? "Yes" : ""
     ]));
     const csv = rows.map(r => r.map(csvField).join(",")).join("\r\n");
     const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
@@ -672,6 +708,8 @@
 
   document.getElementById("correctBtn").addEventListener("click", () => onAnswer(true));
   document.getElementById("wrongBtn").addEventListener("click", () => onAnswer(false));
+  document.getElementById("stealYesBtn").addEventListener("click", () => onSteal(true));
+  document.getElementById("stealNoBtn").addEventListener("click", () => onSteal(false));
   rollBtn.addEventListener("click", doRoll);
   document.getElementById("newGameBtn").addEventListener("click", newGame);
   document.getElementById("logBtn").addEventListener("click", openLog);
