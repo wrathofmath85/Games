@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeopardy Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020742; --blue:#0a1aa0; --blue2:#0d22c4; --card:#06107a;
+  --gold:#ffcf40; --ink:#fff; --muted:#b9c2ff; --red:#ff5c5c; --green:#2fd27a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(ellipse at top,#0b1590,var(--bg) 70%);color:var(--ink);
+  font-family:'Oswald',Impact,'Arial Narrow',sans-serif;overflow:hidden}
+body.mode-setup{overflow:auto}
+button{font:inherit;color:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---------- buttons ---------- */
+.btn{border:0;border-radius:10px;padding:.65em 1.4em;font-size:1.1rem;letter-spacing:.04em;
+  text-transform:uppercase;font-weight:600;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.gold{background:var(--gold);color:#1a1300}
+.btn.green{background:var(--green);color:#03240f}
+.btn.red{background:var(--red);color:#2a0000}
+.btn.ghost{background:transparent;border:2px solid rgba(255,255,255,.35)}
+.btn.small{font-size:.9rem;padding:.5em 1em}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ---------- setup ---------- */
+.setup{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 16px;text-align:center}
+.logo{font-size:clamp(3rem,10vw,6.5rem);margin:0 0 .2em;color:var(--gold);text-transform:uppercase;
+  text-shadow:4px 4px 0 #000;line-height:.95;letter-spacing:.02em}
+.logo span{display:block;color:#fff;font-size:.42em;letter-spacing:.4em;margin-top:.15em}
+.setup h2{font-weight:400;font-size:1.6rem;margin:.6em 0 1em;color:var(--muted)}
+.count-grid{display:grid;grid-template-columns:repeat(7,72px);gap:12px;justify-content:center}
+@media(max-width:620px){.count-grid{grid-template-columns:repeat(4,64px)}}
+.count-btn{height:72px;border-radius:12px;border:3px solid #000;background:var(--blue);color:var(--gold);
+  font-size:2rem;font-weight:700;transition:transform .12s,background .12s}
+.count-btn:hover{background:var(--blue2);transform:scale(1.06)}
+.link-btn{margin-top:28px;background:none;border:0;color:var(--muted);text-decoration:underline;
+  font-family:system-ui,sans-serif;font-size:.95rem}
+.names{display:grid;gap:10px;width:min(440px,100%)}
+.names label{display:flex;align-items:center;gap:10px}
+.names label span{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;
+  background:var(--gold);color:#1a1300;font-weight:700;flex:none}
+.names input{flex:1;min-width:0;font:inherit;font-size:1.25rem;padding:.45em .8em;border-radius:8px;
+  border:2px solid #000;background:#fff;color:#0a0a2a}
+.names .row{display:flex;justify-content:space-between;margin-top:14px;gap:12px}
+
+/* ---------- game layout ---------- */
+body.mode-game #app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.scores{display:flex;gap:8px;padding:8px;flex-wrap:wrap;background:#000;flex:none}
+.player{flex:1 1 120px;min-width:0;background:var(--blue);border:2px solid #000;border-radius:8px;
+  padding:6px 10px;display:flex;flex-direction:column;align-items:center;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.1);transition:transform .15s,opacity .2s,background .15s}
+.pname{font-size:clamp(.85rem,1.6vw,1.2rem);text-transform:uppercase;letter-spacing:.05em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--muted)}
+.pscore{font-size:clamp(1.25rem,2.6vw,2.1rem);font-weight:700;line-height:1.1}
+.player.neg .pscore{color:var(--red)}
+.scores.judging .player:not(.tried){animation:pulse 1.6s infinite}
+.scores.judging .player:not(.tried):hover{transform:translateY(-2px);background:var(--blue2)}
+.player.tried{opacity:.3;cursor:not-allowed}
+@keyframes pulse{0%,100%{box-shadow:inset 0 0 0 2px var(--gold)}50%{box-shadow:inset 0 0 0 2px var(--gold),0 0 16px rgba(255,207,64,.55)}}
+.player.flash-up{animation:flashUp .9s}
+.player.flash-down{animation:flashDown .9s}
+@keyframes flashUp{25%{background:var(--green)}}
+@keyframes flashDown{25%{background:var(--red)}}
+
+.stage{position:relative;flex:1;min-height:0;padding:8px;background:#000}
+.board{height:100%;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:1.3fr repeat(5,1fr);gap:6px}
+.cat,.cell{background:linear-gradient(180deg,var(--blue2),var(--blue));border-radius:4px;display:grid;
+  place-items:center;text-align:center;min-width:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
+.cat{padding:6px;font-size:clamp(.65rem,1.7vw,1.45rem);text-transform:uppercase;letter-spacing:.03em;
+  line-height:1.1;text-shadow:2px 2px 0 #000;margin-bottom:4px}
+.cell{border:0;color:var(--gold);font-size:clamp(.9rem,min(4.8vh,3.6vw),3.6rem);font-weight:700;
+  text-shadow:3px 3px 0 #000;transition:filter .15s}
+.cell small{font-size:.7em;vertical-align:.12em;margin-right:.04em}
+.cell:hover{filter:brightness(1.3)}
+.cell.used{background:var(--card);box-shadow:none}
+
+/* ---------- clue overlay ---------- */
+.clue,.panel{position:absolute;inset:8px;z-index:5;background:linear-gradient(180deg,var(--blue2),#071489);
+  border:3px solid #000;border-radius:6px}
+.clue{display:flex;flex-direction:column;padding:clamp(14px,3vw,36px);transform-origin:0 0;overflow:hidden}
+.clue-meta{display:flex;justify-content:space-between;gap:16px;color:var(--gold);
+  font-size:clamp(1rem,2.2vw,1.7rem);text-transform:uppercase;letter-spacing:.06em}
+.clue-text{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Libre Baskerville',Georgia,serif;text-transform:uppercase;font-size:clamp(1.2rem,3.6vw,3.5rem);
+  line-height:1.4;text-shadow:3px 3px 0 #000;padding:0 4%;overflow:auto;min-height:0}
+.clue-resp{text-align:center;color:var(--gold);font-size:clamp(1.3rem,3vw,2.6rem);margin:.2em 0 .6em;
+  text-transform:uppercase;text-shadow:2px 2px 0 #000}
+.clue-resp::before{content:'Correct response';color:var(--muted);font-size:.5em;display:block;letter-spacing:.15em;text-shadow:none}
+.clue-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  border-top:1px solid rgba(255,255,255,.2);padding-top:14px}
+.hint{color:var(--muted);font-family:system-ui,sans-serif;font-size:.95rem;margin:0}
+.log{font-size:1.15rem;letter-spacing:.03em}
+.log .up{color:var(--green)} .log .down{color:var(--red)}
+
+.dd{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.dd-title{font-size:clamp(3rem,11vw,9rem);color:var(--gold);text-transform:uppercase;text-shadow:5px 5px 0 #000;
+  line-height:1;animation:ddIn .8s cubic-bezier(.2,1.5,.4,1)}
+@keyframes ddIn{from{transform:scale(.15) rotate(-14deg);opacity:0}}
+.dd-form{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:10px}
+.dd-form label{font-size:1.4rem;text-transform:uppercase;letter-spacing:.08em}
+.wager-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:2rem}
+.wager-row input{width:200px;max-width:60vw;font:inherit;font-size:2rem;padding:.15em .5em;border-radius:8px;
+  border:2px solid #000;text-align:center;color:#0a0a2a}
+.err{color:var(--red);min-height:1.2em;margin:0;font-family:system-ui,sans-serif}
+
+/* ---------- panels: round end + final ---------- */
+.panel{z-index:6;overflow:auto;display:flex;padding:24px 16px;text-align:center}
+.panel>.final{margin:auto}
+.final{display:flex;flex-direction:column;align-items:center;gap:16px;width:min(1000px,100%)}
+.final-title{font-size:clamp(2.2rem,6.5vw,5.5rem);color:var(--gold);text-transform:uppercase;
+  text-shadow:4px 4px 0 #000;line-height:1}
+.final-title.sm{font-size:clamp(1.6rem,3.5vw,2.8rem)}
+.final-cat{font-size:clamp(1.8rem,5vw,4rem);text-transform:uppercase;text-shadow:3px 3px 0 #000;line-height:1.1}
+.final-cat.sm{font-size:clamp(1.1rem,2.4vw,1.8rem);color:var(--gold)}
+.final .clue-text{flex:none;min-height:28vh}
+.timer{width:min(640px,100%);display:flex;align-items:center;gap:14px}
+.timer-bar{flex:1;height:18px;background:rgba(0,0,0,.45);border-radius:99px;overflow:hidden}
+.timer-bar i{display:block;height:100%;width:100%;background:var(--gold);border-radius:99px;transition:width .1s linear}
+.timer-num{font-size:2.6rem;width:2.2em;text-align:right;font-variant-numeric:tabular-nums}
+.timer.low .timer-bar i{background:var(--red)} .timer.low .timer-num{color:var(--red)}
+.fj-list{width:min(720px,100%);display:grid;gap:6px}
+.fj-row{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:8px 16px;
+  background:rgba(0,0,0,.3);border-radius:8px;text-align:left;font-size:1.2rem}
+.fj-row.cur{outline:3px solid var(--gold);background:rgba(255,207,64,.12)}
+.fj-row b{min-width:5.5em;text-align:right}
+.muted{color:var(--muted);font-size:.9em}
+.r-right{color:var(--green)} .r-wrong{color:var(--red)}
+.fj-current{background:rgba(0,0,0,.35);border-radius:12px;padding:18px 22px;width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+.fj-current h3{margin:0;font-size:2.2rem;color:var(--gold);text-transform:uppercase}
+.judge{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.judge .btn{min-width:150px;display:flex;flex-direction:column;align-items:center}
+.judge .btn small{font-size:.75em;opacity:.85}
+.sub{margin:0;color:var(--muted);font-family:system-ui,sans-serif}
+
+/* ---------- menu + modal ---------- */
+.menu-btn{position:fixed;right:14px;bottom:14px;z-index:20;width:46px;height:46px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.6);font-size:1.3rem}
+body.clue-open .menu-btn{display:none}
+.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,10,.7);display:grid;place-items:center;padding:16px}
+.modal-card{background:var(--blue);border:3px solid #000;border-radius:14px;padding:24px;width:min(460px,100%);
+  text-align:center;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:pop .18s ease-out}
+.modal-card h3{margin:0;font-size:2rem;color:var(--gold);text-transform:uppercase;line-height:1.1}
+.menu-list{display:flex;flex-direction:column;gap:10px}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+</style>
+</head>
+<body class="mode-setup">
+<div id="app"></div>
+
+<script>
+/* =====================================================================
+   GAME CONTENT — edit categories, clues (q) and responses (a) here.
+   Each round needs 6 categories with 5 clues each, lowest value first.
+   ===================================================================== */
+const GAME = {
+  finalSeconds: 30,
+  rounds: [
+    {
+      name: "Jeopardy! Round",
+      values: [100, 200, 300, 400, 500],
+      dailyDoubles: 1,
+      categories: [
+        { name: "Middle Management", clues: [
+          { q: "It's Michael's middle name", a: "Gary" },
+          { q: "It's Dwight's actual middle name, not 'Fart' as Jim puts on his security badge", a: "Kurt" },
+          { q: "It's Andy's middle name", a: "Baines" },
+          { q: "It's Pam's middle name", a: "Morgan" },
+          { q: "It's the middle name of Jim and Pam's daughter, Cecelia", a: "Marie" }
+        ]},
+        { name: "Prank You Very Much", clues: [
+          { q: "The piece of Dwight's office equipment that Jim puts in Jell-O", a: "Stapler" },
+          { q: "Every time his computer plays the Windows reboot sound, Jim hands Dwight one of these mints", a: "An Altoid" },
+          { q: "What Jim wears to work to mock Dwight's dress-code memo", a: "A tuxedo" },
+          { q: "The code Jim and Pam use to talk about Dwight right in front of him", a: "Morse code" },
+          { q: "The \"language\" Jim encourages Andy to use when pursuing Pam", a: "Pig Latin" }
+        ]},
+        { name: "Keleven", clues: [
+          { q: "The temperature Kevin always sets the thermostat to. No surprise here.", a: "69 Degrees" },
+          { q: "According to Dwight, it's the number of different ways to sniffle", a: "3 ways" },
+          { q: "The weight, in pounds, of each of Michael's exercise weights. He's not going for bulk, he's going for tone.", a: "2.5 Pounds" },
+          { q: "The miles per hour Michael clocks on the radar gun (ignore the pesky car that drove by at the same moment)", a: "31 MPH" },
+          { q: "Michael's hotel room number at the Season 3 convention", a: "308" }
+        ]},
+        { name: "Product Placement", clues: [
+          { q: "The appliance Michael burns his foot on. Whatever you do, don't send Dwight.", a: "George Foreman Grill" },
+          { q: "The restaurant that hosts the Season 2 Dundies", a: "Chili's" },
+          { q: "The candy bar whose jingle Andy can't finish all episode. Give him a break!", a: "Kit Kat" },
+          { q: "The brand of potato chips Karen is desperate to find", a: "Herr's" },
+          { q: "The store where Angela buys clothes for her large colonial dolls", a: "The American Girl Store" }
+        ]},
+        { name: "Bears, Beets, Battlestar Galactica", clues: [
+          { q: "The alliterative award Phyllis receives at the Season 2 Dundies, thanks to a typo", a: "Bushiest Beaver" },
+          { q: "The branch Michael and Holly accidentally announce is closing at the company picnic", a: "Buffalo" },
+          { q: "The Colorado city Michael and Holly move to", a: "Boulder" },
+          { q: "The musician whose concert tickets Michael claims to have for his Crime Aid auction", a: "Bruce Springsteen" },
+          { q: "The high school attended by Toby and Katy, the purse saleswoman", a: "Bishop O'Hara" }
+        ]},
+        { name: "Medical Malpractice", clues: [
+          { q: "According to Dwight, he can raise and lower this at will", a: "His cholesterol" },
+          { q: "It's Hide's former profession back in Japan", a: "Heart surgeon" },
+          { q: "The cereal-inspired disease Pam makes up to prank Dwight when he's in charge of picking the new health care plan", a: "Count Choculitis" },
+          { q: "The activity Toby was doing in Costa Rica when he broke his neck", a: "Zip-lining" },
+          { q: "While she's treated for a cracked pelvis, we learn Meredith has been bitten by a bat, a rat, and this other animal", a: "A raccoon" }
+        ]}
+      ]
+    },
+    {
+      name: "Double Jeopardy! Round",
+      values: [200, 400, 600, 800, 1000],
+      dailyDoubles: 2,
+      categories: [
+        { name: "Before & After", clues: [
+          { q: "Michael's scared-straight jail persona + the boxer who bit Evander Holyfield's ear", a: "Prison Mike Tyson" },
+          { q: "The puppet paired with Kevin's voice in Oscar's parody video + a giant-wheeled vehicle that crushes cars", a: "Cookie Monster Truck" },
+          { q: "Michael Scarn's hockey mentor + the actor who yelled \"Here's Johnny!\" in The Shining", a: "Cherokee Jack Nicholson" },
+          { q: "The musical starring Andy + Michael's crude traveling-salesman buddy", a: "Sweeney Todd Packer" },
+          { q: "The suspender-wearing Family Matters nerd known for \"Did I do that?\" + the name Michael gives the woman in his Jamaica vacation photo", a: "Steve Urkel Grue" }
+        ]},
+        { name: "It's All Relative", clues: [
+          { q: "Dwight's cousin who lives on the Schrute farm", a: "Mose" },
+          { q: "The name of Jan's baby", a: "Astrid" },
+          { q: "Pam's mom, and briefly Michael's girlfriend", a: "Helene" },
+          { q: "Michael's nephew, who briefly works at Dunder Mifflin and infuriates the staff", a: "Luke" },
+          { q: "Name either of Jo Bennett's two dogs", a: "Callie or Jo Jr." }
+        ]},
+        { name: "Movie Monday", clues: [
+          { q: "The TV show Gabe builds his viewing party around", a: "Glee" },
+          { q: "Dwight compares the warehouse workers to \"The Others\" from this TV show", a: "Lost" },
+          { q: "The actress at the center of a day-long office debate over whether she's hot", a: "Hilary Swank" },
+          { q: "According to Michael, this movie made Dwight cry", a: "Armageddon" },
+          { q: "While Kevin waits on his skin cancer test results, Jim and Pam buy him this DVD to replace the one he lent to Creed", a: "American Pie 2" }
+        ]},
+        { name: "Color Me Scranton", clues: [
+          { q: "The villain in Michael's movie Threat Level Midnight", a: "Goldenface" },
+          { q: "The name of the consultant Corporate sends to lead diversity training", a: "Mr. Brown" },
+          { q: "In \"A Benihana Christmas,\" after rejecting green, Angela declares this streamer color whorish too", a: "Orange" },
+          { q: "The flavor of power drink Ryan finds while cleaning out Michael's car. Blue is not a flavor!", a: "Blue Blast" },
+          { q: "The color of Dwight's urine when he was tested while applying to be a volunteer sheriff's deputy", a: "Green" }
+        ]},
+        { name: "Snack Attack", clues: [
+          { q: "According to Jim, it's Pam's favorite flavor of yogurt", a: "Mixed berry" },
+          { q: "Ryan starts the fire by leaving this in the toaster oven", a: "A cheese pita" },
+          { q: "Creed sprouts these on a damp paper towel in his desk drawer, and they smell like death", a: "Mung beans" },
+          { q: "Michael plants what he thinks are drugs in Toby's desk, but the police find this instead", a: "Caprese salad" },
+          { q: "The snack Erin brings the manager every afternoon at 2:30", a: "Ants on a log" }
+        ]},
+        { name: "Toby, or Not Toby", clues: [
+          { q: "The murder trial Toby serves on as a juror. He was up to his neck in it!", a: "Scranton Strangler" },
+          { q: "The Office Olympics game Toby teaches Jim. So that's what that noise is all day!", a: "Dunderball" },
+          { q: "Along with Pam and Oscar, Toby is a founding member of this club", a: "The Finer Things Club" },
+          { q: "Toby needs an eye patch after this coworker's paper airplane hits him in the eye", a: "Pam" },
+          { q: "The detective hero of Toby's murder-mystery novel", a: "Chad Flenderman" }
+        ]}
+      ]
+    }
+  ],
+  final: {
+    category: "Music",
+    q: "It's Angela's favorite song — she sings it at the merged karaoke Christmas party in \"A Benihana Christmas,\" and later requests it as her wedding's first dance",
+    a: "The Little Drummer Boy"
+  }
+};
+
+/* =====================================================================
+   GAME ENGINE
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const fmt = n => (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY = 'jeopardy-office-v1';
+
+let S = null;      // saved game state
+let clue = null;   // the clue currently on screen
+let tick = null;   // final jeopardy timer
+let audio = null;
+
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+function loadSaved(){ try { const t = localStorage.getItem(KEY); return t ? JSON.parse(t) : null; } catch(e){ return null; } }
+function clearSaved(){ try { localStorage.removeItem(KEY); } catch(e){} }
+
+/* ---------- setup ---------- */
+function showSetup(){
+  stopTimer(); clue = null;
+  document.body.className = 'mode-setup';
+  const saved = loadSaved();
+  const canResume = saved && saved.players && saved.phase && saved.phase !== 'over';
+  $('#app').innerHTML = `
+    <div class="setup">
+      <h1 class="logo">Jeopardy<span>Game Night</span></h1>
+      <h2>How many players?</h2>
+      <div class="count-grid">${[2,3,4,5,6,7,8].map(n => `<button class="count-btn" data-n="${n}">${n}</button>`).join('')}</div>
+      ${canResume ? `<button class="link-btn" data-act="resume">Resume saved game (${saved.players.map(p => esc(p.name)).join(', ')})</button>` : ''}
+    </div>`;
+}
+
+function showNames(n){
+  $('#app').innerHTML = `
+    <div class="setup">
+      <h1 class="logo">Jeopardy<span>Game Night</span></h1>
+      <h2>Enter player names</h2>
+      <form id="names" class="names" autocomplete="off">
+        ${Array.from({length:n}, (_, i) => `<label><span>${i+1}</span><input type="text" maxlength="18" placeholder="Player ${i+1}"></label>`).join('')}
+        <div class="row">
+          <button type="button" class="btn ghost" data-act="setup">Back</button>
+          <button type="submit" class="btn gold">Start Game</button>
+        </div>
+      </form>
+    </div>`;
+  $('#names input').focus();
+}
+
+function newGame(names){
+  S = {
+    phase: 'board',
+    round: 0,
+    players: names.map(name => ({ name, score: 0 })),
+    used: GAME.rounds.map(() => []),
+    dd: GAME.rounds.map(placeDailyDoubles),
+    final: null
+  };
+  save(); showGame();
+}
+
+function placeDailyDoubles(round){
+  const picks = [], cols = new Set(), nCats = round.categories.length;
+  while (picks.length < round.dailyDoubles){
+    const c = Math.floor(Math.random() * nCats);
+    const r = 1 + Math.floor(Math.random() * 4); // never the top row, like the real show
+    if (cols.has(c)) continue;                     // multiple DDs land in different categories
+    cols.add(c); picks.push(c + '-' + r);
+  }
+  return picks;
+}
+
+/* ---------- main game screen ---------- */
+function showGame(){
+  document.body.className = 'mode-game';
+  $('#app').innerHTML = `
+    <header id="scores" class="scores"></header>
+    <main class="stage">
+      <div id="board" class="board"></div>
+      <section id="clue" class="clue hidden"></section>
+      <section id="panel" class="panel hidden"></section>
+    </main>
+    <button class="menu-btn" data-act="menu" title="Host menu">☰</button>
+    <div id="modal" class="modal hidden"><div class="modal-card" id="modalCard"></div></div>`;
+  renderScores();
+  if (S.phase === 'board'){
+    renderBoard();
+    if (roundDone()) showRoundEnd();
+  } else {
+    renderFinal();
+  }
+}
+
+function renderScores(){
+  const el = $('#scores'); if (!el) return;
+  const judging = clue && !clue.done && !(clue.isDD && clue.wager === null);
+  el.classList.toggle('judging', !!judging);
+  el.innerHTML = S.players.map((p, i) => {
+    const tried = clue && clue.attempted.includes(i);
+    return `<button class="player ${p.score < 0 ? 'neg' : ''} ${tried ? 'tried' : ''}" data-i="${i}">
+      <span class="pname">${esc(p.name)}</span><span class="pscore">${fmt(p.score)}</span></button>`;
+  }).join('');
+}
+
+function flash(i, up){
+  const el = document.querySelector(`.player[data-i="${i}"]`); if (!el) return;
+  el.classList.add(up ? 'flash-up' : 'flash-down');
+}
+
+function renderBoard(){
+  const R = GAME.rounds[S.round], used = new Set(S.used[S.round]);
+  const board = $('#board'); board.classList.remove('hidden');
+  let h = R.categories.map(c => `<div class="cat"><span>${esc(c.name)}</span></div>`).join('');
+  for (let r = 0; r < 5; r++){
+    R.categories.forEach((c, ci) => {
+      const k = ci + '-' + r;
+      h += used.has(k) ? `<div class="cell used"></div>`
+        : `<button class="cell" data-c="${ci}" data-r="${r}"><span><small>$</small>${R.values[r].toLocaleString()}</span></button>`;
+    });
+  }
+  board.innerHTML = h;
+}
+
+const roundDone = () => S.used[S.round].length >= GAME.rounds[S.round].categories.length * 5;
+const roundMax = () => Math.max(...GAME.rounds[S.round].values);
+
+/* ---------- clues ---------- */
+function openClue(ci, r, el){
+  const R = GAME.rounds[S.round], cat = R.categories[ci], k = ci + '-' + r;
+  clue = { k, cat: cat.name, q: cat.clues[r].q, a: cat.clues[r].a, value: R.values[r],
+           isDD: S.dd[S.round].includes(k), wager: null, attempted: [], revealed: false, done: false, log: [] };
+  S.used[S.round].push(k); save();
+  document.body.classList.add('clue-open');
+  renderClue(); renderScores();
+  const box = $('#clue'); box.classList.remove('hidden');
+  zoomFrom(el, box);
+}
+
+function zoomFrom(el, box){
+  if (!box.animate) return;
+  const a = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+  if (!a.width || !b.width) return;
+  box.animate([
+    { transform: `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`, opacity: .7 },
+    { transform: 'none', opacity: 1 }
+  ], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
+}
+
+function renderClue(){
+  const box = $('#clue');
+  const shownValue = clue.isDD && clue.wager !== null ? clue.wager : clue.value;
+  const head = `<div class="clue-meta"><span>${esc(clue.cat)}</span><span>${clue.isDD && clue.wager !== null ? 'Wager ' : ''}${fmt(shownValue)}</span></div>`;
+
+  // Daily Double: wager first
+  if (clue.isDD && clue.wager === null){
+    box.innerHTML = `${head}
+      <div class="dd">
+        <div class="dd-title">Daily<br>Double!</div>
+        <form id="ddForm" class="dd-form" autocomplete="off">
+          <label for="ddWager">Enter the wager</label>
+          <div class="wager-row"><span>$</span><input id="ddWager" type="number" inputmode="numeric" min="0" step="100"></div>
+          <p class="sub">Up to the player's score, or up to ${fmt(roundMax())} if that's higher.</p>
+          <p class="err" id="ddErr"></p>
+          <button class="btn gold" type="submit">Show the Clue</button>
+        </form>
+      </div>`;
+    setTimeout(() => { const i = $('#ddWager'); if (i) i.focus(); }, 500);
+    return;
+  }
+
+  const logHtml = clue.log.length ? `<span class="log">${clue.log.join(' &nbsp;·&nbsp; ')}</span>` : '';
+  const hint = clue.done ? '' :
+    clue.isDD ? `<p class="hint">Click the name (top) of the player who found the Daily Double to score it.</p>`
+              : `<p class="hint">Click a player's name at the top to mark their response right or wrong.</p>`;
+  const buttons = clue.done
+    ? `<button class="btn gold" data-act="back">Back to Board</button>`
+    : `${clue.revealed ? '' : `<button class="btn ghost" data-act="reveal">Show Response</button>`}
+       <button class="btn ghost" data-act="nobody">${clue.isDD ? 'Skip — No Score' : 'Nobody Got It'}</button>`;
+
+  box.innerHTML = `${head}
+    <div class="clue-text">${esc(clue.q)}</div>
+    ${clue.revealed ? `<div class="clue-resp">${esc(clue.a)}</div>` : ''}
+    <div class="clue-foot"><div>${logHtml || hint}</div><div class="actions">${buttons}</div></div>`;
+}
+
+function onPlayer(i){
+  if (clue){
+    if (clue.done || (clue.isDD && clue.wager === null) || clue.attempted.includes(i)) return;
+    const amt = clue.isDD ? clue.wager : clue.value, p = S.players[i];
+    modal(`<h3>${esc(p.name)}</h3>
+      <p class="sub">${clue.isDD ? 'Daily Double wager' : 'Clue value'}: ${fmt(amt)}</p>
+      <div class="judge">
+        <button class="btn green" data-act="right" data-i="${i}">✓ Right<small>+${fmt(amt)}</small></button>
+        <button class="btn red" data-act="wrong" data-i="${i}">✗ Wrong<small>−${fmt(amt)}</small></button>
+      </div>
+      <button class="btn ghost small" data-act="close-modal">Cancel</button>`);
+  } else if (S && S.phase !== 'setup'){
+    openAdjust(i);
+  }
+}
+
+function judge(i, right){
+  const amt = clue.isDD ? clue.wager : clue.value, p = S.players[i];
+  p.score += right ? amt : -amt;
+  if (right){
+    clue.done = true; clue.revealed = true;
+    clue.log.push(`<span class="up">✓ ${esc(p.name)} +${fmt(amt)}</span>`);
+  } else {
+    clue.attempted.push(i);
+    clue.log.push(`<span class="down">✗ ${esc(p.name)} −${fmt(amt)}</span>`);
+    if (clue.isDD || clue.attempted.length === S.players.length){ clue.done = true; clue.revealed = true; }
+  }
+  save(); hideModal(); renderScores(); renderClue(); flash(i, right);
+}
+
+function closeClue(){
+  const box = $('#clue');
+  clue = null;
+  document.body.classList.remove('clue-open');
+  const hide = () => { if (!clue) box.classList.add('hidden'); };
+  if (box.animate) box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200 }).onfinish = hide; else hide();
+  renderBoard(); renderScores();
+  if (roundDone()) showRoundEnd();
+}
+
+/* ---------- round transitions ---------- */
+function standingsHtml(){
+  const ranked = S.players.map(p => p).sort((a, b) => b.score - a.score);
+  return `<div class="fj-list">${ranked.map((p, k) =>
+    `<div class="fj-row"><span>${k + 1}. ${esc(p.name)}</span><span></span><b class="${p.score < 0 ? 'r-wrong' : ''}">${fmt(p.score)}</b></div>`).join('')}</div>`;
+}
+
+function showRoundEnd(){
+  const last = S.round === GAME.rounds.length - 1;
+  const p = $('#panel');
+  p.innerHTML = `<div class="final">
+    <div class="final-title sm">End of the ${esc(GAME.rounds[S.round].name)}</div>
+    ${standingsHtml()}
+    <button class="btn gold" data-act="advance">${last ? 'On to Final Jeopardy!' : 'Start the ' + esc(GAME.rounds[S.round + 1].name)}</button>
+  </div>`;
+  p.classList.remove('hidden');
+}
+
+function advance(){
+  stopTimer();
+  if (clue){ clue = null; document.body.classList.remove('clue-open'); $('#clue').classList.add('hidden'); }
+  if (S.phase === 'board' && S.round < GAME.rounds.length - 1){
+    S.round++; save();
+    $('#panel').classList.add('hidden');
+    renderBoard(); renderScores();
+  } else if (S.phase === 'board'){
+    S.phase = 'final';
+    S.final = { step: 'category', timer: 'idle', order: [], cur: 0, results: {} };
+    save(); renderScores(); renderFinal();
+  }
+}
+
+/* ---------- final jeopardy ---------- */
+function renderFinal(){
+  $('#board').classList.add('hidden');
+  const p = $('#panel'); p.classList.remove('hidden');
+  const F = S.final, FJ = GAME.final;
+
+  if (S.phase === 'over'){
+    const ranked = S.players.slice().sort((a, b) => b.score - a.score);
+    const top = ranked[0].score;
+    const winners = top > 0 ? ranked.filter(x => x.score === top) : [];
+    p.innerHTML = `<div class="final">
+      <div class="final-title">${winners.length > 1 ? "It's a Tie!" : winners.length ? 'Champion!' : 'Game Over'}</div>
+      <div class="final-cat">${winners.length ? winners.map(w => esc(w.name)).join(' &amp; ') : 'No winner this time'}</div>
+      ${standingsHtml()}
+      <div class="actions">
+        <button class="btn gold" data-act="again">Play Again — Same Players</button>
+        <button class="btn ghost" data-act="newgame">New Game</button>
+      </div></div>`;
+    return;
+  }
+
+  if (F.step === 'category'){
+    p.innerHTML = `<div class="final">
+      <div class="final-title">Final Jeopardy!</div>
+      <p class="sub">Today's category is…</p>
+      <div class="final-cat">${esc(FJ.category)}</div>
+      <p class="sub">Everyone: secretly write down your wager now — anywhere from $0 up to your current score.</p>
+      <button class="btn gold" data-act="f-clue">Reveal the Clue</button></div>`;
+    return;
+  }
+
+  if (F.step === 'clue'){
+    const running = F.timer === 'running', done = F.timer === 'done';
+    p.innerHTML = `<div class="final">
+      <div class="final-cat sm">Final Jeopardy! · ${esc(FJ.category)}</div>
+      <div class="clue-text">${esc(FJ.q)}</div>
+      <div class="timer ${done ? 'low' : ''}" id="timer">
+        <div class="timer-bar"><i id="tbar" style="width:${done ? 0 : 100}%"></i></div>
+        <div class="timer-num" id="tnum">${done ? 0 : GAME.finalSeconds}</div>
+      </div>
+      <div class="actions">
+        ${!running && !done ? `<button class="btn gold" data-act="f-timer">Start ${GAME.finalSeconds}-Second Timer</button>` : ''}
+        ${done ? `<button class="btn gold" data-act="f-reveal">Time's Up — Reveal Responses</button>` : ''}
+        ${!running && !done ? `<button class="btn ghost small" data-act="f-reveal">Skip Timer</button>` : ''}
+      </div></div>`;
+    return;
+  }
+
+  // reveal: lowest score first
+  const rows = F.order.map((pi, idx) => {
+    const pl = S.players[pi], res = F.results[pi];
+    const status = res
+      ? `<span class="${res.right ? 'r-right' : 'r-wrong'}">${res.right ? '✓ +' : '✗ −'}${fmt(res.wager)}</span>`
+      : `<span class="muted">${idx === F.cur ? 'up now' : 'waiting'}</span>`;
+    return `<div class="fj-row ${idx === F.cur ? 'cur' : ''}"><span>${esc(pl.name)}</span>${status}<b class="${pl.score < 0 ? 'r-wrong' : ''}">${fmt(pl.score)}</b></div>`;
+  }).join('');
+
+  let current = '';
+  if (F.cur < F.order.length){
+    const pi = F.order[F.cur], pl = S.players[pi], max = Math.max(0, pl.score);
+    current = `<div class="fj-current">
+      <h3>${esc(pl.name)}</h3>
+      <p class="sub">Score going in: ${fmt(pl.score)} · Max wager: ${fmt(max)}</p>
+      <p class="sub" style="margin-top:6px">How much did they wager?</p>
+      <div class="wager-row"><span>$</span><input id="fjWager" type="number" inputmode="numeric" min="0" max="${max}"></div>
+      <p class="err" id="fjErr"></p>
+      <p class="sub">Did they get it right?</p>
+      <div class="judge">
+        <button class="btn green" data-act="f-judge" data-v="1">✓ Correct</button>
+        <button class="btn red" data-act="f-judge" data-v="0">✗ Wrong</button>
+      </div></div>`;
+  }
+
+  p.innerHTML = `<div class="final">
+    <div class="final-title sm">Final Jeopardy! Responses</div>
+    <div class="fj-list">${rows}</div>
+    ${current}
+    <button class="btn ghost small" data-act="f-ans">Show / Hide Correct Response</button>
+    <div class="clue-resp hidden" id="fjAns">${esc(FJ.a)}</div>
+    ${F.cur >= F.order.length ? `<button class="btn gold" data-act="f-done">See Final Results</button>` : ''}
+  </div>`;
+  const inp = $('#fjWager'); if (inp) inp.focus();
+}
+
+function finalJudge(right){
+  const F = S.final, pi = F.order[F.cur], pl = S.players[pi], max = Math.max(0, pl.score);
+  const raw = $('#fjWager').value.trim(), v = Number(raw);
+  if (raw === '' || !Number.isInteger(v) || v < 0 || v > max){
+    $('#fjErr').textContent = `Enter a whole-dollar wager from $0 to ${fmt(max)}.`;
+    return;
+  }
+  F.results[pi] = { wager: v, right, before: pl.score };
+  pl.score += right ? v : -v;
+  F.cur++;
+  save(); renderScores(); flash(pi, right); renderFinal();
+}
+
+function beep(freq, dur){
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(.15, audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, audio.currentTime + dur);
+    o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + dur);
+  } catch(e){}
+}
+
+function startTimer(){
+  const total = GAME.finalSeconds * 1000, start = performance.now();
+  let lastSec = null;
+  S.final.timer = 'running'; renderFinal();
+  tick = setInterval(() => {
+    const left = Math.max(0, total - (performance.now() - start)), secs = Math.ceil(left / 1000);
+    const bar = $('#tbar'), num = $('#tnum'), wrap = $('#timer');
+    if (bar) bar.style.width = (left / total * 100) + '%';
+    if (num) num.textContent = secs;
+    if (wrap) wrap.classList.toggle('low', secs <= 5);
+    if (secs !== lastSec){ if (secs <= 5 && secs > 0) beep(880, .12); lastSec = secs; }
+    if (left <= 0){ stopTimer(); beep(330, .9); S.final.timer = 'done'; save(); renderFinal(); }
+  }, 100);
+}
+function stopTimer(){ if (tick){ clearInterval(tick); tick = null; } }
+
+/* ---------- modals ---------- */
+function modal(html){ $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); }
+function hideModal(){ const m = $('#modal'); if (m) m.classList.add('hidden'); }
+
+function openAdjust(i){
+  const p = S.players[i];
+  modal(`<h3>${esc(p.name)}</h3>
+    <p class="sub">Current score: ${fmt(p.score)} — fix a scoring mistake</p>
+    <div class="wager-row"><span>$</span><input id="adjAmt" type="number" min="0" step="100" value="100"></div>
+    <div class="judge">
+      <button class="btn green" data-act="adj" data-i="${i}" data-v="1">+ Add</button>
+      <button class="btn red" data-act="adj" data-i="${i}" data-v="-1">− Subtract</button>
+    </div>
+    <button class="btn ghost small" data-act="close-modal">Cancel</button>`);
+  const inp = $('#adjAmt'); inp.focus(); inp.select();
+}
+
+function openMenu(){
+  let skip = '';
+  if (S.phase === 'board'){
+    skip = S.round < GAME.rounds.length - 1
+      ? `<button class="btn ghost" data-act="skip">Skip to the ${esc(GAME.rounds[S.round + 1].name)}</button>`
+      : `<button class="btn ghost" data-act="skip">Skip to Final Jeopardy!</button>`;
+  }
+  modal(`<h3>Host Menu</h3>
+    <p class="sub">Tip: click a player's name while the board is showing to adjust their score.</p>
+    <div class="menu-list">
+      ${skip}
+      <button class="btn ghost" data-act="again">Restart — Same Players</button>
+      <button class="btn ghost" data-act="newgame">New Game</button>
+      <button class="btn gold" data-act="close-modal">Close</button>
+    </div>`);
+}
+
+/* ---------- events ---------- */
+const ACT = {
+  resume(){ S = loadSaved(); if (S.final && S.final.timer === 'running') S.final.timer = 'idle'; showGame(); },
+  setup(){ showSetup(); },
+  menu(){ openMenu(); },
+  'close-modal'(){ hideModal(); },
+  right(t){ judge(+t.dataset.i, true); },
+  wrong(t){ judge(+t.dataset.i, false); },
+  reveal(){ clue.revealed = true; renderClue(); },
+  nobody(){ clue.done = true; clue.revealed = true; clue.log.push('Nobody got it'); renderClue(); renderScores(); },
+  back(){ closeClue(); },
+  advance(){ advance(); },
+  skip(){ if (confirm('Skip the rest of this round?')){ hideModal(); advance(); } },
+  adj(t){
+    const v = parseInt($('#adjAmt').value, 10); if (!(v > 0)) return;
+    const i = +t.dataset.i, sign = +t.dataset.v;
+    S.players[i].score += sign * v; save(); hideModal(); renderScores(); flash(i, sign > 0);
+    if (S.phase !== 'board') renderFinal();
+  },
+  again(){
+    if (S.phase !== 'over' && !confirm('Restart from the beginning with the same players? Scores reset to $0.')) return;
+    hideModal(); newGame(S.players.map(p => p.name));
+  },
+  newgame(){
+    if (S.phase !== 'over' && !confirm('Start a new game? Current scores will be lost.')) return;
+    clearSaved(); S = null; showSetup();
+  },
+  'f-clue'(){ S.final.step = 'clue'; save(); renderFinal(); },
+  'f-timer'(){ startTimer(); },
+  'f-reveal'(){
+    stopTimer();
+    S.final.order = S.players.map((_, i) => i).sort((a, b) => S.players[a].score - S.players[b].score);
+    S.final.cur = 0; S.final.step = 'reveal'; save(); renderFinal();
+  },
+  'f-judge'(t){ finalJudge(t.dataset.v === '1'); },
+  'f-ans'(){ $('#fjAns').classList.toggle('hidden'); },
+  'f-done'(){ S.phase = 'over'; save(); renderFinal(); }
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button');
+  if (!t){ if (e.target.id === 'modal') hideModal(); return; }
+  if (t.classList.contains('count-btn')) return showNames(+t.dataset.n);
+  if (t.classList.contains('player')) return onPlayer(+t.dataset.i);
+  if (t.classList.contains('cell')){ if (!clue && S.phase === 'board') openClue(+t.dataset.c, +t.dataset.r, t); return; }
+  const act = t.dataset.act; if (act && ACT[act]) ACT[act](t);
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'names'){
+    const names = [...e.target.querySelectorAll('input')].map(i => i.value.trim() || i.placeholder);
+    newGame(names);
+  } else if (e.target.id === 'ddForm'){
+    const raw = $('#ddWager').value.trim(), v = Number(raw);
+    if (raw === '' || !Number.isInteger(v) || v < 0){ $('#ddErr').textContent = 'Enter a whole-dollar wager.'; return; }
+    clue.wager = v; renderClue(); renderScores();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideModal();
+  if (e.key === 'Enter' && e.target.id === 'adjAmt'){ const b = document.querySelector('[data-act="adj"]'); if (b) b.click(); }
+});
+
+document.addEventListener('animationend', e => {
+  if (e.target.classList && e.target.classList.contains('player')) e.target.classList.remove('flash-up', 'flash-down');
+});
+
+showSetup();
+</script>
+</body>
+</html>
