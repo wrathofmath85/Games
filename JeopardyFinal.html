@@ -36,7 +36,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   padding:32px 16px;text-align:center}
 .logo{font-size:clamp(3rem,10vw,6.5rem);margin:0 0 .2em;color:var(--gold);text-transform:uppercase;
   text-shadow:4px 4px 0 #000;line-height:.95;letter-spacing:.02em}
-.logo span{display:block;color:#fff;font-size:.42em;letter-spacing:.4em;margin-top:.15em}
+.logo span{display:block;color:#fff;font-size:.36em;letter-spacing:.25em;margin-top:.2em}
 .setup h2{font-weight:400;font-size:1.6rem;margin:.6em 0 1em;color:var(--muted)}
 .count-grid{display:grid;grid-template-columns:repeat(7,72px);gap:12px;justify-content:center}
 @media(max-width:620px){.count-grid{grid-template-columns:repeat(4,64px)}}
@@ -143,6 +143,24 @@ body.mode-game #app{height:100vh;height:100dvh;display:flex;flex-direction:colum
 .judge .btn small{font-size:.75em;opacity:.85}
 .sub{margin:0;color:var(--muted);font-family:system-ui,sans-serif}
 
+/* ---------- category intro ---------- */
+.intro{display:flex;flex-direction:column;align-items:center;gap:22px;width:min(1100px,100%);margin:auto}
+.intro-round{font-size:clamp(1.6rem,3.5vw,2.8rem);color:var(--gold);text-transform:uppercase;text-shadow:4px 4px 0 #000;line-height:1}
+.intro-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%}
+.intro-strip div{min-height:clamp(48px,9vh,84px);display:grid;place-items:center;padding:6px;border-radius:4px;
+  background:linear-gradient(180deg,var(--blue2),var(--blue));border:2px solid #000;text-transform:uppercase;
+  font-size:clamp(.55rem,1.25vw,1rem);line-height:1.1;text-shadow:2px 2px 0 #000;transition:background .2s}
+.intro-strip div.blank{background:var(--card);color:transparent}
+.intro-strip div.now{outline:3px solid var(--gold);color:var(--gold)}
+.intro-card{display:flex;flex-direction:column;align-items:center;gap:14px;min-height:32vh;justify-content:center;
+  animation:introIn .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes introIn{from{transform:translateX(60px);opacity:0}}
+.intro-count{color:var(--muted);letter-spacing:.2em;text-transform:uppercase;font-size:1rem}
+.intro-name{font-size:clamp(2.2rem,6.5vw,5.5rem);text-transform:uppercase;text-shadow:4px 4px 0 #000;line-height:1.05}
+.intro-desc{margin:0;max-width:820px;font-family:'Libre Baskerville',Georgia,serif;font-size:clamp(1rem,2.2vw,1.7rem);
+  line-height:1.5;color:#e6e9ff}
+.intro .hint{font-size:.85rem}
+
 /* ---------- menu + modal ---------- */
 .menu-btn{position:fixed;right:14px;bottom:14px;z-index:20;width:46px;height:46px;border-radius:50%;
   border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.6);font-size:1.3rem}
@@ -162,51 +180,52 @@ body.clue-open .menu-btn{display:none}
 /* =====================================================================
    GAME CONTENT — edit categories, clues (q) and responses (a) here.
    Each round needs 6 categories with 5 clues each, lowest value first.
+   'desc' is only shown during the category intro, never on the board.
    ===================================================================== */
 const GAME = {
   finalSeconds: 30,
   rounds: [
     {
       name: "Jeopardy! Round",
-      values: [100, 200, 300, 400, 500],
+      values: [200, 400, 600, 800, 1000],
       dailyDoubles: 1,
       categories: [
-        { name: "Middle Management", clues: [
+        { name: "Middle Management", desc: "Forget the regional managers. Every response is the middle name of someone in the Dunder Mifflin family.", clues: [
           { q: "It's Michael's middle name", a: "Gary" },
           { q: "It's Dwight's actual middle name, not 'Fart' as Jim puts on his security badge", a: "Kurt" },
           { q: "It's Andy's middle name", a: "Baines" },
           { q: "It's Pam's middle name", a: "Morgan" },
           { q: "It's the middle name of Jim and Pam's daughter, Cecelia", a: "Marie" }
         ]},
-        { name: "Prank You Very Much", clues: [
+        { name: "Prank You Very Much", desc: "Jim's greatest hits, all at Dwight's expense.", clues: [
           { q: "The piece of Dwight's office equipment that Jim puts in Jell-O", a: "Stapler" },
           { q: "Every time his computer plays the Windows reboot sound, Jim hands Dwight one of these mints", a: "An Altoid" },
           { q: "What Jim wears to work to mock Dwight's dress-code memo", a: "A tuxedo" },
           { q: "The code Jim and Pam use to talk about Dwight right in front of him", a: "Morse code" },
           { q: "The \"language\" Jim encourages Andy to use when pursuing Pam", a: "Pig Latin" }
         ]},
-        { name: "Keleven", clues: [
+        { name: "Keleven", desc: "It's all about the numbers: temperatures, weights, speeds and more. Kevin math not required.", clues: [
           { q: "The temperature Kevin always sets the thermostat to. No surprise here.", a: "69 Degrees" },
           { q: "According to Dwight, it's the number of different ways to sniffle", a: "3 ways" },
           { q: "The weight, in pounds, of each of Michael's exercise weights. He's not going for bulk, he's going for tone.", a: "2.5 Pounds" },
           { q: "The miles per hour Michael clocks on the radar gun (ignore the pesky car that drove by at the same moment)", a: "31 MPH" },
           { q: "Michael's hotel room number at the Season 3 convention", a: "308" }
         ]},
-        { name: "Product Placement", clues: [
+        { name: "Product Placement", desc: "Name the brands, stores and restaurants that made a cameo in Scranton.", clues: [
           { q: "The appliance Michael burns his foot on. Whatever you do, don't send Dwight.", a: "George Foreman Grill" },
           { q: "The restaurant that hosts the Season 2 Dundies", a: "Chili's" },
           { q: "The candy bar whose jingle Andy can't finish all episode. Give him a break!", a: "Kit Kat" },
           { q: "The brand of potato chips Karen is desperate to find", a: "Herr's" },
           { q: "The store where Angela buys clothes for her large colonial dolls", a: "The American Girl Store" }
         ]},
-        { name: "Bears, Beets, Battlestar Galactica", clues: [
+        { name: "Bears, Beets, Battlestar Galactica", desc: "Every correct response starts with the letter B.", clues: [
           { q: "The alliterative award Phyllis receives at the Season 2 Dundies, thanks to a typo", a: "Bushiest Beaver" },
           { q: "The branch Michael and Holly accidentally announce is closing at the company picnic", a: "Buffalo" },
           { q: "The Colorado city Michael and Holly move to", a: "Boulder" },
           { q: "The musician whose concert tickets Michael claims to have for his Crime Aid auction", a: "Bruce Springsteen" },
           { q: "The high school attended by Toby and Katy, the purse saleswoman", a: "Bishop O'Hara" }
         ]},
-        { name: "Medical Malpractice", clues: [
+        { name: "Medical Malpractice", desc: "Injuries, illnesses and completely made-up diseases from around the office.", clues: [
           { q: "According to Dwight, he can raise and lower this at will", a: "His cholesterol" },
           { q: "It's Hide's former profession back in Japan", a: "Heart surgeon" },
           { q: "The cereal-inspired disease Pam makes up to prank Dwight when he's in charge of picking the new health care plan", a: "Count Choculitis" },
@@ -217,45 +236,45 @@ const GAME = {
     },
     {
       name: "Double Jeopardy! Round",
-      values: [200, 400, 600, 800, 1000],
+      values: [400, 800, 1200, 1600, 2000],
       dailyDoubles: 2,
       categories: [
-        { name: "Before & After", clues: [
+        { name: "Before & After", desc: "Two clues, one response. The end of the first answer is the start of the second.", clues: [
           { q: "Michael's scared-straight jail persona + the boxer who bit Evander Holyfield's ear", a: "Prison Mike Tyson" },
           { q: "The puppet paired with Kevin's voice in Oscar's parody video + a giant-wheeled vehicle that crushes cars", a: "Cookie Monster Truck" },
           { q: "Michael Scarn's hockey mentor + the actor who yelled \"Here's Johnny!\" in The Shining", a: "Cherokee Jack Nicholson" },
           { q: "The musical starring Andy + Michael's crude traveling-salesman buddy", a: "Sweeney Todd Packer" },
           { q: "The suspender-wearing Family Matters nerd known for \"Did I do that?\" + the name Michael gives the woman in his Jamaica vacation photo", a: "Steve Urkel Grue" }
         ]},
-        { name: "It's All Relative", clues: [
+        { name: "It's All Relative", desc: "Cousins, moms, nephews, babies, and even a couple of dogs.", clues: [
           { q: "Dwight's cousin who lives on the Schrute farm", a: "Mose" },
           { q: "The name of Jan's baby", a: "Astrid" },
           { q: "Pam's mom, and briefly Michael's girlfriend", a: "Helene" },
           { q: "Michael's nephew, who briefly works at Dunder Mifflin and infuriates the staff", a: "Luke" },
           { q: "Name either of Jo Bennett's two dogs", a: "Callie or Jo Jr." }
         ]},
-        { name: "Movie Monday", clues: [
+        { name: "Movie Monday", desc: "The movies, TV shows and stars that come up around the office.", clues: [
           { q: "The TV show Gabe builds his viewing party around", a: "Glee" },
           { q: "Dwight compares the warehouse workers to \"The Others\" from this TV show", a: "Lost" },
           { q: "The actress at the center of a day-long office debate over whether she's hot", a: "Hilary Swank" },
           { q: "According to Michael, this movie made Dwight cry", a: "Armageddon" },
           { q: "While Kevin waits on his skin cancer test results, Jim and Pam buy him this DVD to replace the one he lent to Creed", a: "American Pie 2" }
         ]},
-        { name: "Color Me Scranton", clues: [
+        { name: "Color Me Scranton", desc: "Every correct response contains a color.", clues: [
           { q: "The villain in Michael's movie Threat Level Midnight", a: "Goldenface" },
           { q: "The name of the consultant Corporate sends to lead diversity training", a: "Mr. Brown" },
           { q: "In \"A Benihana Christmas,\" after rejecting green, Angela declares this streamer color whorish too", a: "Orange" },
           { q: "The flavor of power drink Ryan finds while cleaning out Michael's car. Blue is not a flavor!", a: "Blue Blast" },
           { q: "The color of Dwight's urine when he was tested while applying to be a volunteer sheriff's deputy", a: "Green" }
         ]},
-        { name: "Snack Attack", clues: [
+        { name: "Snack Attack", desc: "Food and snacks from the break room and beyond.", clues: [
           { q: "According to Jim, it's Pam's favorite flavor of yogurt", a: "Mixed berry" },
           { q: "Ryan starts the fire by leaving this in the toaster oven", a: "A cheese pita" },
           { q: "Creed sprouts these on a damp paper towel in his desk drawer, and they smell like death", a: "Mung beans" },
           { q: "Michael plants what he thinks are drugs in Toby's desk, but the police find this instead", a: "Caprese salad" },
           { q: "The snack Erin brings the manager every afternoon at 2:30", a: "Ants on a log" }
         ]},
-        { name: "Toby, or Not Toby", clues: [
+        { name: "Toby, or Not Toby", desc: "It's all about everyone's favorite HR rep. Michael would rather you didn't play this one.", clues: [
           { q: "The murder trial Toby serves on as a juror. He was up to his neck in it!", a: "Scranton Strangler" },
           { q: "The Office Olympics game Toby teaches Jim. So that's what that noise is all day!", a: "Dunderball" },
           { q: "Along with Pam and Oscar, Toby is a founding member of this club", a: "The Finer Things Club" },
@@ -297,7 +316,7 @@ function showSetup(){
   const canResume = saved && saved.players && saved.phase && saved.phase !== 'over';
   $('#app').innerHTML = `
     <div class="setup">
-      <h1 class="logo">Jeopardy<span>Game Night</span></h1>
+      <h1 class="logo">Jeopardy<span>The Office Edition</span></h1>
       <h2>How many players?</h2>
       <div class="count-grid">${[2,3,4,5,6,7,8].map(n => `<button class="count-btn" data-n="${n}">${n}</button>`).join('')}</div>
       ${canResume ? `<button class="link-btn" data-act="resume">Resume saved game (${saved.players.map(p => esc(p.name)).join(', ')})</button>` : ''}
@@ -307,7 +326,7 @@ function showSetup(){
 function showNames(n){
   $('#app').innerHTML = `
     <div class="setup">
-      <h1 class="logo">Jeopardy<span>Game Night</span></h1>
+      <h1 class="logo">Jeopardy<span>The Office Edition</span></h1>
       <h2>Enter player names</h2>
       <form id="names" class="names" autocomplete="off">
         ${Array.from({length:n}, (_, i) => `<label><span>${i+1}</span><input type="text" maxlength="18" placeholder="Player ${i+1}"></label>`).join('')}
@@ -327,6 +346,8 @@ function newGame(names){
     players: names.map(name => ({ name, score: 0 })),
     used: GAME.rounds.map(() => []),
     dd: GAME.rounds.map(placeDailyDoubles),
+    intro: GAME.rounds.map(() => false),
+    introStep: -1,
     final: null
   };
   save(); showGame();
@@ -358,7 +379,8 @@ function showGame(){
   renderScores();
   if (S.phase === 'board'){
     renderBoard();
-    if (roundDone()) showRoundEnd();
+    if (introPending()) renderIntro();
+    else if (roundDone()) showRoundEnd();
   } else {
     renderFinal();
   }
@@ -496,6 +518,58 @@ function closeClue(){
   if (roundDone()) showRoundEnd();
 }
 
+/* ---------- category intro ---------- */
+const introPending = () => S && S.phase === 'board' && Array.isArray(S.intro) && !S.intro[S.round];
+
+function renderIntro(){
+  const R = GAME.rounds[S.round], n = R.categories.length, step = S.introStep;
+  const p = $('#panel'); p.classList.remove('hidden');
+  const strip = `<div class="intro-strip">${R.categories.map((c, i) =>
+    `<div class="${i > step ? 'blank' : ''} ${i === step ? 'now' : ''}">${i <= step ? esc(c.name) : '?'}</div>`).join('')}</div>`;
+
+  if (step < 0){
+    p.innerHTML = `<div class="intro">
+      <div class="intro-round">${esc(R.name)}</div>
+      ${strip}
+      <div class="intro-card">
+        <div class="intro-name">Here are the categories</div>
+        <p class="intro-desc">Clues are worth ${fmt(R.values[0])} to ${fmt(R.values[R.values.length - 1])} this round.</p>
+      </div>
+      <div class="actions">
+        <button class="btn gold" data-act="i-next">Reveal First Category</button>
+        <button class="btn ghost small" data-act="i-done">Skip Intro</button>
+      </div></div>`;
+    return;
+  }
+
+  const c = R.categories[step], last = step === n - 1;
+  p.innerHTML = `<div class="intro">
+    <div class="intro-round">${esc(R.name)}</div>
+    ${strip}
+    <div class="intro-card" key="${step}">
+      <div class="intro-count">Category ${step + 1} of ${n}</div>
+      <div class="intro-name">${esc(c.name)}</div>
+      ${c.desc ? `<p class="intro-desc">${esc(c.desc)}</p>` : ''}
+    </div>
+    <div class="actions">
+      <button class="btn ghost" data-act="i-prev">Back</button>
+      <button class="btn gold" data-act="${last ? 'i-done' : 'i-next'}">${last ? "Let's Play!" : 'Next Category'}</button>
+    </div>
+    <p class="hint">Tip: press the right arrow or spacebar to advance.</p></div>`;
+}
+
+function introNext(){
+  const n = GAME.rounds[S.round].categories.length;
+  if (S.introStep >= n - 1) return introDone();
+  S.introStep++; save(); renderIntro();
+}
+function introPrev(){ if (S.introStep > -1){ S.introStep--; save(); renderIntro(); } }
+function introDone(){
+  S.intro[S.round] = true; save();
+  $('#panel').classList.add('hidden');
+  renderBoard(); renderScores();
+}
+
 /* ---------- round transitions ---------- */
 function standingsHtml(){
   const ranked = S.players.map(p => p).sort((a, b) => b.score - a.score);
@@ -518,9 +592,8 @@ function advance(){
   stopTimer();
   if (clue){ clue = null; document.body.classList.remove('clue-open'); $('#clue').classList.add('hidden'); }
   if (S.phase === 'board' && S.round < GAME.rounds.length - 1){
-    S.round++; save();
-    $('#panel').classList.add('hidden');
-    renderBoard(); renderScores();
+    S.round++; S.introStep = -1; save();
+    renderBoard(); renderScores(); renderIntro();
   } else if (S.phase === 'board'){
     S.phase = 'final';
     S.final = { step: 'category', timer: 'idle', order: [], cur: 0, results: {} };
@@ -698,6 +771,9 @@ const ACT = {
   nobody(){ clue.done = true; clue.revealed = true; clue.log.push('Nobody got it'); renderClue(); renderScores(); },
   back(){ closeClue(); },
   advance(){ advance(); },
+  'i-next'(){ introNext(); },
+  'i-prev'(){ introPrev(); },
+  'i-done'(){ introDone(); },
   skip(){ if (confirm('Skip the rest of this round?')){ hideModal(); advance(); } },
   adj(t){
     const v = parseInt($('#adjAmt').value, 10); if (!(v > 0)) return;
@@ -730,7 +806,7 @@ document.addEventListener('click', e => {
   if (!t){ if (e.target.id === 'modal') hideModal(); return; }
   if (t.classList.contains('count-btn')) return showNames(+t.dataset.n);
   if (t.classList.contains('player')) return onPlayer(+t.dataset.i);
-  if (t.classList.contains('cell')){ if (!clue && S.phase === 'board') openClue(+t.dataset.c, +t.dataset.r, t); return; }
+  if (t.classList.contains('cell')){ if (!clue && S.phase === 'board' && !introPending()) openClue(+t.dataset.c, +t.dataset.r, t); return; }
   const act = t.dataset.act; if (act && ACT[act]) ACT[act](t);
 });
 
@@ -748,6 +824,11 @@ document.addEventListener('submit', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') hideModal();
+  const modalOpen = $('#modal') && !$('#modal').classList.contains('hidden');
+  if (introPending() && !modalOpen && e.target.tagName !== 'INPUT'){
+    if (e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); introNext(); }
+    else if (e.key === 'ArrowLeft'){ e.preventDefault(); introPrev(); }
+  }
   if (e.key === 'Enter' && e.target.id === 'adjAmt'){ const b = document.querySelector('[data-act="adj"]'); if (b) b.click(); }
 });
 
